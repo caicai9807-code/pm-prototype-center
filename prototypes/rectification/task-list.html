@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>面积检查任务管理</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="task-list" data-menu="task-list">
+    <div id="app"></div>
+    <script src="./app.js"></script>
+    <script>
+      (function () {
+        const expertNames = ["刘国栋", "周明德"];
+
+        function buildExpertDetail(confirmText) {
+          const parts = String(confirmText || "0/2").split("/");
+          const confirmedCount = Number(parts[0]) || 0;
+          const totalCount = Number(parts[1]) || 2;
+          const names = expertNames.slice(0, totalCount);
+
+          const lines = names
+            .map(function (name, index) {
+              const confirmed = index < confirmedCount;
+              return (
+                '<div class="expert-confirm-line">' +
+                "<span>" + name + "</span>" +
+                '<span class="expert-confirm-status ' + (confirmed ? "confirmed" : "pending") + '">' +
+                (confirmed ? "已确认" : "未确认") +
+                "</span>" +
+                "</div>"
+              );
+            })
+            .join("");
+
+          return (
+            '<span class="expert-confirm-trigger">' +
+            confirmText +
+            '<span class="expert-confirm-pop">' +
+            '<div class="expert-confirm-title">专家确认明细</div>' +
+            lines +
+            "</span>" +
+            "</span>"
+          );
+        }
+
+        function enhanceExpertColumn() {
+          var tableBody = document.getElementById("taskTableBody");
+          if (!tableBody) return;
+          Array.prototype.forEach.call(tableBody.querySelectorAll("tr"), function (row) {
+            var cell = row.children[5];
+            if (!cell || cell.dataset.expertEnhanced === "true") return;
+            var rawText = cell.textContent.trim();
+            if (!/^\d+\/\d+$/.test(rawText)) return;
+            cell.innerHTML = buildExpertDetail(rawText);
+            cell.dataset.expertEnhanced = "true";
+          });
+        }
+
+        function startEnhance() {
+          enhanceExpertColumn();
+          var tableBody = document.getElementById("taskTableBody");
+          if (!tableBody) {
+            window.requestAnimationFrame(startEnhance);
+            return;
+          }
+          var observer = new MutationObserver(function () {
+            enhanceExpertColumn();
+          });
+          observer.observe(tableBody, { childList: true, subtree: true });
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", startEnhance);
+        } else {
+          startEnhance();
+        }
+      })();
+    </script>
+  </body>
+</html>
