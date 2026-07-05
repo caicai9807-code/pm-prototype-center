@@ -1,6 +1,6 @@
 (function () {
   const tasks = [
-    { id: 1, name: "2026 第29周 常规合同面积检查任务", start: "2026-07-14", end: "2026-07-20", year: "2026", expert: "2/2", progress: "9/15", status: "进行中", qualified: 9, unqualified: 0, createdAt: "2026-07-10", completedAt: "—", owner: "张建国", area: "容东片区", planName: "常规合同面积检查", desc: "按周开展项目合同面积核验，已下发 15 个检查点位，当前已完成 9 个。", canView: true, canEdit: false, canDelete: false },
+    { id: 1, name: "2026 第29周 常规合同面积检查任务", start: "2026-07-14", end: "2026-07-20", year: "2026", expert: "2/2", progress: "9/15", status: "进行中", qualified: 9, unqualified: 0, createdAt: "2026-07-10", completedAt: "—", owner: "张建国", area: "容东片区", planName: "常规合同面积检查", desc: "按周开展项目合同面积核验，已下发 15 个检查点位，当前已完成 9 个。", canView: true, canEdit: true, canDelete: false },
     { id: 2, name: "2026 第30周 临时检查任务", start: "2026-07-21", end: "2026-07-27", year: "2026", expert: "1/2", progress: "0/8", status: "待开始", qualified: 0, unqualified: 0, createdAt: "2026-07-15", completedAt: "—", owner: "张建国", area: "启动区", planName: "临时专项抽查", desc: "围绕临时问题线索发起专项抽检，待第二名专家确认后开始。", canView: true, canEdit: true, canDelete: true },
     { id: 3, name: "2026 第28周 专项检查任务", start: "2026-07-07", end: "2026-07-13", year: "2026", expert: "2/2", progress: "18/18", status: "已结束", qualified: 16, unqualified: 2, createdAt: "2026-07-03", completedAt: "2026-07-13", owner: "李晓峰", area: "昝岗片区", planName: "重点项目专项检查", desc: "专项检查已完成闭环，存在 2 个不合格点位，已进入整改任务。", canView: true, canEdit: false, canDelete: false },
     { id: 4, name: "2026 第26周 裕华补充检查任务", start: "2026-06-23", end: "2026-06-29", year: "2026", expert: "2/2", progress: "12/12", status: "已结束", qualified: 10, unqualified: 2, createdAt: "2026-06-20", completedAt: "2026-06-28", owner: "李晓峰", area: "裕华组团", planName: "补充复核计划", desc: "补充检查任务已全部完成，问题清单已下发相关责任单位。", canView: true, canEdit: false, canDelete: false },
@@ -21,6 +21,25 @@
     { code: "60218B005", name: "长安区西站", dept: "长安管理部", area: "长安片区所", type: "自管站", district: "长安区", office: "青园街道", address: "长安区和平路与友谊大街交叉口西行200米", census: "否", inspect: "否" }
   ];
 
+  const taskSites = {
+    1: ["60218B002", "60218B003"],
+    2: ["60218B001", "60218B005"],
+    6: ["60218B002", "60218B004", "60218B005"],
+    7: ["60218B001", "60218B003"],
+    9: ["60218B003"]
+  };
+
+  const taskExpertAssignments = {
+    1: {
+      "长安管理部": [{ name: "赵明远", level: "一类" }, { name: "孙丽华", level: "二类" }],
+      "桥西管理部": [{ name: "周建国", level: "一类" }, { name: "吴秀英", level: "二类" }]
+    },
+    2: {
+      "裕华管理部": [{ name: "陈志强", level: "一类" }],
+      "长安管理部": [{ name: "赵明远", level: "一类" }]
+    }
+  };
+
   var pageMap = window.AppConfig.pageMap;
   var currentPage = window.AppConfig.currentPage;
   var currentMenu = window.AppConfig.currentMenu;
@@ -28,6 +47,21 @@
   function getTask(id) {
     return tasks.find((item) => item.id === Number(id)) || tasks[0];
   }
+
+  function getTaskSites(taskId) {
+    var codes = taskSites[taskId];
+    if (!codes) return [];
+    return codes.map(function (c) {
+      return sitePool.find(function (s) { return s.code === c; });
+    }).filter(Boolean);
+  }
+
+  function getTaskExpertAssignments(taskId) {
+    return taskExpertAssignments[taskId] || null;
+  }
+
+  window.getTaskSites = getTaskSites;
+  window.getTaskExpertAssignments = getTaskExpertAssignments;
 
 
   var statusClass = window.AppComponents.statusClass;
@@ -235,11 +269,20 @@
   }
 
   function renderTaskCreatePage() {
+    var params = new URLSearchParams(window.location.search);
+    var editMode = params.get("mode") === "edit";
+    var editTask = editMode ? getTask(params.get("id")) : null;
+    var isOngoing = editTask && editTask.status === "进行中";
+    var pageTitle = editMode ? "编辑任务" : "新建任务";
+    var pageHint = editMode
+      ? (isOngoing ? "进行中的任务仅可修改专家分配" : "请先完成基础信息和站点选择")
+      : "请先完成基础信息和站点选择";
+
     return `
       <section class="card">
         <div class="card-header toolbar">
-          <div class="card-title">新建任务</div>
-          <div class="create-header-hint">请先完成基础信息和站点选择</div>
+          <div class="card-title">${pageTitle}</div>
+          <div class="create-header-hint">${pageHint}</div>
         </div>
       </section>
       <section class="card">
@@ -269,15 +312,15 @@
           <div class="create-form-row">
             <div class="create-form-field create-form-field--name">
               <label><span class="required">*</span> 任务名称</label>
-              <input id="createTaskName" class="control" placeholder="请输入任务名称，如：2026 第30周 常规合同面积检查任务" />
+              <input id="createTaskName" class="control" placeholder="请输入任务名称，如：2026 第30周 常规合同面积检查任务" ${isOngoing ? 'disabled' : ''} />
             </div>
             <div class="create-form-field">
               <label><span class="required">*</span> 任务开始时间</label>
-              <input id="createStartDate" class="control" type="date" placeholder="年 / 月 / 日" />
+              <input id="createStartDate" class="control" type="date" placeholder="年 / 月 / 日" ${isOngoing ? 'disabled' : ''} />
             </div>
             <div class="create-form-field">
               <label><span class="required">*</span> 任务结束时间</label>
-              <input id="createEndDate" class="control" type="date" placeholder="年 / 月 / 日" />
+              <input id="createEndDate" class="control" type="date" placeholder="年 / 月 / 日" ${isOngoing ? 'disabled' : ''} />
             </div>
           </div>
           <div class="create-notice-box">
@@ -295,7 +338,7 @@
             <span class="count-pill" id="siteCountPill">0 个站点</span>
           </div>
           <div class="btn-row">
-            <button class="btn primary" id="openSiteSelectorBtn">+ 打开站点选择器</button>
+            ${isOngoing ? '' : '<button class="btn primary" id="openSiteSelectorBtn">+ 打开站点选择器</button>'}
           </div>
         </div>
         <div class="card-body">
@@ -322,7 +365,7 @@
         </div>
       </section>
       <div class="create-footer">
-        <div class="create-footer-hint">至少选择 1 个站点后才能进入下一步</div>
+        <div class="create-footer-hint">${isOngoing ? '进行中的任务仅可修改专家分配' : '至少选择 1 个站点后才能进入下一步'}</div>
         <div class="create-footer-actions">
           <a class="btn" href="./task-list.html">取消</a>
           <button class="btn ghost" id="saveDraftBtn">暂存</button>
@@ -333,10 +376,14 @@
   }
 
   function renderTaskExpertPage() {
+    var params = new URLSearchParams(window.location.search);
+    var editMode = params.get("mode") === "edit";
+    var editTask = editMode ? getTask(params.get("id")) : null;
+    var pageTitle = editMode ? "编辑任务" : "新建任务";
     return `
       <section class="card">
         <div class="card-header toolbar">
-          <div class="card-title">新建任务</div>
+          <div class="card-title">${pageTitle}</div>
           <div class="create-header-hint">请配置专家抽取规则并完成分组分配</div>
         </div>
       </section>
@@ -547,7 +594,7 @@
             <td>
               <div class="action-row">
                 <a class="action-link ${!task.canView ? "disabled" : ""}" href="${detailLink}">详情</a>
-                <a class="action-link ${!task.canEdit ? "disabled" : ""}" href="./task-detail.html?id=${task.id}&mode=edit">编辑</a>
+                <a class="action-link ${!task.canEdit ? "disabled" : ""}" href="${task.canEdit ? `./task-create.html?id=${task.id}&mode=edit` : 'javascript:void(0)'}">编辑</a>
                 <a class="action-link danger ${!task.canDelete ? "disabled" : ""}" href="./task-list.html?delete=${task.id}">删除</a>
               </div>
             </td>
@@ -830,7 +877,7 @@
     });
   }
 
-  function fillSiteTable() {
+  function fillSiteTable(readonly) {
     var tbody = document.getElementById("siteTableBody");
     var pill = document.getElementById("siteCountPill");
     var n = selectedSites.length;
@@ -841,6 +888,7 @@
     }
     tbody.innerHTML = selectedSites.map(function (s) {
       var typeClass = s.type === "自管站" ? "tag-orange" : "tag-blue";
+      var actionCol = readonly ? '<td>—</td>' : '<td><a class="link-danger site-remove-btn" data-code="' + s.code + '">移除</a></td>';
       return '<tr data-code="' + s.code + '">' +
         '<td>' + s.code + '</td>' +
         '<td>' + s.name + '</td>' +
@@ -848,7 +896,7 @@
         '<td>' + s.area + '</td>' +
         '<td><span class="site-type-tag ' + typeClass + '">' + s.type + '</span></td>' +
         '<td>' + s.address + '</td>' +
-        '<td><a class="link-danger site-remove-btn" data-code="' + s.code + '">移除</a></td>' +
+        actionCol +
         '</tr>';
     }).join("");
   }
@@ -859,7 +907,32 @@
     var openSiteSelectorBtn = document.getElementById("openSiteSelectorBtn");
     if (!saveDraftBtn || !nextStepBtn) return;
 
+    /* ---- 编辑模式：回填数据 ---- */
+    var params = new URLSearchParams(window.location.search);
+    var editMode = params.get("mode") === "edit";
+    var editTask = editMode ? getTask(params.get("id")) : null;
+    var isOngoing = editTask && editTask.status === "进行中";
+
+    if (editTask) {
+      /* 回填基础信息 */
+      var nameInput = document.getElementById("createTaskName");
+      var startInput = document.getElementById("createStartDate");
+      var endInput = document.getElementById("createEndDate");
+      if (nameInput) nameInput.value = editTask.name || "";
+      if (startInput) startInput.value = editTask.start || "";
+      if (endInput) endInput.value = editTask.end || "";
+
+      /* 回填站点：根据任务关联的站点数据 */
+      var taskSites = getTaskSites(editTask.id);
+      if (taskSites.length) {
+        selectedSites = taskSites;
+        fillSiteTable(isOngoing);
+      }
+    }
+
     function validateBasicInfo() {
+      /* 进行中状态跳过基础信息验证 */
+      if (isOngoing) return [];
       var name = document.getElementById("createTaskName");
       var startDate = document.getElementById("createStartDate");
       var endDate = document.getElementById("createEndDate");
@@ -885,10 +958,19 @@
         return;
       }
       showToast("进入抽选专家与分组分配", "info");
-      /* 将已选站点存入 sessionStorage，供 task-expert 页面读取 */
-      try { sessionStorage.setItem('selectedSites', JSON.stringify(selectedSites)); } catch(e) {}
+      /* 将已选站点 + 编辑模式参数存入 sessionStorage，供 task-expert 页面读取 */
+      try {
+        sessionStorage.setItem('selectedSites', JSON.stringify(selectedSites));
+        if (editMode) {
+          sessionStorage.setItem('editMode', 'true');
+          sessionStorage.setItem('editTaskId', String(editTask.id));
+        }
+      } catch(e) {}
+      var nextUrl = editMode
+        ? "./task-expert.html?id=" + editTask.id + "&mode=edit"
+        : "./task-expert.html";
       setTimeout(function () {
-        window.location.href = "./task-expert.html";
+        window.location.href = nextUrl;
       }, 800);
     });
 
@@ -899,13 +981,13 @@
     }
 
     var siteTableBody = document.getElementById("siteTableBody");
-    if (siteTableBody) {
+    if (siteTableBody && !isOngoing) {
       siteTableBody.addEventListener("click", function (e) {
         var btn = e.target.closest(".site-remove-btn");
         if (!btn) return;
         var code = btn.dataset.code;
         selectedSites = selectedSites.filter(function (s) { return s.code !== code; });
-        fillSiteTable();
+        fillSiteTable(isOngoing);
       });
     }
   }

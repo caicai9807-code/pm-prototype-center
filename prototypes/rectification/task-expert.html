@@ -2210,6 +2210,43 @@
         if (groupList) groupList.style.display = '';
         if (groupPill) groupPill.textContent = deptGroups.length + ' 个管理部';
 
+        /* ---- 编辑模式：回填已分配专家 + 步骤条标题切换 ---- */
+        (function () {
+          var params = new URLSearchParams(window.location.search);
+          var editMode = params.get('mode') === 'edit';
+          if (!editMode) {
+            try { editMode = sessionStorage.getItem('editMode') === 'true'; } catch(e) {}
+          }
+          var taskId = params.get('id');
+          if (!taskId) {
+            try { taskId = sessionStorage.getItem('editTaskId'); } catch(e) {}
+          }
+
+          if (editMode && taskId && typeof window.getTaskExpertAssignments === 'function') {
+            var assignments = window.getTaskExpertAssignments(Number(taskId));
+            if (assignments) {
+              deptGroups.forEach(function (g) {
+                var deptAssign = assignments[g.dept];
+                if (deptAssign) {
+                  deptAssign.forEach(function (expert) {
+                    var slotIdx = g.slots.indexOf(expert.level);
+                    if (slotIdx >= 0) {
+                      g.assigned[slotIdx] = expert.name;
+                      var poolMatch = expertPool.find(function (p) { return p.name === expert.name; });
+                      if (poolMatch) poolMatch.status = '已分配';
+                    }
+                  });
+                }
+              });
+            }
+          }
+
+          if (editMode) {
+            var titleEl = document.querySelector('.card-title');
+            if (titleEl) titleEl.textContent = '编辑任务';
+          }
+        })();
+
         renderDeptGroupCards();
         bindDeptGroupEvents();
         updateFooterHint();
