@@ -1432,13 +1432,14 @@ body[data-page="task-create"] .link-danger:hover {
 
 .site-modal-table-wrap {
   flex: 1;
-  overflow: auto;
+  overflow-x: auto;
   padding: 0 24px;
 }
 
 .site-modal-table-wrap table {
-  width: 100%;
-  min-width: 1000px;
+  table-layout: fixed;
+  width: 1200px;
+  min-width: 1200px;
   border-collapse: collapse;
 }
 
@@ -1452,8 +1453,31 @@ body[data-page="task-create"] .link-danger:hover {
   padding: 10px 12px;
   text-align: left;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-bottom: 1px solid var(--border);
+  height: 48px;
+  box-sizing: border-box;
 }
+
+.site-modal-table-wrap th:nth-child(1),
+.site-modal-table-wrap td:nth-child(1) { width: 50px; text-align: center; }
+.site-modal-table-wrap th:nth-child(2),
+.site-modal-table-wrap td:nth-child(2) { width: 110px; }
+.site-modal-table-wrap th:nth-child(3),
+.site-modal-table-wrap td:nth-child(3) { width: 140px; }
+.site-modal-table-wrap th:nth-child(4),
+.site-modal-table-wrap td:nth-child(4) { width: 120px; }
+.site-modal-table-wrap th:nth-child(5),
+.site-modal-table-wrap td:nth-child(5) { width: 120px; }
+.site-modal-table-wrap th:nth-child(6),
+.site-modal-table-wrap td:nth-child(6) { width: 100px; text-align: center; }
+.site-modal-table-wrap th:nth-child(7),
+.site-modal-table-wrap td:nth-child(7) { width: 320px; }
+.site-modal-table-wrap th:nth-child(8),
+.site-modal-table-wrap td:nth-child(8) { width: 120px; text-align: center; }
+.site-modal-table-wrap th:nth-child(9),
+.site-modal-table-wrap td:nth-child(9) { width: 120px; text-align: center; }
 
 .site-modal-table-wrap tbody td {
   font-size: 13px;
@@ -1461,6 +1485,10 @@ body[data-page="task-create"] .link-danger:hover {
   padding: 10px 12px;
   border-bottom: 1px solid #f0f2f5;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .site-modal-table-wrap tbody tr:hover {
@@ -1472,6 +1500,24 @@ body[data-page="task-create"] .link-danger:hover {
   color: var(--muted);
   padding: 40px 16px !important;
   font-size: 14px;
+}
+
+.site-type-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 20px;
+}
+.site-type-tag.tag-blue {
+  color: #1890ff;
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+.site-type-tag.tag-orange {
+  color: #fa8c16;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
 }
 
 .site-modal-footer {
