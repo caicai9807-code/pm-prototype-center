@@ -11,13 +11,7 @@
     { id: 9, name: "2026 第33周 临时检查任务", start: "2026-08-11", end: "2026-08-17", year: "2026", expert: "0/2", progress: "0/5", status: "草稿", qualified: 0, unqualified: 0, createdAt: "2026-07-22", completedAt: "—", owner: "张建国", area: "昝岗片区", planName: "临时专项抽查", desc: "草稿任务由业务管理员发起，待补充检查范围。", canView: false, canEdit: true, canDelete: true }
   ];
 
-  const rectifications = [
-    { id: 101, code: "ZG-2026-0710-001", taskId: 3, title: "东区 5# 地块面积偏差整改", unit: "东区项目部", deadline: "2026-07-18", status: "整改中", auditStatus: "待审核", source: "2026 第28周 专项检查任务", problemLevel: "一般", points: "5 个点位", progress: "已整改 3 / 5", assignee: "赵丽", latest: "已提交整改材料，待通知书审核。", planName: "重点项目专项检查" },
-    { id: 102, code: "ZG-2026-0712-004", taskId: 4, title: "裕华组团补测异常整改", unit: "裕华建设单位", deadline: "2026-07-20", status: "待整改", auditStatus: "未发出", source: "2026 第26周 裕华补充检查任务", problemLevel: "重要", points: "2 个点位", progress: "0 / 2", assignee: "陈川", latest: "待生成整改通知书。", planName: "补充复核计划" },
-    { id: 103, code: "ZG-2026-0621-002", taskId: 5, title: "容西合同面积复核整改", unit: "容西责任单位", deadline: "2026-06-28", status: "已完成", auditStatus: "审核通过", source: "2026 第25周 常规合同面积检查任务", problemLevel: "一般", points: "2 个点位", progress: "2 / 2", assignee: "宋伟", latest: "整改完成并通过复核。", planName: "常规合同面积检查" },
-    { id: 104, code: "ZG-2026-0614-003", taskId: 8, title: "容东片区边界误差整改", unit: "容东建设单位", deadline: "2026-06-25", status: "已逾期", auditStatus: "审核驳回", source: "2026 第24周 常规合同面积检查任务", problemLevel: "重要", points: "1 个点位", progress: "已整改 0 / 1", assignee: "高博", latest: "第一次提交材料不完整，已退回补充。", planName: "常规合同面积检查" },
-    { id: 105, code: "ZG-2026-0716-006", taskId: 2, title: "启动区抽检问题整改", unit: "启动区项目部", deadline: "2026-07-30", status: "待整改", auditStatus: "待审核", source: "2026 第30周 临时检查任务", problemLevel: "一般", points: "3 个点位", progress: "0 / 3", assignee: "郝楠", latest: "待检查任务正式开始后同步发出。", planName: "临时专项抽查" }
-  ];
+
 
   const sitePool = [
     { code: "60218B001", name: "裕华区中心站", dept: "裕华管理部", area: "裕华片区所", type: "用户站", district: "裕华区", office: "裕东街道", address: "裕华区槐安路与翟营大街交叉口东行200米路北", census: "是", inspect: "是" },
@@ -27,108 +21,21 @@
     { code: "60218B005", name: "长安区西站", dept: "长安管理部", area: "长安片区所", type: "自管站", district: "长安区", office: "青园街道", address: "长安区和平路与友谊大街交叉口西行200米", census: "否", inspect: "否" }
   ];
 
-  const pageMap = {
-    index: { title: "整改任务模块首页", breadcrumb: ["首页", "整改任务模块"] },
-    "task-list": { title: "面积检查任务管理", breadcrumb: ["首页", "面积检查任务管理"] },
-    "task-detail": { title: "面积检查任务详情", breadcrumb: ["首页", "面积检查任务管理", "任务详情"] },
-    "rectification-list": { title: "整改任务", breadcrumb: ["首页", "整改任务"] },
-    "rectification-detail": { title: "整改任务详情", breadcrumb: ["首页", "整改任务", "整改任务详情"] },
-    "notice-audit": { title: "整改通知书审核", breadcrumb: ["首页", "整改通知书审核"] },
-    "my-task-list": { title: "我的面积检查任务", breadcrumb: ["首页", "我的面积检查任务"] },
-    "task-create": { title: "新建面积检查任务", breadcrumb: ["首页", "面积检查任务管理", "新建任务"] },
-    "task-expert": { title: "抽选专家与分组分配", breadcrumb: ["首页", "面积检查任务管理", "新建任务"] }
-  };
-
-  const app = document.getElementById("app");
-  const currentPage = document.body.dataset.page;
-  const currentMenu = document.body.dataset.menu;
+  var pageMap = window.AppConfig.pageMap;
+  var currentPage = window.AppConfig.currentPage;
+  var currentMenu = window.AppConfig.currentMenu;
 
   function getTask(id) {
     return tasks.find((item) => item.id === Number(id)) || tasks[0];
   }
 
-  function getRectification(id) {
-    return rectifications.find((item) => item.id === Number(id)) || rectifications[0];
-  }
 
-  function statusClass(status) {
-    if (status === "草稿") return "status-draft";
-    if (status === "待开始" || status === "待整改" || status === "待审核") return "status-pending";
-    if (status === "进行中" || status === "整改中") return "status-progress";
-    if (status === "已结束" || status === "审核通过" || status === "已完成") return "status-finished";
-    if (status === "已逾期" || status === "审核驳回") return "status-overdue";
-    return "status-done";
-  }
+  var statusClass = window.AppComponents.statusClass;
+  var renderBreadcrumb = window.AppComponents.renderBreadcrumb;
+  var renderShell = window.AppComponents.renderShell;
+  var showToast = window.AppComponents.showToast;
 
-  function renderBreadcrumb(items) {
-    return `
-      <div class="breadcrumb">
-        ${items
-          .map((item, idx) =>
-            idx === 0
-              ? `<a href="./index.html">${item}</a>`
-              : idx === items.length - 1
-                ? `<span>${item}</span>`
-                : `<span>${item}</span>`
-          )
-          .join('<span>/</span>')}
-      </div>
-    `;
-  }
-
-  function menuItem(href, key, icon, label, count) {
-    return `
-      <a class="menu-item ${currentMenu === key ? "active" : ""}" href="${href}">
-        <span class="menu-icon">${icon}</span>
-        <span>${label}</span>
-        ${count ? `<span class="menu-count">${count}</span>` : ""}
-      </a>
-    `;
-  }
-
-  function renderShell(content) {
-    return `
-      <div class="layout">
-        <header class="topbar">
-          <div class="brand">
-            <div class="brand-badge">面</div>
-            <div>面积检查业务受理中心</div>
-          </div>
-          <div class="top-actions">
-            <div class="switch-group">
-              <div class="switch-item">PC端</div>
-              <div class="switch-item">App端</div>
-            </div>
-            <div>角色：</div>
-            <div class="chip">业务管理员</div>
-            <div class="chip demo">DEMO</div>
-            <div class="avatar">张</div>
-            <div>张建国</div>
-          </div>
-        </header>
-        <div class="body">
-          <aside class="sidebar">
-            <div class="menu-section">
-              <div class="menu-title">任务管理</div>
-              ${menuItem("./task-list.html", "task-list", "□", "面积检查任务管理")}
-              ${menuItem("./rectification-list.html", "rectification-list", "🔧", "整改任务", 5)}
-              ${menuItem("./notice-audit.html", "notice-audit", "🗂", "整改通知书审核", 3)}
-              ${menuItem("./my-task-list.html", "my-task-list", "📝", "我的面积检查任务", 3)}
-            </div>
-            <div class="menu-section">
-              <div class="menu-title">移动端预览</div>
-              <a class="menu-item" href="./index.html"><span class="menu-icon">📱</span><span>专家App</span></a>
-              <a class="menu-item" href="./index.html"><span class="menu-icon">📱</span><span>部门领导App</span></a>
-            </div>
-          </aside>
-          <main class="main">
-            ${renderBreadcrumb(pageMap[currentPage].breadcrumb)}
-            ${content}
-          </main>
-        </div>
-      </div>
-    `;
-  }
+  var app = document.getElementById("app");
 
   function renderIndexPage() {
     return `
@@ -143,9 +50,6 @@
         <div class="card-body">
           <div class="stat-grid">
             <div class="stat-card"><div class="stat-label">面积检查任务</div><div class="stat-value">9</div></div>
-            <div class="stat-card"><div class="stat-label">整改任务</div><div class="stat-value">5</div></div>
-            <div class="stat-card"><div class="stat-label">待审核通知书</div><div class="stat-value">3</div></div>
-            <div class="stat-card"><div class="stat-label">我的待办</div><div class="stat-value">3</div></div>
           </div>
         </div>
       </section>
@@ -157,10 +61,6 @@
           <div class="card-link-grid">
             ${navCard("面积检查任务管理", "任务筛选、任务表格、状态控制、横向滚动与分页。", "./task-list.html")}
             ${navCard("面积检查任务详情", "任务基础信息、专家确认、检查统计、关联整改数据。", "./task-detail.html?id=1")}
-            ${navCard("整改任务列表", "整改任务筛选、通知书状态、整改进度与审核入口。", "./rectification-list.html")}
-            ${navCard("整改任务详情", "整改责任单位、问题点位、整改说明、审核流转信息。", "./rectification-detail.html?id=101")}
-            ${navCard("整改通知书审核", "通知书正文、附件、审核意见、通过/驳回动作。", "./notice-audit.html?id=101")}
-            ${navCard("我的面积检查任务", "面向执行人员查看个人负责的检查任务与当前进度。", "./my-task-list.html")}
           </div>
         </div>
       </section>
@@ -267,7 +167,6 @@
     const task = params.get("mode") === "create" ? null : getTask(params.get("id") || 1);
     const title = task ? task.name : "新建面积检查任务";
     const status = task ? task.status : "草稿";
-    const related = rectifications.filter((item) => item.taskId === (task ? task.id : -1));
     return `
       <section class="card">
         <div class="card-header toolbar">
@@ -330,321 +229,6 @@
             <div class="stat-card"><div class="stat-label">合格数量</div><div class="stat-value">${task ? task.qualified : 0}</div></div>
             <div class="stat-card"><div class="stat-label">不合格数量</div><div class="stat-value">${task ? task.unqualified : 0}</div></div>
           </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">关联整改任务</div></div>
-        <div class="card-body">
-          ${
-            related.length
-              ? `
-            <div class="table-scroll">
-              <table style="min-width: 1080px;">
-                <thead>
-                  <tr>
-                    <th style="width:190px;">整改单号</th>
-                    <th style="width:280px;">整改标题</th>
-                    <th style="width:170px;">责任单位</th>
-                    <th style="width:120px;">整改状态</th>
-                    <th style="width:120px;">审核状态</th>
-                    <th style="width:130px;">整改期限</th>
-                    <th style="width:120px;">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${related
-                    .map(
-                      (item) => `
-                    <tr>
-                      <td>${item.code}</td>
-                      <td><strong>${item.title}</strong></td>
-                      <td>${item.unit}</td>
-                      <td><span class="status-tag ${statusClass(item.status)}">${item.status}</span></td>
-                      <td><span class="status-tag ${statusClass(item.auditStatus)}">${item.auditStatus}</span></td>
-                      <td>${item.deadline}</td>
-                      <td><a class="action-link" href="./rectification-detail.html?id=${item.id}">详情</a></td>
-                    </tr>`
-                    )
-                    .join("")}
-                </tbody>
-              </table>
-            </div>`
-              : `<div class="notice-box">当前任务暂无关联整改任务。若任务存在不合格点位，可在任务结束后自动生成整改任务。</div>`
-          }
-        </div>
-      </section>
-    `;
-  }
-
-  function renderRectificationListPage() {
-    return `
-      <section class="card">
-        <div class="card-header"><div class="card-title">筛选条件</div></div>
-        <div class="card-body">
-          <div class="filter-grid">
-            <div class="field">
-              <label>整改任务名称</label>
-              <input id="rectTitle" class="control" placeholder="请输入整改任务关键词" />
-            </div>
-            <div class="field">
-              <label>整改状态</label>
-              <select id="rectStatus" class="control">
-                <option value="">全部状态</option>
-                <option value="待整改">待整改</option>
-                <option value="整改中">整改中</option>
-                <option value="已完成">已完成</option>
-                <option value="已逾期">已逾期</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>通知书审核状态</label>
-              <select id="rectAuditStatus" class="control">
-                <option value="">全部状态</option>
-                <option value="待审核">待审核</option>
-                <option value="审核通过">审核通过</option>
-                <option value="审核驳回">审核驳回</option>
-                <option value="未发出">未发出</option>
-              </select>
-            </div>
-            <div class="btn-row">
-              <button id="rectQueryBtn" class="btn primary">查询</button>
-              <button id="rectResetBtn" class="btn">重置</button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header toolbar">
-          <div class="card-title">整改任务列表 <span class="count-pill" id="rectCountPill">共 5 条整改任务</span></div>
-          <div class="toolbar-note">
-            <span><span class="blue-dot">●</span>列表展示整改状态、通知书状态和整改进度</span>
-          </div>
-        </div>
-        <div class="table-scroll">
-          <table style="min-width: 1460px;">
-            <thead>
-              <tr>
-                <th style="width:180px;">整改单号</th>
-                <th style="width:260px;">整改任务名称</th>
-                <th style="width:180px;">关联检查任务</th>
-                <th style="width:170px;">责任单位</th>
-                <th style="width:110px;">问题等级</th>
-                <th style="width:110px;">问题点位</th>
-                <th style="width:120px;">整改状态</th>
-                <th style="width:130px;">审核状态</th>
-                <th style="width:150px;">整改进度</th>
-                <th style="width:130px;">整改期限</th>
-                <th style="width:110px;">责任人</th>
-                <th style="width:160px;">操作</th>
-              </tr>
-            </thead>
-            <tbody id="rectTableBody"></tbody>
-          </table>
-        </div>
-        <div class="pagination">
-          <div id="rectPaginationText">第 1 - 5 条 / 共 5 条</div>
-          <div class="page-box">
-            <div class="page-btn">‹</div>
-            <div class="page-number active">1</div>
-            <div class="page-btn">›</div>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function renderRectificationDetailPage() {
-    const item = getRectification(new URLSearchParams(window.location.search).get("id") || 101);
-    const task = getTask(item.taskId);
-    return `
-      <section class="card">
-        <div class="card-header toolbar">
-          <div class="card-title">${item.title}</div>
-          <div class="btn-row">
-            <a class="btn" href="./rectification-list.html">返回</a>
-            <a class="btn ghost" href="./notice-audit.html?id=${item.id}">进入通知书审核</a>
-            <button class="btn primary">保存整改记录</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="stat-grid">
-            <div class="stat-card"><div class="stat-label">整改状态</div><div class="status-tag ${statusClass(item.status)}">${item.status}</div></div>
-            <div class="stat-card"><div class="stat-label">审核状态</div><div class="status-tag ${statusClass(item.auditStatus)}">${item.auditStatus}</div></div>
-            <div class="stat-card"><div class="stat-label">整改期限</div><div class="stat-value" style="font-size:20px;">${item.deadline}</div></div>
-            <div class="stat-card"><div class="stat-label">责任人</div><div class="stat-value" style="font-size:20px;">${item.assignee}</div></div>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">整改基础信息</div></div>
-        <div class="card-body">
-          <div class="desc-list">
-            ${descItem("整改单号", item.code)}
-            ${descItem("整改任务名称", item.title)}
-            ${descItem("关联检查任务", task.name)}
-            ${descItem("所属计划", item.planName)}
-            ${descItem("责任单位", item.unit)}
-            ${descItem("责任人", item.assignee)}
-            ${descItem("问题等级", item.problemLevel)}
-            ${descItem("问题点位", item.points)}
-            ${descItem("整改进度", item.progress)}
-            ${descItem("整改期限", item.deadline)}
-            ${descItem("最新进展", item.latest, true)}
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">整改说明</div></div>
-        <div class="card-body grid-2">
-          <div class="field">
-            <label>问题描述</label>
-            <textarea class="textarea">检查过程中发现合同面积与现场测绘数据存在偏差，需在整改期限内完成原因分析、台账补录和复核申请。</textarea>
-          </div>
-          <div class="field">
-            <label>整改措施</label>
-            <textarea class="textarea">1. 补充测绘底稿；2. 修正台账面积字段；3. 上传佐证材料；4. 提交复核申请。</textarea>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">流转记录</div></div>
-        <div class="card-body">
-          <div class="step-list">
-            ${stepItem(1, "检查发现", true)}
-            <span class="step-arrow">→</span>
-            ${stepItem(2, "生成整改任务", true)}
-            <span class="step-arrow">→</span>
-            ${stepItem(3, "提交整改材料", item.status !== "待整改")}
-            <span class="step-arrow">→</span>
-            ${stepItem(4, "通知书审核", item.auditStatus !== "未发出")}
-            <span class="step-arrow">→</span>
-            ${stepItem(5, "整改关闭", item.status === "已完成")}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function renderNoticeAuditPage() {
-    const item = getRectification(new URLSearchParams(window.location.search).get("id") || 101);
-    return `
-      <section class="card">
-        <div class="card-header toolbar">
-          <div class="card-title">整改通知书审核 - ${item.code}</div>
-          <div class="btn-row">
-            <a class="btn" href="./rectification-list.html">返回</a>
-            <button class="btn">驳回</button>
-            <button class="btn primary">审核通过</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="notice-box">当前原型仅模拟本地审核流程，不连接真实后端，不调用真实接口。</div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">通知书摘要</div></div>
-        <div class="card-body">
-          <div class="desc-list">
-            ${descItem("通知书编号", item.code.replace("ZG", "TZS"))}
-            ${descItem("关联整改任务", item.title)}
-            ${descItem("责任单位", item.unit)}
-            ${descItem("审核状态", item.auditStatus)}
-            ${descItem("整改期限", item.deadline)}
-            ${descItem("责任人", item.assignee)}
-            ${descItem("问题等级", item.problemLevel)}
-            ${descItem("问题点位", item.points)}
-            ${descItem("通知书正文", "经面积检查发现相关点位存在偏差，请责任单位于限定日期前完成整改并提交佐证材料，逾期将纳入督办。", true)}
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">审核意见</div></div>
-        <div class="card-body grid-2">
-          <div class="field">
-            <label>审核结论</label>
-            <select class="control">
-              <option>请选择</option>
-              <option>审核通过</option>
-              <option>审核驳回</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>通知书模板版本</label>
-            <input class="control" value="V1.2-面积检查整改通知模板" />
-          </div>
-          <div class="field" style="grid-column: 1 / -1;">
-            <label>审核意见说明</label>
-            <textarea class="textarea">建议补充问题点位截图、测绘对比说明和整改依据条款；通过后可直接下发责任单位。</textarea>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  function renderMyTaskListPage() {
-    return `
-      <section class="card">
-        <div class="card-header"><div class="card-title">我的任务概览</div></div>
-        <div class="card-body">
-          <div class="stat-grid">
-            <div class="stat-card"><div class="stat-label">我负责的任务</div><div class="stat-value">4</div></div>
-            <div class="stat-card"><div class="stat-label">待开始</div><div class="stat-value">1</div></div>
-            <div class="stat-card"><div class="stat-label">进行中</div><div class="stat-value">1</div></div>
-            <div class="stat-card"><div class="stat-label">草稿</div><div class="stat-value">2</div></div>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header"><div class="card-title">筛选条件</div></div>
-        <div class="card-body">
-          <div class="filter-grid">
-            <div class="field">
-              <label>任务名称</label>
-              <input id="myTaskName" class="control" placeholder="请输入任务名称关键词" />
-            </div>
-            <div class="field">
-              <label>当前状态</label>
-              <select id="myTaskStatus" class="control">
-                <option value="">全部状态</option>
-                <option value="草稿">草稿</option>
-                <option value="待开始">待开始</option>
-                <option value="进行中">进行中</option>
-                <option value="已结束">已结束</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>负责人</label>
-              <input class="control" value="张建国" disabled />
-            </div>
-            <div class="btn-row">
-              <button id="myTaskQueryBtn" class="btn primary">查询</button>
-              <button id="myTaskResetBtn" class="btn">重置</button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section class="card">
-        <div class="card-header toolbar">
-          <div class="card-title">我的面积检查任务 <span class="count-pill" id="myTaskCountPill">共 4 条任务</span></div>
-          <div class="toolbar-note"><span><span class="blue-dot">●</span>仅展示当前登录人负责的任务</span></div>
-        </div>
-        <div class="table-scroll">
-          <table style="min-width: 1320px;">
-            <thead>
-              <tr>
-                <th style="width:300px;">任务名称</th>
-                <th style="width:120px;">任务状态</th>
-                <th style="width:120px;">完成情况</th>
-                <th style="width:130px;">合格数量</th>
-                <th style="width:130px;">不合格数量</th>
-                <th style="width:160px;">任务开始时间</th>
-                <th style="width:160px;">任务结束时间</th>
-                <th style="width:160px;">所属片区</th>
-                <th style="width:120px;">操作</th>
-              </tr>
-            </thead>
-            <tbody id="myTaskTableBody"></tbody>
-          </table>
         </div>
       </section>
     `;
@@ -716,7 +300,7 @@
         </div>
         <div class="card-body">
           <div class="table-scroll">
-            <table style="min-width: 1200px;">
+            <table style="min-width: 1000px;">
               <thead>
                 <tr>
                   <th style="width:130px;">换热站编码</th>
@@ -724,15 +308,13 @@
                   <th style="width:120px;">管理部</th>
                   <th style="width:120px;">片区所</th>
                   <th style="width:100px;">站点类型</th>
-                  <th style="width:100px;">行政区</th>
-                  <th style="width:100px;">办事处</th>
                   <th style="width:200px;">用热地址</th>
                   <th style="width:80px;">操作</th>
                 </tr>
               </thead>
               <tbody id="siteTableBody">
                 <tr>
-                  <td colspan="9" class="empty-cell">暂无选择站点</td>
+                  <td colspan="7" class="empty-cell">暂无选择站点</td>
                 </tr>
               </tbody>
             </table>
@@ -937,10 +519,6 @@
     if (currentPage === "index") content = renderIndexPage();
     if (currentPage === "task-list") content = renderTaskListPage();
     if (currentPage === "task-detail") content = renderTaskDetailPage();
-    if (currentPage === "rectification-list") content = renderRectificationListPage();
-    if (currentPage === "rectification-detail") content = renderRectificationDetailPage();
-    if (currentPage === "notice-audit") content = renderNoticeAuditPage();
-    if (currentPage === "my-task-list") content = renderMyTaskListPage();
     if (currentPage === "task-create") content = renderTaskCreatePage();
     if (currentPage === "task-expert") content = renderTaskExpertPage();
     app.innerHTML = renderShell(content);
@@ -987,66 +565,6 @@
     }
   }
 
-  function renderRectificationRows(data) {
-    const tbody = document.getElementById("rectTableBody");
-    if (!tbody) return;
-    tbody.innerHTML = data
-      .map(
-        (item) => `
-        <tr>
-          <td>${item.code}</td>
-          <td><strong>${item.title}</strong></td>
-          <td>${getTask(item.taskId).name}</td>
-          <td>${item.unit}</td>
-          <td>${item.problemLevel}</td>
-          <td>${item.points}</td>
-          <td><span class="status-tag ${statusClass(item.status)}">${item.status}</span></td>
-          <td><span class="status-tag ${statusClass(item.auditStatus)}">${item.auditStatus}</span></td>
-          <td>${item.progress}</td>
-          <td>${item.deadline}</td>
-          <td>${item.assignee}</td>
-          <td>
-            <div class="action-row">
-              <a class="action-link" href="./rectification-detail.html?id=${item.id}">详情</a>
-              <a class="action-link" href="./notice-audit.html?id=${item.id}">审核</a>
-            </div>
-          </td>
-        </tr>`
-      )
-      .join("");
-    const countNode = document.getElementById("rectCountPill");
-    const pagingNode = document.getElementById("rectPaginationText");
-    if (countNode) countNode.textContent = `共 ${data.length} 条整改任务`;
-    if (pagingNode) pagingNode.textContent = `第 1 - ${data.length} 条 / 共 ${data.length} 条`;
-  }
-
-  function renderMyTaskRows(data) {
-    const tbody = document.getElementById("myTaskTableBody");
-    if (!tbody) return;
-    tbody.innerHTML = data
-      .map(
-        (task) => `
-        <tr>
-          <td><strong>${task.name}</strong></td>
-          <td><span class="status-tag ${statusClass(task.status)}">${task.status}</span></td>
-          <td>${task.progress}</td>
-          <td>${task.qualified}</td>
-          <td>${task.unqualified}</td>
-          <td>${task.start}</td>
-          <td>${task.end}</td>
-          <td>${task.area}</td>
-          <td>
-            <div class="action-row">
-              <a class="action-link ${!task.canView ? "disabled" : ""}" href="./task-detail.html?id=${task.id}">详情</a>
-            </div>
-          </td>
-        </tr>`
-      )
-      .join("");
-    const countNode = document.getElementById("myTaskCountPill");
-    if (countNode) countNode.textContent = `共 ${data.length} 条任务`;
-  }
-
   function bindTaskFilters() {
     const queryBtn = document.getElementById("taskQueryBtn");
     const resetBtn = document.getElementById("taskResetBtn");
@@ -1070,53 +588,6 @@
       renderTaskRows(tasks, "taskTableBody", "taskCountPill", "taskPaginationText", false);
     });
     renderTaskRows(tasks, "taskTableBody", "taskCountPill", "taskPaginationText", false);
-  }
-
-  function bindRectificationFilters() {
-    const queryBtn = document.getElementById("rectQueryBtn");
-    const resetBtn = document.getElementById("rectResetBtn");
-    if (!queryBtn || !resetBtn) return;
-    const run = () => {
-      const title = document.getElementById("rectTitle").value.trim();
-      const status = document.getElementById("rectStatus").value;
-      const auditStatus = document.getElementById("rectAuditStatus").value;
-      const filtered = rectifications.filter((item) => {
-        return (!title || item.title.includes(title) || item.code.includes(title)) &&
-          (!status || item.status === status) &&
-          (!auditStatus || item.auditStatus === auditStatus);
-      });
-      renderRectificationRows(filtered);
-    };
-    queryBtn.addEventListener("click", run);
-    resetBtn.addEventListener("click", () => {
-      document.getElementById("rectTitle").value = "";
-      document.getElementById("rectStatus").value = "";
-      document.getElementById("rectAuditStatus").value = "";
-      renderRectificationRows(rectifications);
-    });
-    renderRectificationRows(rectifications);
-  }
-
-  function bindMyTaskFilters() {
-    const myTasks = tasks.filter((item) => item.owner === "张建国");
-    const queryBtn = document.getElementById("myTaskQueryBtn");
-    const resetBtn = document.getElementById("myTaskResetBtn");
-    if (!queryBtn || !resetBtn) return;
-    const run = () => {
-      const name = document.getElementById("myTaskName").value.trim();
-      const status = document.getElementById("myTaskStatus").value;
-      const filtered = myTasks.filter((item) => {
-        return (!name || item.name.includes(name)) && (!status || item.status === status);
-      });
-      renderMyTaskRows(filtered);
-    };
-    queryBtn.addEventListener("click", run);
-    resetBtn.addEventListener("click", () => {
-      document.getElementById("myTaskName").value = "";
-      document.getElementById("myTaskStatus").value = "";
-      renderMyTaskRows(myTasks);
-    });
-    renderMyTaskRows(myTasks);
   }
 
   /* ---- 站点选择弹窗 ---- */
@@ -1191,14 +662,12 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width:40px;"><input type="checkbox" id="modalCheckAll" /></th>
+                  <th style="width:50px;"><input type="checkbox" id="modalCheckAll" /></th>
                   <th>换热站编码</th>
                   <th>换热站名称</th>
                   <th>管理部</th>
                   <th>片区所</th>
                   <th>站点类型</th>
-                  <th>行政区</th>
-                  <th>办事处</th>
                   <th>用热地址</th>
                   <th>本轮次是否普查</th>
                   <th>本轮次是否检查</th>
@@ -1240,23 +709,24 @@
   function renderModalRows(list, checkedCodes) {
     var tbody = document.getElementById("modalSiteTbody");
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="11" class="empty-cell">无匹配站点</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">无匹配站点</td></tr>';
       return;
     }
     tbody.innerHTML = list.map(function (s) {
       var checked = checkedCodes.indexOf(s.code) > -1 ? " checked" : "";
+      var typeClass = s.type === "自管站" ? "tag-orange" : "tag-blue";
+      var censusColor = s.census === "是" ? "color:#52c41a;" : "color:#b0b8c4;";
+      var inspectColor = s.inspect === "是" ? "color:#52c41a;" : "color:#b0b8c4;";
       return '<tr data-code="' + s.code + '">' +
         '<td><input type="checkbox" class="modal-row-check"' + checked + ' data-code="' + s.code + '" /></td>' +
         '<td>' + s.code + '</td>' +
         '<td>' + s.name + '</td>' +
         '<td>' + s.dept + '</td>' +
         '<td>' + s.area + '</td>' +
-        '<td>' + s.type + '</td>' +
-        '<td>' + s.district + '</td>' +
-        '<td>' + s.office + '</td>' +
+        '<td><span class="site-type-tag ' + typeClass + '">' + s.type + '</span></td>' +
         '<td>' + s.address + '</td>' +
-        '<td>' + s.census + '</td>' +
-        '<td>' + s.inspect + '</td>' +
+        '<td style="' + censusColor + '">' + s.census + '</td>' +
+        '<td style="' + inspectColor + '">' + s.inspect + '</td>' +
         '</tr>';
     }).join("");
   }
@@ -1366,18 +836,17 @@
     var n = selectedSites.length;
     if (pill) pill.textContent = n + " 个站点";
     if (!n) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">暂无选择站点</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">暂无选择站点</td></tr>';
       return;
     }
     tbody.innerHTML = selectedSites.map(function (s) {
+      var typeClass = s.type === "自管站" ? "tag-orange" : "tag-blue";
       return '<tr data-code="' + s.code + '">' +
         '<td>' + s.code + '</td>' +
         '<td>' + s.name + '</td>' +
         '<td>' + s.dept + '</td>' +
         '<td>' + s.area + '</td>' +
-        '<td>' + s.type + '</td>' +
-        '<td>' + s.district + '</td>' +
-        '<td>' + s.office + '</td>' +
+        '<td><span class="site-type-tag ' + typeClass + '">' + s.type + '</span></td>' +
         '<td>' + s.address + '</td>' +
         '<td><a class="link-danger site-remove-btn" data-code="' + s.code + '">移除</a></td>' +
         '</tr>';
@@ -1389,16 +858,6 @@
     var nextStepBtn = document.getElementById("nextStepBtn");
     var openSiteSelectorBtn = document.getElementById("openSiteSelectorBtn");
     if (!saveDraftBtn || !nextStepBtn) return;
-
-    function showToast(message, type) {
-      var existing = document.querySelector(".toast");
-      if (existing) existing.remove();
-      var toast = document.createElement("div");
-      toast.className = "toast " + (type || "info");
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(function () { toast.remove(); }, 2500);
-    }
 
     function validateBasicInfo() {
       var name = document.getElementById("createTaskName");
@@ -1426,6 +885,8 @@
         return;
       }
       showToast("进入抽选专家与分组分配", "info");
+      /* 将已选站点存入 sessionStorage，供 task-expert 页面读取 */
+      try { sessionStorage.setItem('selectedSites', JSON.stringify(selectedSites)); } catch(e) {}
       setTimeout(function () {
         window.location.href = "./task-expert.html";
       }, 800);
@@ -1700,16 +1161,6 @@
     });
   }
 
-  function showToastGlobal(message, type) {
-    var existing = document.querySelector(".toast");
-    if (existing) existing.remove();
-    var toast = document.createElement("div");
-    toast.className = "toast " + (type || "info");
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(function () { toast.remove(); }, 2500);
-  }
-
   function renderDeptGroupCards() {
     var list = document.getElementById("deptGroupList");
     if (!list) return;
@@ -1815,13 +1266,13 @@
 
     if (setRangeLink) {
       setRangeLink.addEventListener("click", function () {
-        showToastGlobal("设置范围（原型演示，暂未实现弹窗）", "info");
+        showToast("设置范围（原型演示，暂未实现弹窗）", "info");
       });
     }
 
     if (addExpertBtn) {
       addExpertBtn.addEventListener("click", function () {
-        showToastGlobal("添加专家（原型演示，暂未实现弹窗）", "info");
+        showToast("添加专家（原型演示，暂未实现弹窗）", "info");
       });
     }
 
@@ -1864,7 +1315,7 @@
 
         renderDeptGroupCards();
 
-        showToastGlobal("已抽取 " + expertPool.length + " 名专家，生成 " + deptGroups.length + " 个管理部分组", "success");
+        showToast("已抽取 " + expertPool.length + " 名专家，生成 " + deptGroups.length + " 个管理部分组", "success");
       });
     }
 
@@ -1881,7 +1332,7 @@
 
     if (saveBtn) {
       saveBtn.addEventListener("click", function () {
-        showToastGlobal("已暂存", "success");
+        showToast("已暂存", "success");
       });
     }
 
@@ -1889,17 +1340,17 @@
       submitBtn.addEventListener("click", function () {
         var poolList = document.getElementById("poolList");
         if (!poolList || poolList.style.display === "none") {
-          showToastGlobal("请先抽取专家", "warning");
+          showToast("请先抽取专家", "warning");
           return;
         }
         var allFilled = deptGroups.every(function (g) {
           return g.assigned.every(function (a) { return a !== null; });
         });
         if (!allFilled) {
-          showToastGlobal("请先完成所有专家槽位分配", "warning");
+          showToast("请先完成所有专家槽位分配", "warning");
           return;
         }
-        showToastGlobal("任务已提交", "success");
+        showToast("任务已提交", "success");
         setTimeout(function () {
           window.location.href = "./task-list.html";
         }, 1200);
@@ -1909,8 +1360,6 @@
 
   function initEvents() {
     bindTaskFilters();
-    bindRectificationFilters();
-    bindMyTaskFilters();
     bindTaskCreateEvents();
     bindTaskExpertEvents();
   }
