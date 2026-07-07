@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中后台业务原型中心</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+      color: #fff;
+      padding: 48px 0 40px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; font-weight: 600; letter-spacing: 1px; }
+    .header p { margin-top: 10px; font-size: 14px; opacity: 0.8; }
+    .header .repo-link {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 20px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 20px;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .header .repo-link:hover { background: rgba(255,255,255,0.35); }
+    /* Container */
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+    /* Section */
+    .section { margin-top: 28px; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #1677ff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .badge {
+      display: inline-block;
+      background: #1677ff;
+      color: #fff;
+      font-size: 12px;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-weight: 400;
+    }
+    /* Module card */
+    .module-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .module-header {
+      padding: 14px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .module-header .module-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1677ff;
+    }
+    .module-header .module-meta {
+      font-size: 12px;
+      color: #999;
+    }
+    /* Page list */
+    .page-list { padding: 12px 20px; }
+    .page-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .page-item:last-child { border-bottom: none; }
+    .page-item .page-name { font-size: 14px; color: #333; }
+    .page-item .page-desc { font-size: 12px; color: #999; margin-top: 2px; }
+    .page-item .page-link {
+      padding: 4px 14px;
+      background: #1677ff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .page-item .page-link:hover { background: #4096ff; }
+    /* Deliverable cards */
+    .deliverable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .deliverable-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      transition: box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .deliverable-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .deliverable-card .dc-title { font-size: 14px; font-weight: 600; color: #333; }
+    .deliverable-card .dc-desc { font-size: 12px; color: #999; margin: 6px 0 10px; flex: 1; }
+    .deliverable-card .dc-link {
+      align-self: flex-start;
+      padding: 4px 14px;
+      background: #1677ff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    .deliverable-card .dc-link:hover { background: #4096ff; }
+    /* Docs links */
+    .docs-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .docs-list a {
+      padding: 8px 18px;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      color: #333;
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .docs-list a:hover {
+      color: #1677ff;
+      border-color: #1677ff;
+    }
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: #bbb;
+      font-size: 12px;
+    }
+    /* Responsive */
+    @media (max-width: 640px) {
+      .header { padding: 32px 16px 28px; }
+      .header h1 { font-size: 22px; }
+      .container { padding: 16px 12px 40px; }
+      .page-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .page-item .page-link { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏗️ 中后台业务原型中心</h1>
+    <p>用于需求评审、客户演示、研发沟通的多页面 HTML 原型集</p>
+    <a class="repo-link" href="https://github.com/caicai9807-code/pm-prototype-center" target="_blank">📂 GitHub 仓库</a>
+  </div>
+
+  <div class="container">
+
+    <!-- 原型模块 -->
+    <div class="section">
+      <div class="section-title">
+        📄 业务原型 <span class="badge">24 个页面</span>
+      </div>
+
+      <!-- rectification 模块 -->
+      <div class="module-card">
+        <div class="module-header">
+          <span class="module-name">🏠 面积检查 / 整改</span>
+          <span class="module-meta">24 个页面 · prototypes/rectification/</span>
+        </div>
+        <div class="page-list">
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">📋 面积检查任务管理</div>
+              <div class="page-desc">任务列表 · 筛选 · 新建 / 编辑 · 专家分配</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/task-list.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">📋 我的面积检查任务</div>
+              <div class="page-desc">专家视角 · 任务确认 · 开始检查 · 检查录入</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/my-task-list.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">🏢 站点详情</div>
+              <div class="page-desc">普查明细 · 实测复核 · 检查记录 · 整改通知</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/site-detail.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">📑 面积检查站点明细</div>
+              <div class="page-desc">16列数据表格 · 筛选 · 明细导出</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/site-detail-list.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">✅ 整改通知书审核</div>
+              <div class="page-desc">待审核 · 审核流程</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/review-notice.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">🛠️ 整改任务</div>
+              <div class="page-desc">待整改 · 整改中 · 待审核 · 已完成</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/rectification-task.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item">
+            <div>
+              <div class="page-name">🔍 整改任务详情</div>
+              <div class="page-desc">5Tab 详情 · 双专家会签</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/rectification-detail.html" target="_blank">查看 →</a>
+          </div>
+
+          <div class="page-item" style="border-bottom: 1px solid #e8e8e8; padding-bottom: 12px; margin-bottom: 4px;">
+            <div>
+              <div class="page-name">📱 专家 App（移动端）</div>
+              <div class="page-desc">工作台 · 任务确认 · 检查录入 · 电子签名 · 站点详情</div>
+            </div>
+            <a class="page-link" href="prototypes/rectification/expert-app-preview.html" target="_blank">预览 →</a>
+          </div>
+
+          <details style="margin-top: 2px;">
+            <summary style="font-size: 13px; color: #1677ff; cursor: pointer; padding: 6px 0;">
+              展开全部 16 个页面 →
+            </summary>
+            <div style="margin-top: 6px;">
+              <div class="page-item"><div><div class="page-name">面积检查任务详情</div><div class="page-desc">任务进度步骤条 · 检查统计</div></div><a class="page-link" href="prototypes/rectification/task-detail.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">新建任务·基础信息</div><div class="page-desc">步骤1 · 表单 + 站点选择</div></div><a class="page-link" href="prototypes/rectification/task-create.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">新建任务·抽选专家</div><div class="page-desc">步骤2 · 规则设置 + 分配槽位</div></div><a class="page-link" href="prototypes/rectification/task-expert.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">开始检查</div><div class="page-desc">检查录入 · 整改通知单 · 实测复核</div></div><a class="page-link" href="prototypes/rectification/my-task-check.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 工作台</div><div class="page-desc">移动端首页 · 移动端独立版</div></div><a class="page-link" href="prototypes/rectification/expert-app.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 任务列表</div><div class="page-desc">面积检查 + 整改任务 Tab</div></div><a class="page-link" href="prototypes/rectification/expert-app-task-list.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 任务确认</div><div class="page-desc">确认 / 拒绝 · 弹窗交互</div></div><a class="page-link" href="prototypes/rectification/expert-app-task-confirm.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 任务详情</div><div class="page-desc">站点卡片列表</div></div><a class="page-link" href="prototypes/rectification/expert-app-task-detail.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 站点列表</div><div class="page-desc">站点状态卡片</div></div><a class="page-link" href="prototypes/rectification/expert-app-site-list.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 站点详情</div><div class="page-desc">8Tab · 只读模式</div></div><a class="page-link" href="prototypes/rectification/expert-app-site-detail.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 楼栋详情</div><div class="page-desc">基础信息 · 变更详情</div></div><a class="page-link" href="prototypes/rectification/expert-app-building-detail.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 检查记录单</div><div class="page-desc">7项检查 · 电子签名</div></div><a class="page-link" href="prototypes/rectification/expert-app-check-record.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 电子签名</div><div class="page-desc">Canvas 手写签名</div></div><a class="page-link" href="prototypes/rectification/expert-app-signature.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">专家 App · 完整复刻</div><div class="page-desc">9页面 · 手机壳框架 · 纯DOM切换</div></div><a class="page-link" href="prototypes/rectification/expert-app-standalone.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">部门领导 App · 预览</div><div class="page-desc">PC 框架嵌入 iframe</div></div><a class="page-link" href="prototypes/rectification/dept-leader-app-preview.html" target="_blank">查看 →</a></div>
+              <div class="page-item"><div><div class="page-name">部门领导 App · 完整复刻</div><div class="page-desc">转派审核 · 整改任务 · 站点详情</div></div><a class="page-link" href="prototypes/rectification/dept-leader-app-standalone.html" target="_blank">查看 →</a></div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 交付包 -->
+    <div class="section">
+      <div class="section-title">
+        📦 交付包 <span class="badge">6 个文件</span>
+      </div>
+      <div class="deliverable-grid">
+        <div class="deliverable-card">
+          <div class="dc-title">一页纸·面积检查/整改</div>
+          <div class="dc-desc">单文件全功能演示版</div>
+          <a class="dc-link" href="deliverables/rectification-single-file-demo.html" target="_blank">打开 →</a>
+        </div>
+        <div class="deliverable-card">
+          <div class="dc-title">All-in-One 合并版</div>
+          <div class="dc-desc">面积检查 + 整改完整合并</div>
+          <a class="dc-link" href="deliverables/rectification-all-in-one.html" target="_blank">打开 →</a>
+        </div>
+        <div class="deliverable-card">
+          <div class="dc-title">Merged Demo</div>
+          <div class="dc-desc">合并演示版</div>
+          <a class="dc-link" href="deliverables/rectification-merged-demo.html" target="_blank">打开 →</a>
+        </div>
+        <div class="deliverable-card">
+          <div class="dc-title">基础演示版</div>
+          <div class="dc-desc">基础版演示</div>
+          <a class="dc-link" href="deliverables/rectification-demo.html" target="_blank">打开 →</a>
+        </div>
+        <div class="deliverable-card">
+          <div class="dc-title">PC 端版</div>
+          <div class="dc-desc">PC 端演示</div>
+          <a class="dc-link" href="deliverables/rectification-pc.html" target="_blank">打开 →</a>
+        </div>
+        <div class="deliverable-card">
+          <div class="dc-title">App 端版</div>
+          <div class="dc-desc">移动端演示</div>
+          <a class="dc-link" href="deliverables/rectification-app.html" target="_blank">打开 →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 业务文档 -->
+    <div class="section">
+      <div class="section-title">
+        📖 业务文档
+      </div>
+      <div class="docs-list">
+        <a href="docs/页面清单.md" target="_blank">📋 页面清单</a>
+        <a href="docs/字段字典.md" target="_blank">📊 字段字典</a>
+        <a href="docs/业务流程.md" target="_blank">🔄 业务流程</a>
+        <a href="docs/交互规则.md" target="_blank">⚙️ 交互规则</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    pm-prototype-center · 中后台复杂业务 HTML 原型仓库
+  </div>
+</body>
+</html>
