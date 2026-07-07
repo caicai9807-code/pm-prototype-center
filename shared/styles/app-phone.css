@@ -1,0 +1,129 @@
+/* app-phone.css — 专家App手机壳样式组件 */
+/* 来源: expert-app-standalone.html (原 area_checker_static/styles/app.css) */
+
+/* ===== 专家App演示稿 — 手机壳 ===== */
+.app-demo-layout{display:flex;gap:32px;height:100%;padding:24px;align-items:flex-start}
+.app-phone-shell{width:392px;min-width:392px;height:824px;background:linear-gradient(180deg,#3e434d 0%,#12151b 100%);border-radius:44px;padding:9px;box-shadow:0 18px 48px rgba(15,23,42,.24),0 6px 16px rgba(15,23,42,.12),inset 0 0 0 1px rgba(255,255,255,.14);position:relative;flex-shrink:0}
+.app-phone-shell::before{content:'';position:absolute;inset:5px;border-radius:42px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none}
+.app-phone-shell::after{content:'';position:absolute;right:-4px;top:152px;width:4px;height:64px;border-radius:2px;background:linear-gradient(180deg,#59606d 0%,#2f3440 100%);box-shadow:0 96px 0 0 rgba(60,65,76,.95)}
+.app-phone-screen{width:100%;height:100%;background:#f6f7fb;border-radius:35px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px rgba(255,255,255,.68)}
+.app-phone-screen::after{content:'';position:absolute;left:50%;bottom:9px;transform:translateX(-50%);width:136px;height:5px;border-radius:999px;background:rgba(17,24,39,.18);z-index:12}
+.app-phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:198px;height:34px;background:#15181f;border-radius:0 0 22px 22px;z-index:10;box-shadow:0 8px 18px rgba(0,0,0,.12)}
+.app-phone-notch::before{content:'';position:absolute;left:50%;top:16px;transform:translateX(-50%);width:72px;height:7px;border-radius:999px;background:rgba(255,255,255,.12)}
+.app-phone-notch::after{content:'';position:absolute;right:32px;top:13px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.3),rgba(255,255,255,.05) 55%,rgba(0,0,0,.35) 100%)}
+.app-phone-statusbar{height:52px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 20px 0;font-size:12px;color:#1f2937;font-weight:700;position:relative;z-index:5}
+.app-phone-statusbar::before{content:'9:41';letter-spacing:.2px}
+.app-phone-statusbar::after{content:'100%';letter-spacing:.2px}
+.app-page{position:absolute;top:52px;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;background:#f6f7fb;-webkit-overflow-scrolling:touch}
+.app-page.hidden{display:none}
+
+/* ===== 导航栏 ===== */
+.app-nav-bar{position:sticky;top:0;z-index:5;background:#fff;display:flex;align-items:center;height:60px;padding:8px 16px 6px}
+.app-nav-bar .back-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#52607a;font-size:22px;border-radius:16px}
+.app-nav-bar .nav-title{flex:1;text-align:center;font-size:17px;font-weight:700;color:#1f2b3d;margin-right:32px;letter-spacing:.2px}
+
+/* ===== 搜索栏 ===== */
+.app-search-bar{padding:10px 16px 4px;position:relative}
+.app-search-bar::before{content:'⌕';position:absolute;left:31px;top:26px;transform:translateY(-50%);font-size:15px;color:#b8bfcb;pointer-events:none}
+.app-search-bar input{width:100%;height:44px;border-radius:16px;border:none;padding:0 16px 0 38px;font-size:15px;color:#2c3e50;background:#eef0f6;outline:none;box-shadow:inset 0 0 0 1px rgba(233,236,243,.7)}
+.app-search-bar input::placeholder{color:#aab2bf}
+
+/* ===== 段式切换器 ===== */
+.app-segment{display:flex;gap:8px;padding:4px 16px 6px}
+.app-segment-item{flex:1;text-align:center;padding:8px 0;border-radius:12px;font-size:13px;color:#7b8797;cursor:pointer;transition:all .2s;background:#edf1f7;font-weight:600}
+.app-segment-item.active{color:#1677ff;background:#e8f1ff;box-shadow:inset 0 0 0 1px rgba(22,119,255,.12)}
+
+/* ===== 任务卡片 ===== */
+.app-task-card{background:#fff;margin:8px 16px;border-radius:18px;padding:14px 14px 0;border:none;box-shadow:0 6px 18px rgba(31,41,55,.07);cursor:pointer;overflow:hidden}
+.app-task-card .card-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.app-task-card .card-hd .t-name{font-size:16px;font-weight:700;color:#23324a;flex:1;line-height:1.4}
+.app-task-card .card-hd .t-status{font-size:12px;padding:5px 10px;border-radius:13px;white-space:nowrap;font-weight:600}
+.app-task-card .card-info{display:flex;align-items:center;gap:8px;font-size:12px;color:#738198;margin-top:6px;line-height:20px}
+.app-task-card .card-info .label{color:#738198;font-weight:600}
+.app-task-card .card-info .value{color:#556277}
+.app-task-card .card-progress{height:8px;background:#dfe4ec;border-radius:999px;overflow:hidden;margin:6px 0 10px}
+.app-task-card .card-progress-fill{height:100%;background:linear-gradient(90deg,#5c8dff 0%,#4b7cf4 100%);border-radius:999px}
+.app-task-card .card-ft{display:flex;justify-content:center;align-items:center;margin-top:2px;padding:12px 0 13px;border-top:1px solid #eef1f5}
+.app-task-card .card-ft .ft-right{font-size:15px;color:#336dff;font-weight:700;letter-spacing:.1px}
+
+/* ===== 详情区段 ===== */
+.app-detail-section{background:#fff;margin:10px 16px;border-radius:18px;padding:15px 14px;box-shadow:0 6px 18px rgba(31,41,55,.07)}
+.app-detail-section .sec-title{font-size:15px;font-weight:700;color:#23324a;margin-bottom:10px}
+.app-detail-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13px;line-height:20px}
+.app-detail-row .d-label{color:#7b8797;font-weight:600;white-space:nowrap}
+.app-detail-row .d-value{color:#23324a;font-weight:600;text-align:right;max-width:64%}
+
+/* ===== 空状态 ===== */
+.app-empty{text-align:center;padding:56px 20px 20px;color:#94a0b2}
+.app-empty .empty-icon{font-size:42px;margin-bottom:10px;color:#c9d0dc}
+.app-empty .empty-text{font-size:13px;line-height:22px}
+
+/* ===== 首页入口 ===== */
+.app-home-header{padding:22px 20px 10px;background:transparent}
+.app-home-header .greeting{font-size:27px;font-weight:800;line-height:1.2;margin-bottom:4px;letter-spacing:.2px;color:#1f2b3d}
+.app-home-header .sub-greeting{font-size:14px;color:#7b8797}
+.app-entry-card{background:#fff;margin:10px 16px;border-radius:18px;padding:15px 14px;box-shadow:0 6px 18px rgba(31,41,55,.07);cursor:pointer}
+.app-entry-card .entry-hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.app-entry-card .entry-icon{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.app-entry-card .entry-icon.check{background:#e9f1ff}
+.app-entry-card .entry-icon.rectify{background:#fff4e5}
+.app-entry-card .entry-title{font-size:16px;font-weight:700;color:#23324a;line-height:1.3}
+.app-entry-card .entry-desc{font-size:12px;color:#7b8797;margin-top:3px;line-height:18px}
+.app-entry-card .entry-stats{display:flex;gap:8px;flex-wrap:wrap}
+.app-entry-card .stat-item{background:#f2f4f8;border-radius:999px;padding:4px 9px;font-size:11px;color:#66758a}
+.app-entry-card .stat-item .stat-num{font-weight:700;color:#23324a;margin-right:3px}
+.app-entry-card .stat-item.highlight{background:#fff3df;color:#cf7b12}
+.app-entry-card .stat-item.highlight .stat-num{color:#cf7b12}
+
+/* ===== 整改任务卡片 ===== */
+.rt-card{background:#fff;border-radius:16px;padding:14px;margin:10px 12px;box-shadow:0 6px 18px rgba(31,41,55,.07)}
+.rt-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.rt-name{font-size:15px;font-weight:700;color:#23324a;line-height:20px}
+.rt-tag{font-size:11px;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.rt-row{display:flex;justify-content:space-between;gap:12px;min-height:24px;line-height:20px}
+.rt-label{font-size:12px;color:#8a94a6;white-space:nowrap}
+.rt-value{font-size:12px;color:#23324a;text-align:right}
+.rt-btn{width:100%;height:34px;border:none;border-top:1px solid #edf0f2;background:#fff;color:#4b7cf4;font-size:13px;font-weight:700;margin-top:10px;padding-top:9px;cursor:pointer}
+
+/* ===== 站点列表卡片 ===== */
+.sl-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:10px}
+.sl-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sl-card-name{font-size:14px;font-weight:600;color:#111827;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl-card-status{font-size:11px;padding:2px 8px;border-radius:10px;white-space:nowrap;margin-left:8px;flex-shrink:0}
+.sl-card-row{display:flex;justify-content:space-between;align-items:center;height:28px;line-height:28px}
+.sl-card-label{color:#8a8f99;font-size:12px;white-space:nowrap;flex-shrink:0}
+.sl-card-value{color:#111827;font-size:12px;text-align:right;margin-left:8px}
+.sl-card-btn{width:100%;height:36px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;margin-top:10px}
+.sl-card-btn.primary{background:#4b7cf4;color:#fff}
+.sl-card-btn.done{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+
+/* ===== 站点详情 ===== */
+.sd-main-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px}
+.sd-main-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.sd-main-name{font-size:17px;font-weight:700;color:#111827;line-height:24px}
+.sd-result-badge{font-size:11px;padding:4px 9px;border-radius:999px;white-space:nowrap;font-weight:600;flex-shrink:0}
+.sd-main-row{display:flex;justify-content:space-between;align-items:center;height:28px;line-height:28px}
+.sd-main-label{color:#8a8f99;font-size:12px;white-space:nowrap}
+.sd-main-value{color:#111827;font-size:12px;text-align:right;margin-left:8px}
+.sd-tabs{display:flex;background:#fff;border-radius:8px;padding:4px;margin-bottom:10px;gap:2px}
+.sd-tab{flex:1;text-align:center;font-size:12px;padding:7px 0;border-radius:6px;cursor:pointer;color:#66758a;transition:all .15s;white-space:nowrap}
+.sd-tab.active{background:#4b7cf4;color:#fff;font-weight:600}
+.sd-tab-panel{display:none}
+.sd-tab-panel.active{display:block}
+.sd-info-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:10px}
+.sd-info-title{font-size:13px;font-weight:600;color:#111827;margin-bottom:10px}
+.sd-info-row{display:flex;justify-content:space-between;align-items:center;height:30px;line-height:30px;border-bottom:1px solid #f0f2f5}
+.sd-info-row:last-child{border-bottom:none}
+.sd-info-label{color:#8a8f99;font-size:12px;white-space:nowrap;flex-shrink:0}
+.sd-info-value{color:#111827;font-size:12px;text-align:right;margin-left:8px}
+
+/* ===== 建筑物卡片 ===== */
+.sd-bld-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:8px;cursor:pointer}
+.sd-bld-card:active{background:#f9fafb}
+.sd-bld-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sd-bld-name{font-size:13px;font-weight:600;color:#111827}
+.sd-bld-tag{font-size:11px;padding:2px 6px;border-radius:8px;background:#e6f7ff;color:#1890ff}
+.sd-bld-row{display:flex;justify-content:space-between;align-items:center;height:24px;line-height:24px}
+.sd-bld-label{color:#8a8f99;font-size:11px}
+.sd-bld-value{color:#111827;font-size:11px}
+.sd-bld-link{font-size:12px;color:#1677ff;text-align:center;padding:6px 0 0;margin-top:4px;border-top:1px solid #f0f2f5}

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>专家App - 任务列表</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+    :root {
+      --adm-primary: #1677ff;
+      --adm-success: #00b578;
+      --adm-warning: #ff8f1f;
+      --adm-danger: #ff3141;
+      --adm-bg: #f5f5f5;
+    }
+
+    /* ===== 导航栏 ===== */
+    .adm-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 40px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-nav-bar .back {
+      font-size: 20px;
+      color: #333;
+      padding: 2px 6px 2px 0;
+      cursor: pointer;
+      font-weight: 300;
+    }
+    .adm-nav-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      margin-right: 32px;
+    }
+
+    /* ===== 搜索栏 ===== */
+    .adm-search {
+      padding: 8px 12px 0;
+      background: #fff;
+    }
+    .adm-search input {
+      width: 100%;
+      height: 36px;
+      border-radius: 18px;
+      border: none;
+      padding: 0 16px 0 36px;
+      font-size: 14px;
+      color: #333;
+      background: #eef0f6;
+      outline: none;
+    }
+    .adm-search input::placeholder { color: #aab2bf; }
+    .adm-search-wrap {
+      position: relative;
+    }
+    .adm-search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #b8bfcb;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ===== 段式切换器 ===== */
+    .adm-segment {
+      display: flex;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-segment-item {
+      flex: 1;
+      text-align: center;
+      padding: 7px 0;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7b8797;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #edf1f7;
+    }
+    .adm-segment-item.active {
+      color: #1677ff;
+      background: #e8f1ff;
+      box-shadow: inset 0 0 0 1px rgba(22,119,255,0.12);
+    }
+    .adm-segment-item .count { font-weight: 400; }
+
+    /* ===== 任务列表 ===== */
+    .adm-list {
+      padding: 6px 12px 16px;
+    }
+    .adm-list-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: block;
+    }
+    .adm-list-item.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+      cursor: default;
+    }
+    .adm-list-item.disabled:active { transform: none; }
+    .list-item-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .list-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+      margin-right: 6px;
+      line-height: 1.3;
+      color: #1a1a1a;
+    }
+    /* ===== 整改任务卡片（rt-card） ===== */
+    .rt-card {
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: block; cursor: pointer; transition: transform 0.15s;
+    }
+    .rt-card:active { transform: scale(0.98); }
+    .rt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .rt-name { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .rt-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; font-weight: 500; flex-shrink: 0; margin-left: 8px; }
+    .rt-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+    .rt-label { color: #999; }
+    .rt-value { color: #333; font-weight: 500; text-align: right; }
+    .rt-btn {
+      width: 100%; height: 34px; border-radius: 17px;
+      border: 1px solid #1677ff; background: #e8f1ff;
+      color: #1677ff; font-size: 12px; font-weight: 600;
+      cursor: pointer; margin-top: 10px; display: flex;
+      align-items: center; justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .rt-btn:active { opacity: 0.7; }
+
+    .list-item-tag {
+      flex-shrink: 0;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .list-item-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      margin-bottom: 6px;
+    }
+    .list-item-info span {
+      font-size: 12px;
+      color: #999;
+    }
+    .list-item-info span strong {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .list-item-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 6px;
+      border-top: 1px solid #f5f5f5;
+    }
+    .list-item-date {
+      font-size: 11px;
+      color: #bbb;
+    }
+    .list-item-btn {
+      padding: 4px 14px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .list-item-btn:active { opacity: 0.7; }
+
+    /* 状态色 */
+    .tag-confirm { background: #fff7e6; color: #d48806; }
+    .tag-pending { background: #e7f1ff; color: #1677ff; }
+    .tag-progress { background: #ebfaf3; color: #00b578; }
+    .tag-done { background: #f5f5f5; color: #999; }
+    .tag-rectify { background: #ffeeee; color: #ff3141; }
+    .tag-review { background: #fff7e6; color: #d48806; }
+    .tag-reinspect { background: #e7f1ff; color: #1677ff; }
+    .tag-archive { background: #f5f5f5; color: #999; }
+
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-warn { background: #fff7e6; color: #d48806; border: 1px solid #ffe58f; }
+    .btn-danger { background: #ffeeee; color: #ff3141; border: 1px solid #ffccc7; }
+
+    /* ===== 空状态 ===== */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #bbb;
+    }
+    .empty .icon { font-size: 36px; margin-bottom: 8px; }
+    .empty p { font-size: 13px; }
+
+    /* ===== 底部标签栏 ===== */
+    .adm-tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      font-size: 10px;
+      color: #999;
+      padding: 2px 12px;
+      cursor: pointer;
+    }
+    .tab-item.active { color: #1677ff; }
+    .tab-icon { font-size: 20px; line-height: 1; }
+    .tab-label { font-size: 10px; }
+    .safe-area { height: 44px; }
+
+    /* ===== 轻提示 Toast ===== */
+    .adm-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .adm-toast.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="adm-nav-bar">
+    <a href="./expert-app.html" class="back">‹</a>
+    <span class="title" id="pageTitle">任务列表</span>
+  </div>
+
+  <div class="adm-search" id="searchBar">
+    <div class="adm-search-wrap">
+      <input type="text" placeholder="搜索任务名称" id="taskSearch" oninput="renderTasksWithSearch()">
+    </div>
+  </div>
+
+  <div class="adm-segment" id="taskSegment"></div>
+
+  <div class="adm-list" id="taskList"></div>
+
+  <div class="safe-area"></div>
+
+  <div class="adm-tab-bar">
+    <a href="./expert-app.html" class="tab-item">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">首页</span>
+    </a>
+    <a href="./expert-app-task-list.html?type=area-check" class="tab-item active">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">任务</span>
+    </a>
+    <a href="./expert-app.html" class="tab-item">
+      <span class="tab-icon">👤</span>
+      <span class="tab-label">我的</span>
+    </a>
+  </div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var taskType = params.get('type') || 'area-check';
+    var pageTitle = document.getElementById('pageTitle');
+    var taskSegment = document.getElementById('taskSegment');
+    var taskList = document.getElementById('taskList');
+    var currentTab = taskType === 'area-check' ? 'pending' : 'pending'; // area-check:待确认, rectify:待复查
+
+    var areaCheckTasks = [
+      { id: 'T20250701001', title: '2025年夏季面积普查-裕华区', status: 'confirm', statusText: '待确认', sites: '5个站点', expert: '张建国', date: '2025-07-01', deadline: '2025-07-15' },
+      { id: 'T20250701002', title: '2025年夏季面积普查-长安区', status: 'confirm', statusText: '待确认', sites: '4个站点', expert: '张建国', date: '2025-07-01', deadline: '2025-07-15' },
+      { id: 'T20250620001', title: '2025年夏季面积普查-桥西区', status: 'pending', statusText: '待开始', sites: '5个站点', expert: '张建国', date: '2025-06-20', deadline: '2025-07-10' },
+      { id: 'T20250620002', title: '2025年夏季面积普查-新华区', status: 'pending', statusText: '待开始', sites: '4个站点', expert: '张建国', date: '2025-06-20', deadline: '2025-07-10' },
+      { id: 'T20250615001', title: '2025年夏季面积普查-高新区', status: 'progress', statusText: '进行中', sites: '3/5个站点', expert: '张建国', date: '2025-06-15', deadline: '2025-07-05' },
+      { id: 'T20250615002', title: '2025年夏季面积普查-开发区', status: 'progress', statusText: '进行中', sites: '2/4个站点', expert: '张建国', date: '2025-06-15', deadline: '2025-07-05' },
+      { id: 'T20250601001', title: '2025年春季面积普查-裕华区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
+      { id: 'T20250601002', title: '2025年春季面积普查-长安区', status: 'done', statusText: '已结束', sites: '4个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
+      { id: 'T20250601003', title: '2025年春季面积普查-桥西区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
+    ];
+
+    var rectificationTasks = [
+      { id: 'RT-202607-001', siteCode: '60218B001', siteName: '裕华区中心站', status: 'pending', statusText: '待整改', dept: '裕华管理部', address: '裕华区槐安路与翟营大街交叉口东行200米路北', lastSave: '2026-07-04 19:25:12' },
+      { id: 'RT-202607-002', siteCode: '60218B004', siteName: '裕华区万达站', status: 'pending', statusText: '待整改', dept: '裕华管理部', address: '裕华区槐中路与建华东大街交叉口东南角', lastSave: '2026-07-03 16:20:08' },
+      { id: 'RT-202607-003', siteCode: '60218B006', siteName: '桥西区北站', status: 'pending', statusText: '待整改', dept: '桥西管理部', address: '桥西区中山路与维明大街交叉口北行50米', lastSave: '2026-07-04 08:40:52' },
+      { id: 'RT-202607-004', siteCode: '60218B007', siteName: '长安区北站', status: 'pending', statusText: '待整改', dept: '长安管理部', address: '长安区和平路与建设大街交叉口西行100米', lastSave: '2026-07-04 18:18:00' },
+      { id: 'RT-202607-005', siteCode: '60218B008', siteName: '高新区南站', status: 'pending', statusText: '待整改', dept: '高新管理部', address: '高新区长江大道与珠峰大街交叉口南行200米', lastSave: '2026-07-05 09:40:00' },
+      { id: 'RT-202607-006', siteCode: '60218B003', siteName: '桥西区南站', status: 'archive', statusText: '已归档', dept: '桥西管理部', address: '桥西区中华南大街与槐安路交叉口南行150米路东', lastSave: '2026-07-01 17:30:00' },
+    ];
+
+    var config = taskType === 'area-check'
+      ? { title: '面积检查任务', data: areaCheckTasks, tagClass: { confirm:'tag-confirm', pending:'tag-pending', progress:'tag-progress', done:'tag-done' } }
+      : { title: '整改任务', data: rectificationTasks, tagClass: { pending:'tag-rectify', archive:'tag-archive' } };
+    pageTitle.textContent = config.title;
+    document.getElementById('taskSearch').placeholder = taskType === 'area-check' ? '搜索任务名称' : '搜索站点名称';
+
+    // 获取计数
+    function getCounts() {
+      var data = config.data;
+      var kw = (document.getElementById('taskSearch').value || '').trim().toLowerCase();
+      var filtered = kw ? data.filter(function(t) { return (t.title || t.siteName || '').toLowerCase().indexOf(kw) >= 0; }) : data;
+      if (taskType === 'area-check') {
+        var pending = filtered.filter(function(t) { return t.status === 'confirm'; });
+        var progress = filtered.filter(function(t) { return t.status === 'pending' || t.status === 'progress'; });
+        var done = filtered.filter(function(t) { return t.status === 'done'; });
+        return { pending: pending, progress: progress, done: done, all: filtered };
+      } else {
+        var pending = filtered.filter(function(t) { return t.status === 'pending'; });
+        var done = filtered.filter(function(t) { return t.status === 'archive'; });
+        return { pending: pending, done: done, progress: [], all: filtered };
+      }
+    }
+
+    // 渲染段式切换器
+    function renderSegment() {
+      var counts = getCounts();
+      var tabs;
+      if (taskType === 'area-check') {
+        tabs = [
+          { key: 'pending', label: '待确认', count: counts.pending.length },
+          { key: 'progress', label: '进行中', count: counts.progress.length },
+          { key: 'done', label: '已结束', count: counts.done.length }
+        ];
+      } else {
+        tabs = [
+          { key: 'pending', label: '待整改', count: counts.pending.length },
+          { key: 'done', label: '已归档', count: counts.done.length }
+        ];
+      }
+      taskSegment.innerHTML = tabs.map(function(tab) {
+        return '<div class="adm-segment-item' + (tab.key === currentTab ? ' active' : '') + '" data-key="' + tab.key + '">' + tab.label + '<span class="count">（' + tab.count + '）</span></div>';
+      }).join('');
+    }
+
+    // 确认任务
+    function confirmTask(id) {
+      window.location.href = './expert-app-task-confirm.html?id=' + id + '&type=' + taskType;
+    }
+
+    // 轻提示
+    function showToast(msg) {
+      var existing = document.querySelector('.adm-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'adm-toast';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('hide'); }, 1800);
+      setTimeout(function() { toast.remove(); }, 2200);
+    }
+
+    // 渲染整改任务列表（rt-card风格）
+    function renderRectifyTasks(list) {
+      return list.map(function(t) {
+        var tagClass = t.status === 'pending' ? 'tag-rectify' : 'tag-archive';
+        var tagHtml = '<span class="rt-tag ' + tagClass + '">' + t.statusText + '</span>';
+        return '<div class="rt-card" onclick="location.href=\'./expert-app-site-detail.html?code=' + t.siteCode + '\'">' +
+          '<div class="rt-top"><span class="rt-name">' + t.siteName + '</span>' + tagHtml + '</div>' +
+          '<div class="rt-row"><span class="rt-label">用户编码</span><span class="rt-value">' + t.siteCode + '</span></div>' +
+          '<div class="rt-row"><span class="rt-label">所属管理部</span><span class="rt-value">' + t.dept + '</span></div>' +
+          '<div class="rt-row"><span class="rt-label">用热地址</span><span class="rt-value">' + t.address + '</span></div>' +
+          '<div class="rt-row"><span class="rt-label">最近保存</span><span class="rt-value">' + t.lastSave + '</span></div>' +
+          '<div class="rt-btn" onclick="event.stopPropagation();location.href=\'./expert-app-site-detail.html?code=' + t.siteCode + '\'">查看整改</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // 渲染任务列表
+    function renderTasks() {
+      var counts = getCounts();
+      var list = [];
+
+      if (taskType === 'area-check') {
+        if (currentTab === 'pending') list = counts.pending;
+        else if (currentTab === 'progress') list = counts.progress;
+        else if (currentTab === 'done') list = counts.done;
+      } else {
+        if (currentTab === 'pending') list = counts.pending;
+        else if (currentTab === 'done') list = counts.done;
+      }
+
+      renderSegment();
+
+      if (list.length === 0) {
+        taskList.innerHTML = '<div class="empty"><div class="icon">📭</div><p>暂无任务</p></div>';
+        return;
+      }
+
+      if (taskType === 'rectification') {
+        taskList.innerHTML = renderRectifyTasks(list);
+        return;
+      }
+
+      taskList.innerHTML = list.map(function(t) {
+        var tc = config.tagClass[t.status] || 'tag-done';
+        var actionBtn = '';
+        if (t.status === 'confirm') {
+          actionBtn = '<button class="list-item-btn btn-primary" onclick="event.stopPropagation();event.preventDefault();confirmTask(\'' + t.id + '\')">去确认</button>';
+        } else if (t.status === 'rectify') {
+          actionBtn = '<button class="list-item-btn btn-danger" onclick="event.stopPropagation();event.preventDefault();alert(\'进入整改填报\')">整改</button>';
+        } else if (t.status === 'reinspect') {
+          actionBtn = '<button class="list-item-btn btn-primary" onclick="event.stopPropagation();event.preventDefault();alert(\'进入复查\')">复查</button>';
+        }
+
+        var infoRows = taskType === 'area-check'
+          ? '<span>站点：<strong>' + t.sites + '</strong></span><span>专家：<strong>' + t.expert + '</strong></span>'
+          : '<span>站点：<strong>' + t.site + '</strong></span><span>通知单：<strong>' + t.notice + '</strong></span>';
+
+        var detailHref = './expert-app-task-detail.html?id=' + t.id + '&type=' + taskType;
+        if (t.status === 'progress' && taskType === 'area-check') {
+          detailHref = './expert-app-site-list.html?id=' + t.id;
+        }
+
+        var isDisabled = t.status === 'pending';
+        var isClickable = t.status !== 'pending' && t.status !== 'confirm';
+        var cardTag = isClickable ? 'a' : 'div';
+        var hrefAttr = isClickable ? ' href="' + detailHref + '"' : '';
+        var disabledClass = isDisabled ? ' disabled' : '';
+
+        return '<' + cardTag + hrefAttr + ' class="adm-list-item' + disabledClass + '">' +
+          '<div class="list-item-top">' +
+            '<div class="list-item-title">' + t.title + '</div>' +
+            '<span class="list-item-tag ' + tc + '">' + t.statusText + '</span>' +
+          '</div>' +
+          '<div class="list-item-info">' + infoRows + '</div>' +
+          '<div class="list-item-bottom">' +
+            '<span class="list-item-date">截止：' + t.deadline + '</span>' +
+            actionBtn +
+          '</div>' +
+        '</' + cardTag + '>';
+      }).join('');
+    }
+
+    // 搜索后刷新
+    function renderTasksWithSearch() {
+      renderTasks();
+    }
+
+    renderTasks();
+
+    // 段式切换器点击事件
+    taskSegment.addEventListener('click', function(e) {
+      var item = e.target.closest('.adm-segment-item');
+      if (!item) return;
+      currentTab = item.dataset.key;
+      renderTasks();
+    });
+  </script>
+</body>
+</html>

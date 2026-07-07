@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>任务确认</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+    :root {
+      --adm-primary: #1677ff;
+      --adm-danger: #ff3141;
+    }
+
+    /* ===== 导航栏 ===== */
+    .adm-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 40px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-nav-bar .back {
+      font-size: 20px;
+      color: #333;
+      padding: 2px 6px 2px 0;
+      cursor: pointer;
+      font-weight: 300;
+    }
+    .adm-nav-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      margin-right: 32px;
+    }
+
+    /* ===== 内容区 ===== */
+    .adm-content {
+      padding: 8px 12px 16px;
+    }
+
+    /* ===== 卡片 ===== */
+    .adm-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .adm-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    /* ===== 信息行 ===== */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+      font-size: 13px;
+      color: #999;
+      flex-shrink: 0;
+    }
+    .info-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    /* ===== 须知列表 ===== */
+    .notice-list {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .notice-item {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+      padding: 4px 0;
+      position: relative;
+      padding-left: 18px;
+    }
+    .notice-item::before {
+      content: attr(data-index);
+      position: absolute;
+      left: 0;
+      top: 4px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    /* ===== 底部操作按钮 ===== */
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+    .action-bar .btn {
+      flex: 1;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .action-bar .btn:active { opacity: 0.8; }
+    .btn-reject {
+      background: #fff;
+      color: #ff3141;
+      border: 1px solid #ffccc7;
+    }
+    .btn-primary {
+      background: #1677ff;
+      color: #fff;
+    }
+    .btn-primary.disabled {
+      background: #bae0ff;
+      pointer-events: none;
+    }
+
+    .safe-area { height: 60px; }
+
+    /* ===== 轻提示 Toast ===== */
+    .adm-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .adm-toast.hide { opacity: 0; }
+
+    /* ===== 拒绝弹窗 ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 340px;
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 20px 20px 16px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      color: #1a1a1a;
+    }
+    .modal-body {
+      padding: 0 20px 20px;
+    }
+    .modal-textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 14px;
+      color: #333;
+      resize: none;
+      outline: none;
+      font-family: inherit;
+      background: #fafafa;
+    }
+    .modal-textarea::placeholder {
+      color: #bbb;
+    }
+    .modal-textarea:focus {
+      border-color: #ff3141;
+      background: #fff;
+    }
+    .modal-hint {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+      text-align: right;
+    }
+    .modal-footer {
+      display: flex;
+      padding: 0 20px 20px;
+      gap: 12px;
+    }
+    .modal-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-btn:active { opacity: 0.8; }
+    .modal-btn-cancel {
+      background: #f5f5f5;
+      color: #666;
+    }
+    .modal-btn-confirm {
+      background: #ffeeee;
+      color: #ff3141;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="adm-nav-bar">
+    <a href="javascript:history.back()" class="back">‹</a>
+    <span class="title">任务确认</span>
+  </div>
+
+  <div class="adm-content">
+    <!-- 任务信息 -->
+    <div class="adm-card">
+      <div class="adm-card-title">任务信息</div>
+      <div class="info-row">
+        <span class="info-label">任务名称</span>
+        <span class="info-value" id="taskName">2026 第29周 常规合同面积检查任务</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">所属年度</span>
+        <span class="info-value" id="taskYear">2026</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">任务周期</span>
+        <span class="info-value" id="taskPeriod">2026-07-14 至 2026-07-20</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">所属管理部</span>
+        <span class="info-value" id="taskDept">裕华管理部</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">待处理站点</span>
+        <span class="info-value" id="taskSites">4 个</span>
+      </div>
+    </div>
+
+    <!-- 确认须知 -->
+    <div class="adm-card">
+      <div class="adm-card-title">确认须知</div>
+      <ul class="notice-list">
+        <li class="notice-item" data-index="1.">接受任务后，请在任务周期内完成所有站点的面积检查工作</li>
+        <li class="notice-item" data-index="2.">每个站点需填写检查记录单，不合格项需生成整改通知书</li>
+        <li class="notice-item" data-index="3.">拒绝任务需填写拒绝原因，提交后不可撤回</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="safe-area"></div>
+
+  <!-- 底部操作按钮 -->
+  <div class="action-bar">
+    <button class="btn btn-reject" id="btnReject">拒绝</button>
+    <button class="btn btn-primary" id="btnConfirm">确认</button>
+  </div>
+
+  <!-- 拒绝弹窗 -->
+  <div class="modal-overlay" id="rejectModal">
+    <div class="modal-card">
+      <div class="modal-header">拒绝原因</div>
+      <div class="modal-body">
+        <textarea class="modal-textarea" id="rejectReason" placeholder="请输入拒绝原因..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" onclick="closeRejectModal()">取消</button>
+        <button class="modal-btn modal-btn-confirm" onclick="submitReject()">确认拒绝</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 解析URL参数获取任务信息
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get('id') || 'T20250701001';
+    const taskType = params.get('type') || 'area-check';
+
+    // 模拟任务数据（实际应从服务端获取）
+    const taskData = {
+      'T20250701001': {
+        name: '2025年夏季面积普查-裕华区',
+        year: '2025',
+        period: '2025-07-01 至 2025-07-15',
+        dept: '裕华管理部',
+        sites: 5
+      },
+      'T20250701002': {
+        name: '2025年夏季面积普查-长安区',
+        year: '2025',
+        period: '2025-07-01 至 2025-07-15',
+        dept: '长安管理部',
+        sites: 4
+      }
+    };
+
+    const task = taskData[taskId] || taskData['T20250701001'];
+
+    // 填充数据
+    document.getElementById('taskName').textContent = task.name;
+    document.getElementById('taskYear').textContent = task.year;
+    document.getElementById('taskPeriod').textContent = task.period;
+    document.getElementById('taskDept').textContent = task.dept;
+    document.getElementById('taskSites').textContent = task.sites + ' 个';
+
+    // 显示Toast
+    function showToast(message) {
+      var existing = document.querySelector('.adm-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'adm-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(function() {
+        toast.classList.add('hide');
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 1800);
+    }
+
+    // 确认按钮
+    document.getElementById('btnConfirm').addEventListener('click', function() {
+      this.classList.add('disabled');
+      this.textContent = '确认中...';
+      setTimeout(function() {
+        // 模拟通知PC端：任务已确认
+        try { localStorage.setItem('taskConfirm_' + taskId, 'confirmed'); } catch(e) {}
+        showToast('确认成功');
+        setTimeout(function() {
+          history.back();
+        }, 1200);
+      }, 600);
+    });
+
+    // 拒绝弹窗
+    var rejectModal = document.getElementById('rejectModal');
+    document.getElementById('btnReject').addEventListener('click', function() {
+      rejectModal.classList.add('show');
+      document.getElementById('rejectReason').focus();
+    });
+    function closeRejectModal() {
+      rejectModal.classList.remove('show');
+      document.getElementById('rejectReason').value = '';
+    }
+    function submitReject() {
+      var reason = document.getElementById('rejectReason').value.trim();
+      if (!reason) {
+        showToast('请填写拒绝原因');
+        document.getElementById('rejectReason').focus();
+        return;
+      }
+      closeRejectModal();
+      // 模拟通知PC端：任务已拒绝
+      try { localStorage.setItem('taskConfirm_' + taskId, 'rejected'); } catch(e) {}
+      showToast('已拒绝');
+      setTimeout(function() {
+        history.back();
+      }, 1200);
+    }
+    // 点击遮罩关闭
+    rejectModal.addEventListener('click', function(e) {
+      if (e.target === rejectModal) closeRejectModal();
+    });
+  </script>
+</body>
+</html>

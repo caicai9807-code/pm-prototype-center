@@ -1,0 +1,210 @@
+{
+  "name": "抽选专家与分组分配",
+  "pageKey": "task-expert",
+  "business": "为检查任务配置专家抽取规则（年龄优先、检查间隔、管理部专家、专家库范围、抽取数量），按管理部分组分配专家到检查槽位，所有槽位占满后可提交任务",
+  "domain": "rectification",
+  "inputs": [
+    {
+      "name": "mode",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "页面模式，mode=edit为编辑模式，从task-create跳转时携带"
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "编辑模式下的任务ID"
+    },
+    {
+      "name": "selectedSites",
+      "type": "array",
+      "source": "session-storage",
+      "required": false,
+      "description": "从task-create页面传递的已选站点数据"
+    },
+    {
+      "name": "editMode",
+      "type": "string",
+      "source": "session-storage",
+      "required": false,
+      "description": "编辑模式标记，从task-create页面传递"
+    },
+    {
+      "name": "editTaskId",
+      "type": "string",
+      "source": "session-storage",
+      "required": false,
+      "description": "编辑任务ID，从task-create页面传递"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "deptGroups",
+      "type": "array",
+      "target": "ui-render",
+      "description": "管理部分组卡片列表，每组包含dept/sites/slots/assigned字段，展示站点标签和专家槽位分配状态"
+    },
+    {
+      "name": "expertPool",
+      "type": "array",
+      "target": "ui-render",
+      "description": "候选专家池列表，每个专家包含id/name/dept/type/age/lastCheck/status字段，支持按全部/待分配/已分配筛选"
+    },
+    {
+      "name": "assignments",
+      "type": "object",
+      "target": "ui-render",
+      "description": "专家分配结果，记录每个管理部每个槽位分配的专家姓名"
+    },
+    {
+      "name": "footerHint",
+      "type": "string",
+      "target": "ui-render",
+      "description": "底部提示文本，显示槽位分配进度（已分配X/Y），全部占满后提示可提交"
+    }
+  ],
+  "stateMachine": {
+    "initial": "configuring",
+    "states": {
+      "configuring": {
+        "description": "配置专家抽取规则状态，设置年龄优先条件、检查间隔、管理部专家开关及人数、专家库范围、抽取总数量",
+        "transitions": [
+          {
+            "trigger": "click-draw",
+            "target": "drawn",
+            "action": "根据规则抽取专家生成候选池，创建管理部分组，渲染分组卡片和专家列表"
+          },
+          {
+            "trigger": "click-prev-step",
+            "target": "navigating-to-create",
+            "action": "返回上一步（task-create页面）"
+          },
+          {
+            "trigger": "click-save",
+            "target": "configuring",
+            "action": "暂存当前配置，显示成功提示"
+          },
+          {
+            "trigger": "toggle-dept-switch",
+            "target": "configuring",
+            "action": "切换管理部专家开关，启用/禁用管理部专家人数输入"
+          }
+        ]
+      },
+      "drawn": {
+        "description": "已抽取专家状态，候选专家池和管理部分组已生成，可进行专家分配",
+        "transitions": [
+          {
+            "trigger": "click-slot-btn",
+            "target": "expert-selecting",
+            "action": "点击槽位按钮，打开专家选择弹窗"
+          },
+          {
+            "trigger": "click-add-expert",
+            "target": "drawn",
+            "action": "添加专家（原型演示暂未实现弹窗）"
+          },
+          {
+            "trigger": "filter-pool",
+            "target": "drawn",
+            "action": "按全部/待分配/已分配筛选候选专家池"
+          },
+          {
+            "trigger": "search-pool",
+            "target": "drawn",
+            "action": "按专家姓名搜索候选专家池"
+          },
+          {
+            "trigger": "click-save",
+            "target": "drawn",
+            "action": "暂存当前分配状态"
+          },
+          {
+            "trigger": "click-submit",
+            "target": "submitting",
+            "action": "验证所有槽位是否已分配，通过则提交任务"
+          },
+          {
+            "trigger": "click-prev-step",
+            "target": "navigating-to-create",
+            "action": "返回上一步"
+          }
+        ]
+      },
+      "expert-selecting": {
+        "description": "专家选择弹窗打开状态，左侧组织部门树筛选，右侧专家列表单选，支持按用户名/真实姓名搜索",
+        "transitions": [
+          {
+            "trigger": "click-confirm-expert",
+            "target": "drawn",
+            "action": "确认选择专家，将专家分配到对应槽位，更新分组卡片和专家池状态"
+          },
+          {
+            "trigger": "click-cancel-modal",
+            "target": "drawn",
+            "action": "取消选择，关闭弹窗"
+          },
+          {
+            "trigger": "click-tree-node",
+            "target": "expert-selecting",
+            "action": "按部门筛选专家列表"
+          }
+        ]
+      },
+      "submitting": {
+        "description": "提交任务中，验证所有槽位已分配后提交",
+        "transitions": [
+          {
+            "trigger": "submit-success",
+            "target": "navigating-to-list",
+            "action": "提交成功，跳转到任务列表页"
+          },
+          {
+            "trigger": "submit-fail-slots-empty",
+            "target": "drawn",
+            "action": "存在未分配槽位，显示警告提示"
+          },
+          {
+            "trigger": "submit-fail-not-drawn",
+            "target": "configuring",
+            "action": "尚未抽取专家，显示警告提示"
+          }
+        ]
+      },
+      "navigating-to-list": {
+        "description": "跳转到任务列表页",
+        "transitions": []
+      },
+      "navigating-to-create": {
+        "description": "返回上一步（task-create页面）",
+        "transitions": []
+      }
+    }
+  },
+  "dependencies": {
+    "components": [
+      "AppComponents.statusClass",
+      "AppComponents.showToast"
+    ],
+    "services": [
+      "TaskService.getTask"
+    ],
+    "mockData": [
+      "MockData.expertPool",
+      "MockData.deptGroups",
+      "MockData.expertModalPool"
+    ]
+  },
+  "navigation": {
+    "entryPoints": [
+      "task-create"
+    ],
+    "exitPoints": [
+      "task-list",
+      "task-create"
+    ]
+  }
+}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>填写检查记录单</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f6f8; color: #333; font-size: 14px;
+      min-height: 100vh; -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    .cf-nav-bar {
+      position: sticky; top: 0; z-index: 5;
+      background: #fff; display: flex; align-items: center;
+      height: 36px; padding: 0 12px; border-bottom: 1px solid #edf0f2;
+    }
+    .cf-back-btn {
+      width: 28px; height: 28px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: #4b7cf4;
+      font-size: 20px; border-radius: 14px; flex-shrink: 0;
+    }
+    .cf-nav-title {
+      flex: 1; text-align: center; font-size: 16px; font-weight: 600;
+      color: #111827; margin-right: 28px;
+    }
+    .cf-content { padding: 12px; }
+
+    .cf-card { background: #fff; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .cf-card-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 12px; }
+
+    .check-item { margin-bottom: 14px; }
+    .check-item:last-child { margin-bottom: 0; }
+    .check-q {
+      font-size: 13px; color: #1a1a1a; font-weight: 500;
+      margin-bottom: 8px; line-height: 1.5;
+    }
+    .check-choices { display: flex; gap: 8px; flex-wrap: wrap; }
+    .check-choice {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; color: #475569;
+      background: #f8fafc; border: 1px solid #e5e7eb;
+      border-radius: 999px; padding: 5px 12px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .check-choice input { accent-color: #1677ff; margin: 0; }
+    .check-choice.selected { background: #e8f1ff; border-color: #1677ff; color: #1677ff; }
+
+    .issue-group {
+      display: none; margin-top: 8px; padding: 10px; background: #fff7f7;
+      border-radius: 8px; border: 1px solid #ffe8e8;
+    }
+    .issue-group.show { display: block; }
+    .issue-item {
+      display: flex; align-items: flex-start; gap: 6px;
+      font-size: 12px; color: #666; line-height: 20px; margin-bottom: 6px;
+    }
+    .issue-item:last-child { margin-bottom: 0; }
+    .issue-item input { margin-top: 3px; accent-color: #ff4d4f; flex-shrink: 0; }
+    .issue-other {
+      margin-top: 6px; padding-top: 6px; border-top: 1px solid #f0f0f0;
+    }
+    .issue-other input {
+      width: 100%; height: 32px; border: 1px solid #e5e7eb;
+      border-radius: 6px; padding: 0 10px; font-size: 12px; outline: none;
+    }
+    .issue-other input:focus { border-color: #1677ff; }
+
+    .conclusion-row {
+      display: flex; gap: 16px; margin-bottom: 12px;
+    }
+    .conclusion-row label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+    }
+    .conclusion-row input { accent-color: #1677ff; }
+
+    .cf-textarea {
+      width: 100%; min-height: 72px; border: 1px solid #e5e7eb;
+      border-radius: 8px; padding: 8px 10px; font-size: 13px;
+      resize: none; outline: none; font-family: inherit; color: #333;
+    }
+    .cf-textarea:focus { border-color: #1677ff; }
+    .cf-textarea::placeholder { color: #bbb; }
+
+    .cf-submit {
+      width: 100%; height: 42px; border: none; border-radius: 8px;
+      background: #1677ff; color: #fff; font-size: 15px; font-weight: 600;
+      cursor: pointer; margin-top: 4px; transition: opacity 0.15s;
+    }
+    .cf-submit:active { opacity: 0.8; }
+    .cf-submit:disabled { background: #bae0ff; cursor: not-allowed; }
+
+    /* 电子签名 */
+    .e-sign-card { background: #fff; border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .e-sign-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 12px; }
+    .e-sign-box {
+      width: 100%; height: 80px; border: 1px dashed #d9d9d9;
+      border-radius: 8px; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .e-sign-box:active { background: #f8f9fc; }
+    .e-sign-name { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+    .e-sign-hint {
+      font-size: 12px; color: #999; margin-top: 8px; line-height: 1.5;
+    }
+
+    .safe-area { height: 12px; }
+
+    /* ===== 轻提示 Toast ===== */
+    .adm-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .adm-toast.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="cf-nav-bar">
+    <a href="javascript:history.back()" class="cf-back-btn">‹</a>
+    <div class="cf-nav-title">填写检查记录单</div>
+  </div>
+  <div class="cf-content" id="formContent"></div>
+  <div class="safe-area"></div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var siteCode = params.get('code') || '60218B006';
+    var taskId = params.get('task') || '';
+
+    // 检查项数据（与PC端7项检查清单一致）
+    var checkItems = [
+      { id: 1, title: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？', hasNA: false, issues: ['数据填写不正确', '项目填写不齐全', '表格不完整'], hasOther: true },
+      { id: 2, title: '用热范围平面图是否具备绘制人、审批流程是否完整、绘制日期，且方位正确？', hasNA: false, issues: ['无绘制人签字', '无绘制日期', '方位标注不正确', '现场建筑名称与图纸不一致', '楼号/层数不一致', '未入网建筑与平面图不符'], hasOther: true },
+      { id: 3, title: '面积核查依据（确权书及相关证明材料）是否有效且齐全？', hasNA: false, issues: ['确权书缺失或无效', '证明材料不齐全', '面积计算依据不明确', '审批流程缺失', '确权书过期', '缺面积确权总表', '实地/图纸/实测依据登记表不明确', '缺确权单批次明细表', '确权单批次明细表与实际不一致', '三方认证与实际不符', '现场面积与确权面积不符'], hasOther: true },
+      { id: 4, title: '是否存在面积变化情况？', hasNA: false, issues: [], hasOther: false },
+      { id: 5, title: '面积核查汇总表与用热现场是否一致（建筑名称、楼号、层数、未入网建筑等）？', hasNA: false, issues: ['建筑名称不一致', '楼号与现场不一致', '层数与现场不一致', '未入网建筑未标注', '现场存在未入网建筑', '商铺与现场不一致'], hasOther: true },
+      { id: 6, title: '商业门头平面图与现场顺序是否一致？', hasNA: true, issues: ['平面图顺序与现场不一致', '商业门头位置错误', '标识不清或缺失'], hasOther: true },
+      { id: 7, title: '实测计算是否满足制度要求？', hasNA: true, issues: ['偏差值大于3%', '偏差值大于2%', '偏差值大于±60m²'], hasOther: false },
+    ];
+
+    // 表单状态
+    var formState = {};
+    checkItems.forEach(function(item) {
+      formState[item.id] = { result: '', issues: [], other: '' };
+    });
+
+    function renderForm() {
+      var html = '';
+      // 检查结论
+      html += '<div class="cf-card">';
+      html += '<div class="cf-card-title">检查结论 <span style="color:#ff4d4f">*</span></div>';
+      html += '<div class="conclusion-row">';
+      html += '<label><input type="radio" name="conclusion" value="合格" onchange="window._conclusion=this.value"> 合格</label>';
+      html += '<label><input type="radio" name="conclusion" value="不合格" onchange="window._conclusion=this.value"> 不合格</label>';
+      html += '</div>';
+      html += '</div>';
+
+      // 检查项
+      checkItems.forEach(function(item) {
+        var state = formState[item.id];
+        html += '<div class="cf-card">';
+        html += '<div class="check-item">';
+        html += '<div class="check-q">' + item.id + '. ' + item.title + '</div>';
+        html += '<div class="check-choices">';
+        html += '<label class="check-choice" onclick="selectChoice(' + item.id + ', \'是\')"><input type="radio" name="check_' + item.id + '" value="是"' + (state.result === '是' ? ' checked' : '') + '> 是</label>';
+        html += '<label class="check-choice" onclick="selectChoice(' + item.id + ', \'否\')"><input type="radio" name="check_' + item.id + '" value="否"' + (state.result === '否' ? ' checked' : '') + '> 否</label>';
+        if (item.hasNA) {
+          html += '<label class="check-choice" onclick="selectChoice(' + item.id + ', \'不适用\')"><input type="radio" name="check_' + item.id + '" value="不适用"' + (state.result === '不适用' ? ' checked' : '') + '> 不适用</label>';
+        }
+        html += '</div>';
+        // 不满足项
+        if (item.issues.length > 0) {
+          var show = state.result === '否' ? ' show' : '';
+          html += '<div class="issue-group' + show + '" id="issueGroup_' + item.id + '">';
+          item.issues.forEach(function(issue, idx) {
+            var checked = state.issues.indexOf(issue) >= 0 ? ' checked' : '';
+            html += '<div class="issue-item"><input type="checkbox" value="' + issue + '"' + checked + ' onchange="toggleIssue(' + item.id + ', this)"><span>' + issue + '</span></div>';
+          });
+          if (item.hasOther) {
+            html += '<div class="issue-other"><input type="text" placeholder="其他问题..." value="' + state.other + '" oninput="formState[' + item.id + '].other=this.value"></div>';
+          }
+          html += '</div>';
+        }
+        html += '</div></div>';
+      });
+
+      // 问题描述
+      html += '<div class="cf-card">';
+      html += '<div class="cf-card-title">问题描述</div>';
+      html += '<textarea class="cf-textarea" id="problemDesc" placeholder="请描述检查中发现的问题..." maxlength="500"></textarea>';
+      html += '<div style="text-align:right;font-size:12px;color:#bbb;margin-top:4px;">0/500</div>';
+      html += '</div>';
+
+      // 现场说明
+      html += '<div class="cf-card">';
+      html += '<div class="cf-card-title">现场说明</div>';
+      html += '<textarea class="cf-textarea" id="siteNote" placeholder="请补充现场情况说明..." maxlength="500"></textarea>';
+      html += '<div style="text-align:right;font-size:12px;color:#bbb;margin-top:4px;">0/500</div>';
+      html += '</div>';
+
+      // 电子签名
+      html += '<div class="e-sign-card">';
+      html += '<div class="e-sign-title">电子签名</div>';
+      html += '<div class="e-sign-box" onclick="location.href=\'./expert-app-signature.html\'">';
+      html += '<span class="e-sign-name">张建国</span>';
+      html += '</div>';
+      html += '<div class="e-sign-hint">提交记录前请完成第一名专家确认签字</div>';
+      html += '</div>';
+
+      // 提交按钮
+      html += '<button class="cf-submit" onclick="submitForm()">提交检查记录单</button>';
+
+      document.getElementById('formContent').innerHTML = html;
+    }
+
+    // 选择检查项结果
+    function selectChoice(itemId, value) {
+      formState[itemId].result = value;
+      var group = document.getElementById('issueGroup_' + itemId);
+      if (group) {
+        group.classList.toggle('show', value === '否');
+      }
+      // 如果不是"否"，清空子项
+      if (value !== '否') {
+        formState[itemId].issues = [];
+        formState[itemId].other = '';
+      }
+    }
+
+    // 切换子项
+    function toggleIssue(itemId, checkbox) {
+      var state = formState[itemId];
+      if (checkbox.checked) {
+        if (state.issues.indexOf(checkbox.value) < 0) state.issues.push(checkbox.value);
+      } else {
+        var idx = state.issues.indexOf(checkbox.value);
+        if (idx >= 0) state.issues.splice(idx, 1);
+      }
+    }
+
+    // 提交校验
+    function submitForm() {
+      if (!window._conclusion) {
+        showToast('请选择检查结论');
+        return;
+      }
+      var allDone = true;
+      checkItems.forEach(function(item) {
+        var state = formState[item.id];
+        if (!state.result) { allDone = false; }
+      });
+      if (!allDone) {
+        showToast('请完成所有检查项');
+        return;
+      }
+      showToast('检查记录单提交成功');
+      // 模拟通知站点详情页：结论不合格时显示整改通知单Tab
+      if (window._conclusion === '不合格') {
+        try { sessionStorage.setItem('needRectify', 'true'); } catch(e) {}
+      }
+      setTimeout(function() {
+        history.back();
+      }, 1200);
+    }
+
+    function showToast(msg) {
+      var existing = document.querySelector('.adm-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'adm-toast';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('hide'); }, 1800);
+      setTimeout(function() { toast.remove(); }, 2200);
+    }
+
+    renderForm();
+
+    // 字数统计（事件委托）
+    document.addEventListener('input', function(e) {
+      if (e.target.id === 'problemDesc' || e.target.id === 'siteNote') {
+        var len = e.target.value.length;
+        var next = e.target.nextElementSibling;
+        if (next) next.textContent = len + '/500';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -24,20 +24,26 @@
     `;
   }
 
-  function menuItem(href, key, icon, label, count) {
-    return `
-      <a class="menu-item ${currentMenu === key ? "active" : ""}" href="${href}">
-        <span class="menu-icon">${icon}</span>
-        <span>${label}</span>
-        ${count ? `<span class="menu-count">${count}</span>` : ""}
-      </a>
-    `;
+  function menuItem(href, key, icon, label, count, badge, badgeColor) {
+    var badgeHTML = "";
+    if (badge) {
+      var bgColor = badgeColor || "#1890ff";
+      badgeHTML = '<span class="menu-badge" style="background:' + bgColor + ';color:#fff;font-size:11px;min-width:18px;height:18px;line-height:18px;text-align:center;border-radius:9px;padding:0 5px;margin-left:6px;display:inline-block;vertical-align:middle;">' + badge + '</span>';
+    }
+    return '\
+      <a class="menu-item ' + (currentMenu === key ? "active" : "") + '" href="' + href + '">\
+        <span class="menu-icon">' + icon + '</span>\
+        <span>' + label + '</span>\
+        ' + badgeHTML + '\
+        ' + (count ? '<span class="menu-count">' + count + '</span>' : "") + '\
+      </a>\
+    ';
   }
 
   function renderShell(content) {
     var menuHTML = menuConfig.map(function (section) {
       var itemsHTML = section.items.map(function (item) {
-        return menuItem(item.href, item.key, item.icon, item.label, item.count);
+        return menuItem(item.href, item.key, item.icon, item.label, item.count, item.badge, item.badgeColor);
       }).join("\n");
       return `
         <div class="menu-section">
@@ -71,7 +77,7 @@
             ${menuHTML}
           </aside>
           <main class="main">
-            ${renderBreadcrumb(pageMap[currentPage].breadcrumb)}
+            ${renderBreadcrumb((pageMap[currentPage] || { breadcrumb: [] }).breadcrumb)}
             ${content}
           </main>
         </div>

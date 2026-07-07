@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>整改任务</title>
+  <link rel="stylesheet" href="../../shared/styles/shared.css" />
+  <link rel="stylesheet" href="./styles/pc-system-template.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    /* ===== 整改任务列表专用样式（rt- 前缀隔离） ===== */
+
+    .rt-page {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── 筛选卡片 ── */
+    .rt-filter-card {
+      margin-bottom: 20px;
+    }
+    .rt-filter-card .card-body {
+      padding: 20px;
+    }
+    .rt-filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 14px 20px;
+      align-items: center;
+    }
+    .rt-filter-item {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .rt-filter-item label {
+      display: inline-flex;
+      align-items: center;
+      width: 72px;
+      min-width: 72px;
+      margin-right: 8px;
+      font-size: 13px;
+      color: var(--pc-color-text-3);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .rt-filter-item .control,
+    .rt-filter-item select.control {
+      width: 100%;
+    }
+    .rt-filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* ── 表格列宽 ── */
+    .rt-table {
+      min-width: 1260px;
+      table-layout: fixed;
+    }
+    .rt-table .col-seq { width: 52px; }
+    .rt-table .col-task-name { width: 200px; }
+    .rt-table .col-station-name { width: 120px; }
+    .rt-table .col-person { width: 80px; }
+    .rt-table .col-status { width: 90px; }
+    .rt-table .col-deadline { width: 100px; }
+    .rt-table .col-overdue { width: 80px; }
+    .rt-table .col-node { width: 120px; }
+    .rt-table .col-ops { width: 110px; }
+
+    /* 操作列 sticky 固定 */
+    .rt-table th:last-child,
+    .rt-table td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.08);
+    }
+    .rt-table th:last-child { background: #fafbfc; }
+    .rt-table td:last-child { background: #fff; }
+    .rt-table tbody tr:hover td:last-child { background: #f5f7fa; }
+
+    /* 操作按钮 */
+    .rt-action-link {
+      color: var(--pc-color-primary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color .2s;
+      white-space: nowrap;
+    }
+    .rt-action-link:hover { color: var(--pc-color-primary-hover); }
+    .rt-action-divider {
+      display: inline-block;
+      width: 1px;
+      height: 14px;
+      background: #d9dde4;
+      margin: 0 6px;
+      vertical-align: middle;
+    }
+
+    /* ── 列表标题 ── */
+    .rt-list-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 0;
+    }
+    .rt-list-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--pc-color-text);
+    }
+    .rt-count-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 10px;
+      background: #f0f2f5;
+      color: var(--pc-color-text-3);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ── 页面标题 ── */
+    .rt-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .rt-page-title {
+      color: var(--pc-color-text);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* ── 表格居中列 ── */
+    .rt-col-center { text-align: center; }
+
+    /* ── 分页信息 ── */
+    .rt-pagination-info {
+      color: var(--pc-color-text-3);
+      font-size: 13px;
+    }
+
+    /* ── 状态 Tag ── */
+    .rt-status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+    .rt-status-tag.status-todo { background: #fff7e6; color: #d48806; }     /* 待整改-橙 */
+    .rt-status-tag.status-fixing { background: #f0f5ff; color: #4c78f5; }   /* 整改中-蓝 */
+    .rt-status-tag.status-expert-review { background: #f9f0ff; color: #722ed1; } /* 待专家审核-紫 */
+    .rt-status-tag.status-done { background: #f5f5f5; color: #8c8c8c; } /* 已完成-灰 */
+    .rt-status-tag.status-overdue { background: #fff2f0; color: #ff4d4f; }  /* 已超期-红 */
+
+    /* 超期文本颜色 */
+    .rt-overdue-yes { color: #ff4d4f; font-weight: 500; }
+    .rt-overdue-no { color: #52c41a; }
+
+    /* ── 整改弹窗 ── */
+    .rt-fix-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .rt-fix-overlay.active { display: flex; }
+    /* ── 接收确认弹窗（复用 fix 样式）── */
+    .rt-receive-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .rt-receive-overlay.active { display: flex; }
+    .rt-receive-card {
+      background: #fff;
+      border-radius: 8px;
+      width: 480px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .rt-receive-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .rt-receive-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #262626;
+    }
+    .rt-receive-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #8c8c8c;
+      line-height: 1;
+    }
+    .rt-receive-close:hover { color: #262626; }
+    .rt-receive-body {
+      padding: 24px 20px;
+    }
+    .rt-receive-info {
+      font-size: 14px;
+      color: #595959;
+      line-height: 24px;
+      margin-bottom: 16px;
+    }
+    .rt-receive-info strong {
+      color: #262626;
+    }
+    .rt-receive-deadline {
+      background: #fff7e6;
+      border: 1px solid #ffd591;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #d48806;
+      line-height: 20px;
+      margin-bottom: 8px;
+    }
+    .rt-receive-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .rt-fix-card {
+      background: #fff;
+      border-radius: 8px;
+      width: 640px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .rt-fix-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .rt-fix-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #262626;
+    }
+    .rt-fix-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #8c8c8c;
+      line-height: 1;
+    }
+    .rt-fix-close:hover { color: #262626; }
+    .rt-fix-body {
+      padding: 20px;
+    }
+    .rt-fix-section {
+      margin-bottom: 24px;
+    }
+    .rt-fix-section-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #262626;
+      margin-bottom: 10px;
+    }
+    .rt-fix-section-title .rt-fix-required {
+      color: #ff4d4f;
+      margin-right: 4px;
+    }
+    .rt-fix-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #262626;
+      resize: vertical;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .rt-fix-textarea:focus {
+      border-color: #4c78f5;
+      box-shadow: 0 0 0 3px rgba(76,120,245,0.1);
+    }
+    .rt-fix-textarea::placeholder {
+      color: #bfbfbf;
+    }
+    .rt-fix-char-count {
+      text-align: right;
+      font-size: 12px;
+      color: #bfbfbf;
+      margin-top: 4px;
+    }
+    .rt-fix-upload-area {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      padding: 20px;
+      background: #fafafa;
+    }
+    .rt-fix-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 14px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      font-size: 13px;
+      color: #595959;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .rt-fix-upload-btn:hover {
+      border-color: #4c78f5;
+      color: #4c78f5;
+    }
+    .rt-fix-upload-hint {
+      display: inline-block;
+      margin-left: 12px;
+      font-size: 13px;
+      color: #8c8c8c;
+    }
+    .rt-fix-upload-hint span {
+      color: #bfbfbf;
+      font-size: 12px;
+    }
+    .rt-fix-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+  </style>
+</head>
+<body data-page="rectification-task" data-menu="rectification-task">
+  <div id="app"></div>
+  <script src="../../shared/utils/helpers.js"></script>
+  <script src="../../shared/components/Layout/layout.js"></script>
+  <script src="./config.js"></script>
+  <script src="./components.js"></script>
+  <script src="./store/PrototypeStore.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ============================================================
+      // 数据（从 PrototypeStore 读取 + 本地fallback）
+      // ============================================================
+      var Store = window.PrototypeStore;
+      var mockData = [
+        { id: 1, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区中心站', stationCode: '60218B001', person: '赵立成', status: '待整改', deadline: '2026-07-20', overdueDays: 0, node: '待接收' },
+        { id: 2, taskName: '2026 第27周 裕华片区异常转派补查任务', stationName: '裕华区万达站', stationCode: '60218B004', person: '王建国', status: '整改中', deadline: '2026-07-25', overdueDays: 0, node: '整改执行' },
+        { id: 3, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区东南站', stationCode: '60218B007', person: '赵立成', status: '待专家审核', deadline: '2026-06-28', overdueDays: 7, node: '专家审核' },
+        { id: 4, taskName: '2026 第26周 桥西片区常规面积核查任务', stationName: '桥西区新百站', stationCode: '60218B010', person: '李志强', status: '已完成', deadline: '2026-07-05', overdueDays: 0, node: '已完成' },
+        { id: 5, taskName: '2026 第26周 长安片区管网排查任务', stationName: '长安区中山东路站', stationCode: '60218B012', person: '张伟', status: '已超期', deadline: '2026-06-25', overdueDays: 10, node: '整改执行' },
+        { id: 6, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区槐北站', stationCode: '60218B015', person: '赵立成', status: '待整改', deadline: '2026-07-22', overdueDays: 0, node: '待接收' }
+      ];
+
+      /** 从 Store 加载数据，若无则用 fallback */
+      function loadData() {
+        try {
+          var storeData = Store.getRectificationTasks();
+          if (storeData && storeData.length) {
+            mockData = storeData.map(function (r) {
+              var now = new Date();
+              var deadline = new Date(r.deadline || now);
+              var diff = Math.ceil((deadline - now) / (1000*60*60*24));
+              return {
+                id: r.id,
+                taskName: r.taskName || '—',
+                stationName: r.stationName || r.siteCode || '—',
+                stationCode: r.siteCode || '',
+                person: r.assignee || '—',
+                status: r.status || '待整改',
+                deadline: r.deadline || '—',
+                overdueDays: diff < 0 ? Math.abs(diff) : 0,
+                node: r.status === '待整改' ? '待接收' : r.status === '整改中' ? '整改执行' : r.status === '待专家审核' ? '专家审核' : r.status === '已完成' ? '已完成' : '整改执行'
+              };
+            });
+          }
+        } catch(e) {}
+      }
+
+      // ============================================================
+      // 渲染函数
+      // ============================================================
+      function statusClass(s) {
+        var map = { '待整改': 'status-todo', '整改中': 'status-fixing', '待专家审核': 'status-expert-review', '已完成': 'status-done', '已超期': 'status-overdue' };
+        return 'rt-status-tag ' + (map[s] || 'status-todo');
+      }
+
+      function renderAction(row) {
+        var taskIdParam = row.taskId ? '&taskId=' + row.taskId : '';
+        var html = '<a class="rt-action-link" href="./rectification-detail.html?code=' + row.stationCode + taskIdParam + '">详情</a>';
+        if (row.status === '待整改') {
+          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-receive" data-station="' + row.stationCode + '" data-deadline="' + row.deadline + '">接收</span>';
+        } else if (row.status === '整改中' || row.status === '已超期') {
+          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-fix">整改</span>';
+        }
+        return html;
+      }
+
+      // ============================================================
+      // 渲染主体内容
+      // ============================================================
+      function renderPageContent() {
+        var total = mockData.length;
+        var rowsHtml = '';
+        for (var i = 0; i < total; i++) {
+          var r = mockData[i];
+          var isOverdue = r.overdueDays > 0;
+          var overdueClass = isOverdue ? 'rt-overdue-yes' : 'rt-overdue-no';
+          var overdueText = isOverdue ? '超期 ' + r.overdueDays + ' 天' : '正常';
+          rowsHtml += '\
+            <tr>\
+              <td class="rt-col-center">' + r.id + '</td>\
+              <td>' + r.taskName + '</td>\
+              <td>' + r.stationName + '</td>\
+              <td>' + r.person + '</td>\
+              <td class="rt-col-center"><span class="' + statusClass(r.status) + '">' + r.status + '</span></td>\
+              <td>' + r.deadline + '</td>\
+              <td class="rt-col-center"><span class="' + overdueClass + '">' + overdueText + '</span></td>\
+              <td>' + r.node + '</td>\
+              <td>' + renderAction(r) + '</td>\
+            </tr>';
+        }
+
+        return '\
+          <div class="rt-page">\
+            <div class="rt-page-header">\
+              <div class="rt-page-title">整改任务</div>\
+            </div>\
+            <section class="card rt-filter-card">\
+              <div class="card-body">\
+                <div class="rt-filter-grid">\
+                  <div class="rt-filter-item"><label>任务名称：</label><input class="control" id="rt-f-task" placeholder="请输入" /></div>\
+                  <div class="rt-filter-item"><label>站点名称：</label><input class="control" id="rt-f-station" placeholder="请输入" /></div>\
+                  <div class="rt-filter-item"><label>整改状态：</label><select class="control" id="rt-f-status"><option value="">全部</option><option value="待整改">待整改</option><option value="整改中">整改中</option><option value="待专家审核">待专家审核</option><option value="已完成">已完成</option><option value="已超期">已超期</option></select></div>\
+                  <div class="rt-filter-item"><label>整改人：</label><input class="control" id="rt-f-person" placeholder="请输入" /></div>\
+                  <div class="rt-filter-item"><label>管理部：</label><select class="control" id="rt-f-dept"><option value="">全部</option><option value="裕华管理部">裕华管理部</option><option value="长安管理部">长安管理部</option><option value="桥西管理部">桥西管理部</option></select></div>\
+                  <div class="rt-filter-item"><label>片区所：</label><select class="control" id="rt-f-area"><option value="">全部</option><option value="裕华片区所">裕华片区所</option><option value="长安片区所">长安片区所</option><option value="桥西片区所">桥西片区所</option></select></div>\
+                  <div class="rt-filter-item"><label>是否超期：</label><select class="control" id="rt-f-overdue"><option value="">全部</option><option value="是">是</option><option value="否">否</option></select></div>\
+                  <div class="rt-filter-actions">\
+                    <button class="btn" id="rt-btn-reset">重置</button>\
+                    <button class="btn primary" id="rt-btn-query">查询</button>\
+                  </div>\
+                </div>\
+              </div>\
+            </section>\
+            <section class="card">\
+              <div class="card-body">\
+                <div class="rt-list-header">\
+                  <span class="rt-list-title">整改任务列表</span>\
+                  <span class="rt-count-badge">共 ' + total + ' 条记录</span>\
+                </div>\
+                <div class="table-scroll">\
+                  <table class="rt-table">\
+                    <thead>\
+                      <tr>\
+                        <th class="rt-col-center col-seq">序号</th>\
+                        <th class="col-task-name">主任务名称</th>\
+                        <th class="col-station-name">站点名称</th>\
+                        <th class="col-person">整改人</th>\
+                        <th class="rt-col-center col-status">整改状态</th>\
+                        <th class="col-deadline">整改截止时间</th>\
+                        <th class="rt-col-center col-overdue">是否超期</th>\
+                        <th class="col-node">当前处理节点</th>\
+                        <th class="col-ops">操作</th>\
+                      </tr>\
+                    </thead>\
+                    <tbody id="rt-table-body">' + rowsHtml + '</tbody>\
+                  </table>\
+                </div>\
+                <div class="pagination">\
+                  <span class="rt-pagination-info">第 1 - ' + total + ' 条 / 共 ' + total + ' 条</span>\
+                  <div class="page-box">\
+                    <div class="page-btn disabled">&lt;</div>\
+                    <div class="page-number active">1</div>\
+                    <div class="page-btn disabled">&gt;</div>\
+                  </div>\
+                </div>\
+              </div>\
+            </section>\
+            <!-- 接收确认弹窗 -->\
+            <div class="rt-receive-overlay" id="rt-receive-modal">\
+              <div class="rt-receive-card">\
+                <div class="rt-receive-header">\
+                  <span class="rt-receive-title">接收整改任务</span>\
+                  <span class="rt-receive-close" id="rt-receive-close">&times;</span>\
+                </div>\
+                <div class="rt-receive-body">\
+                  <div class="rt-receive-info">\
+                    确认接收该整改任务后，<strong>整改计时将立即开始</strong>，请在截止时间前完成整改并提交。\
+                  </div>\
+                  <div class="rt-receive-deadline" id="rt-receive-deadline-text">\
+                    整改截止时间：—\
+                  </div>\
+                </div>\
+                <div class="rt-receive-footer">\
+                  <button class="btn" id="rt-receive-cancel">取消</button>\
+                  <button class="btn primary" id="rt-receive-confirm">确认接收</button>\
+                </div>\
+              </div>\
+            </div>\
+            <!-- 整改弹窗 -->\
+            <div class="rt-fix-overlay" id="rt-fix-modal">\
+              <div class="rt-fix-card">\
+                <div class="rt-fix-header">\
+                  <span class="rt-fix-title">整改信息</span>\
+                  <span class="rt-fix-close" id="rt-fix-close">&times;</span>\
+                </div>\
+                <div class="rt-fix-body">\
+                  <div class="rt-fix-section">\
+                    <div class="rt-fix-section-title"><span class="rt-fix-required">*</span>整改情况</div>\
+                    <textarea class="rt-fix-textarea" id="rt-fix-desc" placeholder="请输入整改情况" maxlength="300"></textarea>\
+                    <div class="rt-fix-char-count" id="rt-fix-char-count">0 / 300</div>\
+                  </div>\
+                  <div class="rt-fix-section">\
+                    <div class="rt-fix-section-title">上传整改告知书</div>\
+                    <div class="rt-fix-upload-area">\
+                      <button class="rt-fix-upload-btn" id="rt-fix-upload-btn">选择文件</button>\
+                      <span class="rt-fix-upload-hint">上传整改告知书或相关附件<br><span>支持 .rar .zip .doc .docx .pdf .xlsx .png .jpg .jpeg .gif，单个文件不超过 20MB</span></span>\
+                    </div>\
+                  </div>\
+                </div>\
+                <div class="rt-fix-footer">\
+                  <button class="btn" id="rt-fix-cancel">取消</button>\
+                  <button class="btn primary" id="rt-fix-save">保存</button>\
+                </div>\
+              </div>\
+            </div>\
+          </div>';
+      }
+
+      // ============================================================
+      // 渲染完整页面
+      // ============================================================
+      function renderPage() {
+        document.getElementById('app').innerHTML = AppComponents.renderShell(renderPageContent());
+        bindEvents();
+        bindReceiveModalEvents();
+        bindFixModalEvents();
+      }
+
+      // ============================================================
+      // 事件绑定 + 筛选
+      // ============================================================
+      function bindEvents() {
+        var queryBtn = document.getElementById('rt-btn-query');
+        var resetBtn = document.getElementById('rt-btn-reset');
+
+        function doFilter() {
+          var taskVal = (document.getElementById('rt-f-task').value || '').trim();
+          var stationVal = (document.getElementById('rt-f-station').value || '').trim();
+          var statusVal = document.getElementById('rt-f-status').value;
+          var personVal = (document.getElementById('rt-f-person').value || '').trim();
+          var deptVal = document.getElementById('rt-f-dept').value;
+          var areaVal = document.getElementById('rt-f-area').value;
+          var overdueVal = document.getElementById('rt-f-overdue').value;
+
+          var filtered = mockData.filter(function (r) {
+            if (taskVal && r.taskName.indexOf(taskVal) === -1) return false;
+            if (stationVal && r.stationName.indexOf(stationVal) === -1) return false;
+            if (statusVal && r.status !== statusVal) return false;
+            if (personVal && r.person.indexOf(personVal) === -1) return false;
+            if (overdueVal === '是' && !(r.overdueDays > 0)) return false;
+            if (overdueVal === '否' && r.overdueDays > 0) return false;
+            return true;
+          });
+          renderTable(filtered);
+        }
+
+        if (queryBtn) queryBtn.addEventListener('click', doFilter);
+        if (resetBtn) {
+          resetBtn.addEventListener('click', function () {
+            ['rt-f-task','rt-f-station','rt-f-person'].forEach(function (id) {
+              var el = document.getElementById(id);
+              if (el) el.value = '';
+            });
+            ['rt-f-status','rt-f-dept','rt-f-area','rt-f-overdue'].forEach(function (id) {
+              var el = document.getElementById(id);
+              if (el) el.value = '';
+            });
+            renderTable(mockData);
+          });
+        }
+
+        // 操作列点击
+        bindActionLinks();
+      }
+
+      function bindActionLinks() {
+        // 接收按钮点击
+        document.querySelectorAll('.rt-action-receive').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var station = this.getAttribute('data-station') || '';
+            var deadline = this.getAttribute('data-deadline') || '';
+            openReceiveModal(station, deadline);
+          });
+        });
+
+        // 整改按钮点击
+        document.querySelectorAll('.rt-action-fix').forEach(function (el) {
+          el.addEventListener('click', function () {
+            openFixModal();
+          });
+        });
+
+        // 分页按钮原型提示
+        document.querySelectorAll('.page-btn.disabled, .page-number').forEach(function (el) {
+          el.addEventListener('click', function () {
+            showToast('当前为原型预览，分页未实现', 'info');
+          });
+        });
+      }
+
+      // ============================================================
+      // 接收确认弹窗
+      // ============================================================
+      var receiveModalStation = '';
+
+      function openReceiveModal(station, deadline) {
+        var modal = document.getElementById('rt-receive-modal');
+        var deadlineEl = document.getElementById('rt-receive-deadline-text');
+        if (!modal) return;
+
+        receiveModalStation = station;
+        if (deadlineEl) deadlineEl.innerHTML = '整改截止时间：<strong>' + (deadline || '—') + '</strong>';
+
+        modal.classList.add('active');
+      }
+
+      function closeReceiveModal() {
+        var modal = document.getElementById('rt-receive-modal');
+        if (modal) modal.classList.remove('active');
+        receiveModalStation = '';
+      }
+
+      function bindReceiveModalEvents() {
+        var closeBtn = document.getElementById('rt-receive-close');
+        var cancelBtn = document.getElementById('rt-receive-cancel');
+        var confirmBtn = document.getElementById('rt-receive-confirm');
+        var overlay = document.getElementById('rt-receive-modal');
+
+        if (closeBtn) closeBtn.addEventListener('click', closeReceiveModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeReceiveModal);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeReceiveModal();
+          });
+        }
+
+        if (confirmBtn) {
+          confirmBtn.addEventListener('click', function () {
+            showToast('整改任务已接收：' + (receiveModalStation || '—') + '，计时已开始', 'success');
+            closeReceiveModal();
+          });
+        }
+      }
+
+      // ============================================================
+      // 整改弹窗
+      // ============================================================
+      function openFixModal() {
+        var modal = document.getElementById('rt-fix-modal');
+        if (!modal) return;
+
+        // 重置表单
+        var textarea = document.getElementById('rt-fix-desc');
+        var countEl = document.getElementById('rt-fix-char-count');
+        if (textarea) textarea.value = '';
+        if (countEl) countEl.textContent = '0 / 300';
+
+        modal.classList.add('active');
+      }
+
+      function closeFixModal() {
+        var modal = document.getElementById('rt-fix-modal');
+        if (modal) modal.classList.remove('active');
+      }
+
+      function bindFixModalEvents() {
+        var closeBtn = document.getElementById('rt-fix-close');
+        var cancelBtn = document.getElementById('rt-fix-cancel');
+        var saveBtn = document.getElementById('rt-fix-save');
+        var overlay = document.getElementById('rt-fix-modal');
+        var textarea = document.getElementById('rt-fix-desc');
+        var countEl = document.getElementById('rt-fix-char-count');
+        var uploadBtn = document.getElementById('rt-fix-upload-btn');
+
+        if (closeBtn) closeBtn.addEventListener('click', closeFixModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeFixModal);
+        if (overlay) {
+          overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeFixModal();
+          });
+        }
+
+        if (textarea && countEl) {
+          textarea.addEventListener('input', function () {
+            var len = this.value.length;
+            countEl.textContent = len + ' / 300';
+          });
+        }
+
+        if (uploadBtn) {
+          uploadBtn.addEventListener('click', function () {
+            showToast('已选择文件（模拟上传）', 'success');
+          });
+        }
+
+        if (saveBtn) {
+          saveBtn.addEventListener('click', function () {
+            var desc = textarea ? textarea.value.trim() : '';
+            if (!desc) {
+              showToast('请输入整改情况', 'warning');
+              if (textarea) textarea.focus();
+              return;
+            }
+            showToast('整改信息已保存', 'success');
+            closeFixModal();
+          });
+        }
+      }
+
+      // ============================================================
+      // Toast 提示
+      // ============================================================
+      function showToast(message, type) {
+        var existing = document.querySelector('.rt-toast');
+        if (existing) existing.remove();
+        var toast = document.createElement('div');
+        toast.className = 'rt-toast';
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:6px;font-size:14px;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+        if (type === 'warning') {
+          toast.style.background = '#fffbe6';
+          toast.style.color = '#d48806';
+          toast.style.border = '1px solid #ffe58f';
+        } else if (type === 'success') {
+          toast.style.background = '#f0fff4';
+          toast.style.color = '#389e0d';
+          toast.style.border = '1px solid #b7eb8f';
+        } else {
+          toast.style.background = '#fff';
+          toast.style.color = '#262626';
+          toast.style.border = '1px solid #d9d9d9';
+        }
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2500);
+      }
+
+      // ============================================================
+      // 表格重新渲染
+      // ============================================================
+      function renderTable(data) {
+        var total = data.length;
+        var rowsHtml = '';
+        for (var i = 0; i < total; i++) {
+          var r = data[i];
+          var isOverdue = r.overdueDays > 0;
+          var overdueClass = isOverdue ? 'rt-overdue-yes' : 'rt-overdue-no';
+          var overdueText = isOverdue ? '超期 ' + r.overdueDays + ' 天' : '正常';
+          rowsHtml += '\
+            <tr>\
+              <td class="rt-col-center">' + r.id + '</td>\
+              <td>' + r.taskName + '</td>\
+              <td>' + r.stationName + '</td>\
+              <td>' + r.person + '</td>\
+              <td class="rt-col-center"><span class="' + statusClass(r.status) + '">' + r.status + '</span></td>\
+              <td>' + r.deadline + '</td>\
+              <td class="rt-col-center"><span class="' + overdueClass + '">' + overdueText + '</span></td>\
+              <td>' + r.node + '</td>\
+              <td>' + renderAction(r) + '</td>\
+            </tr>';
+        }
+        document.getElementById('rt-table-body').innerHTML = rowsHtml;
+
+        var badge = document.querySelector('.rt-count-badge');
+        if (badge) badge.textContent = '共 ' + total + ' 条记录';
+        var info = document.querySelector('.rt-pagination-info');
+        if (info) info.textContent = '第 1 - ' + total + ' 条 / 共 ' + total + ' 条';
+
+        bindActionLinks();
+      }
+
+      // ============================================================
+      // 启动
+      // ============================================================
+      loadData();
+
+      // 从URL参数读取筛选：?taskId=X&siteCode=XXX
+      (function () {
+        var p = new URLSearchParams(window.location.search);
+        var filterTaskId = p.get('taskId');
+        var filterSiteCode = p.get('siteCode');
+        if (filterTaskId || filterSiteCode) {
+          try {
+            var sc = filterSiteCode || '';
+            var tid = filterTaskId ? parseInt(filterTaskId) : 0;
+            var filtered = mockData.filter(function (r) {
+              return (!tid || r.taskId === tid) && (!sc || r.stationCode === sc);
+            });
+            if (filtered.length) mockData = filtered;
+          } catch(e) {}
+        }
+      })();
+
+      renderPage();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+{
+  "name": "面积检查任务管理",
+  "pageKey": "task-list",
+  "business": "展示检查任务列表，支持按计划名称、所属年度、任务状态筛选，可查看详情、编辑任务、新建任务、删除草稿/待开始任务",
+  "domain": "rectification",
+  "inputs": [
+    {
+      "name": "planName",
+      "type": "string",
+      "source": "filter",
+      "required": false,
+      "description": "计划名称关键词，模糊匹配planName或name字段"
+    },
+    {
+      "name": "year",
+      "type": "string",
+      "source": "filter",
+      "required": false,
+      "description": "所属年度，精确匹配year字段"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "source": "filter",
+      "required": false,
+      "description": "任务状态，可选值：草稿、待开始、进行中、已结束"
+    },
+    {
+      "name": "delete",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "删除任务的ID，通过URL参数传递"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "filteredTasks",
+      "type": "array",
+      "target": "ui-render",
+      "description": "筛选后的任务列表，渲染到表格tbody"
+    },
+    {
+      "name": "taskCount",
+      "type": "string",
+      "target": "ui-render",
+      "description": "任务记录总数，显示在count-pill中"
+    },
+    {
+      "name": "paginationText",
+      "type": "string",
+      "target": "ui-render",
+      "description": "分页文本，格式如'第 1 - 9 条 / 共 9 条'"
+    }
+  ],
+  "stateMachine": {
+    "initial": "loaded",
+    "states": {
+      "loaded": {
+        "description": "初始加载完成，展示全部任务列表",
+        "transitions": [
+          {
+            "trigger": "click-query",
+            "target": "filtered",
+            "action": "根据筛选条件过滤任务列表并重新渲染"
+          },
+          {
+            "trigger": "click-reset",
+            "target": "loaded",
+            "action": "清空筛选条件，恢复展示全部任务"
+          },
+          {
+            "trigger": "click-view",
+            "target": "navigating-to-detail",
+            "action": "跳转到任务详情页"
+          },
+          {
+            "trigger": "click-edit",
+            "target": "navigating-to-create",
+            "action": "跳转到编辑任务页（带mode=edit参数）"
+          },
+          {
+            "trigger": "click-delete",
+            "target": "deleting",
+            "action": "删除草稿或待开始状态的任务"
+          },
+          {
+            "trigger": "click-create",
+            "target": "navigating-to-create",
+            "action": "跳转到新建任务页"
+          }
+        ]
+      },
+      "filtered": {
+        "description": "筛选结果展示状态",
+        "transitions": [
+          {
+            "trigger": "click-query",
+            "target": "filtered",
+            "action": "根据新筛选条件重新过滤"
+          },
+          {
+            "trigger": "click-reset",
+            "target": "loaded",
+            "action": "清空筛选条件，恢复全部任务"
+          },
+          {
+            "trigger": "click-view",
+            "target": "navigating-to-detail",
+            "action": "跳转到任务详情页"
+          },
+          {
+            "trigger": "click-edit",
+            "target": "navigating-to-create",
+            "action": "跳转到编辑任务页"
+          },
+          {
+            "trigger": "click-delete",
+            "target": "deleting",
+            "action": "删除任务"
+          }
+        ]
+      },
+      "deleting": {
+        "description": "删除任务中（草稿/待开始可删）",
+        "transitions": [
+          {
+            "trigger": "delete-complete",
+            "target": "loaded",
+            "action": "删除完成，刷新列表"
+          }
+        ]
+      },
+      "navigating-to-detail": {
+        "description": "跳转到任务详情页",
+        "transitions": []
+      },
+      "navigating-to-create": {
+        "description": "跳转到新建/编辑任务页",
+        "transitions": []
+      }
+    }
+  },
+  "dependencies": {
+    "components": [
+      "AppComponents.statusClass"
+    ],
+    "services": [
+      "TaskService.filterTasks"
+    ],
+    "mockData": [
+      "MockData.tasks"
+    ]
+  },
+  "navigation": {
+    "entryPoints": [
+      "index"
+    ],
+    "exitPoints": [
+      "task-detail",
+      "task-create"
+    ]
+  }
+}

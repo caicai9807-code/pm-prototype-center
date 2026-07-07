@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>专家App - 任务详情</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+    :root {
+      --adm-primary: #1677ff;
+      --adm-success: #00b578;
+      --adm-warning: #ff8f1f;
+      --adm-danger: #ff3141;
+    }
+
+    /* ===== 导航栏 ===== */
+    .adm-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 40px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-nav-bar .back {
+      font-size: 20px;
+      color: #333;
+      padding: 2px 6px 2px 0;
+      cursor: pointer;
+      font-weight: 300;
+    }
+    .adm-nav-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      margin-right: 32px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ===== 状态卡片 ===== */
+    .status-card {
+      background: #fff;
+      padding: 12px;
+      margin-bottom: 6px;
+    }
+    .status-card .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .tag-confirm { background: #fff7e6; color: #d48806; }
+    .tag-pending { background: #e7f1ff; color: #1677ff; }
+    .tag-progress { background: #ebfaf3; color: #00b578; }
+    .tag-done { background: #f5f5f5; color: #999; }
+    .tag-rectify { background: #ffeeee; color: #ff3141; }
+    .tag-reinspect { background: #e7f1ff; color: #1677ff; }
+
+    .status-card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #1a1a1a;
+    }
+    .status-card .meta {
+      font-size: 12px;
+      color: #999;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+    }
+
+    /* ===== 信息区块 ===== */
+    .info-section {
+      background: #fff;
+      padding: 12px;
+      margin-bottom: 6px;
+    }
+    .info-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #1a1a1a;
+    }
+    .info-row {
+      display: flex;
+      padding: 6px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+      width: 80px;
+      color: #999;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .info-value {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+      word-break: break-all;
+    }
+
+    /* ===== 站点列表 ===== */
+    .site-section {
+      padding: 0 12px 16px;
+    }
+    .site-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: block;
+    }
+    .site-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .site-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .site-card-code {
+      font-size: 11px;
+      color: #bbb;
+    }
+    .site-card-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      font-size: 12px;
+      color: #999;
+    }
+    .site-card-info strong {
+      color: #333;
+      font-weight: 500;
+    }
+    .site-tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .site-checked { background: #ebfaf3; color: #00b578; }
+    .site-unchecked { background: #fff7e6; color: #d48806; }
+    .site-rectify { background: #ffeeee; color: #ff3141; }
+
+    /* ===== 操作按钮区 ===== */
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #f0f0f0;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      display: flex;
+      gap: 8px;
+      z-index: 100;
+    }
+    .action-bar .btn {
+      flex: 1;
+      height: 38px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .action-bar .btn:active { opacity: 0.7; }
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-warn { background: #fff7e6; color: #d48806; border: 1px solid #ffe58f; }
+    .btn-danger { background: #ffeeee; color: #ff3141; border: 1px solid #ffccc7; }
+    .btn-default { background: #f5f5f5; color: #666; border: 1px solid #ddd; }
+
+    .safe-area { height: 60px; }
+  </style>
+</head>
+<body>
+  <div class="adm-nav-bar">
+    <a href="javascript:history.back()" class="back">‹</a>
+    <span class="title" id="pageTitle">任务详情</span>
+  </div>
+
+  <div id="content"></div>
+  <div class="safe-area"></div>
+
+  <div class="action-bar" id="actionBar"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get('id');
+    const taskType = params.get('type') || 'area-check';
+
+    const areaCheckData = {
+      'T20250701001': {
+        title: '2025年夏季面积普查-裕华区', status: 'confirm', statusText: '待确认',
+        taskNo: 'RW-20250701-001', type: '面积普查', area: '裕华区',
+        sites: 5, startDate: '2025-07-01', endDate: '2025-07-15',
+        expert: '张建国', dept: '裕华区管理部',
+        sitesList: [
+          { code: '60218A001', name: '裕华区万达站', type: '中心站', status: 'unchecked', statusText: '待检查' },
+          { code: '60218A002', name: '裕华区世纪站', type: '子站', status: 'unchecked', statusText: '待检查' },
+          { code: '60218A003', name: '裕华区新百站', type: '中心站', status: 'unchecked', statusText: '待检查' },
+          { code: '60218A004', name: '裕华区怀特站', type: '子站', status: 'unchecked', statusText: '待检查' },
+          { code: '60218A005', name: '裕华区槐底站', type: '子站', status: 'unchecked', statusText: '待检查' },
+        ]
+      },
+      'T20250615001': {
+        title: '2025年夏季面积普查-高新区', status: 'progress', statusText: '进行中',
+        taskNo: 'RW-20250615-001', type: '面积普查', area: '高新区',
+        sites: 5, startDate: '2025-06-15', endDate: '2025-07-05',
+        expert: '张建国', dept: '高新区管理部',
+        sitesList: [
+          { code: '60218C001', name: '高新区南站', type: '中心站', status: 'checked', statusText: '已检查' },
+          { code: '60218C002', name: '高新区北站', type: '子站', status: 'rectify', statusText: '待整改' },
+          { code: '60218C003', name: '高新区东站', type: '子站', status: 'unchecked', statusText: '待检查' },
+          { code: '60218C004', name: '高新区西站', type: '子站', status: 'checked', statusText: '已检查' },
+          { code: '60218C005', name: '高新区中站', type: '中心站', status: 'unchecked', statusText: '待检查' },
+        ]
+      },
+    };
+
+    const rectData = {
+      'R20250701001': {
+        title: '裕华区万达站整改', status: 'rectify', statusText: '待整改',
+        noticeNo: '整改2025-007', site: '裕华区万达站', code: '60218A001',
+        deadline: '2025-08-01', issue: '供热面积与实际不符',
+        rectification: '重新核实供热面积并补齐相关资料',
+        sitesList: []
+      },
+      'R20250620001': {
+        title: '长安区东站整改复查', status: 'reinspect', statusText: '待专家复查',
+        noticeNo: '整改2025-006', site: '长安区东站', code: '60218B002',
+        deadline: '2025-07-20', issue: '建筑年代信息缺失',
+        rectification: '补充建筑年代证明材料',
+        sitesList: []
+      },
+    };
+
+    const data = taskType === 'area-check' ? areaCheckData : rectData;
+    const task = data[taskId] || areaCheckData['T20250701001'];
+    document.getElementById('pageTitle').textContent = task.title;
+
+    const tagMap = {
+      confirm: 'tag-confirm', pending: 'tag-pending', progress: 'tag-progress',
+      done: 'tag-done', rectify: 'tag-rectify', reinspect: 'tag-reinspect'
+    };
+
+    let html = `
+      <div class="status-card">
+        <span class="tag ${tagMap[task.status] || 'tag-done'}">${task.statusText}</span>
+        <h2>${task.title}</h2>
+        <div class="meta">
+          ${taskType === 'area-check'
+            ? `<span>任务编号：${task.taskNo}</span><span>检查类型：${task.type}</span><span>区域：${task.area}</span><span>站点：${task.sites}个</span>`
+            : `<span>通知单：${task.noticeNo}</span><span>站点：${task.site}</span><span>编码：${task.code}</span>`}
+        </div>
+      </div>
+    `;
+
+    if (taskType === 'area-check') {
+      html += `
+        <div class="info-section">
+          <div class="info-section-title">任务信息</div>
+          <div class="info-row"><div class="info-label">任务编号</div><div class="info-value">${task.taskNo}</div></div>
+          <div class="info-row"><div class="info-label">检查类型</div><div class="info-value">${task.type}</div></div>
+          <div class="info-row"><div class="info-label">检查区域</div><div class="info-value">${task.area}</div></div>
+          <div class="info-row"><div class="info-label">站点数量</div><div class="info-value">${task.sites}个</div></div>
+          <div class="info-row"><div class="info-label">开始日期</div><div class="info-value">${task.startDate}</div></div>
+          <div class="info-row"><div class="info-label">截止日期</div><div class="info-value">${task.endDate}</div></div>
+          <div class="info-row"><div class="info-label">指派专家</div><div class="info-value">${task.expert}</div></div>
+          <div class="info-row"><div class="info-label">所属管理部</div><div class="info-value">${task.dept}</div></div>
+        </div>
+        <div class="info-section">
+          <div class="info-section-title">站点列表</div>
+      `;
+      if (task.sitesList && task.sitesList.length > 0) {
+        html += task.sitesList.map(s => {
+          const sc = s.status === 'checked' ? 'site-checked' : s.status === 'rectify' ? 'site-rectify' : 'site-unchecked';
+          return `<a href="./expert-app-site-detail.html?code=${s.code}&task=${taskId}" class="site-card">
+            <div class="site-card-top">
+              <span class="site-card-name">${s.name}</span>
+              <span class="site-tag ${sc}">${s.statusText}</span>
+            </div>
+            <div class="site-card-info">
+              <span>编码：<strong>${s.code}</strong></span>
+              <span>类型：<strong>${s.type}</strong></span>
+            </div>
+          </a>`;
+        }).join('');
+      } else {
+        html += '<p style="padding:20px;text-align:center;color:#bbb;">暂无站点数据</p>';
+      }
+      html += '</div>';
+    } else {
+      html += `
+        <div class="info-section">
+          <div class="info-section-title">整改信息</div>
+          <div class="info-row"><div class="info-label">整改通知单</div><div class="info-value">${task.noticeNo}</div></div>
+          <div class="info-row"><div class="info-label">整改站点</div><div class="info-value">${task.site}</div></div>
+          <div class="info-row"><div class="info-label">站点编码</div><div class="info-value">${task.code}</div></div>
+          <div class="info-row"><div class="info-label">整改期限</div><div class="info-value">${task.deadline}</div></div>
+          <div class="info-row"><div class="info-label">存在问题</div><div class="info-value">${task.issue}</div></div>
+          <div class="info-row"><div class="info-label">整改要求</div><div class="info-value">${task.rectification}</div></div>
+        </div>
+      `;
+    }
+
+    document.getElementById('content').innerHTML = html;
+
+    const actionBar = document.getElementById('actionBar');
+    if (task.status === 'confirm') {
+      actionBar.innerHTML = `<button class="btn btn-warn" onclick="alert('已拒绝')">拒绝</button><button class="btn btn-primary" onclick="alert('已确认')">确认</button>`;
+    } else if (task.status === 'rectify') {
+      actionBar.innerHTML = `<button class="btn btn-primary" onclick="alert('进入整改填报')">开始整改</button>`;
+    } else if (task.status === 'reinspect') {
+      actionBar.innerHTML = `<button class="btn btn-primary" onclick="alert('进入复查')">复查</button>`;
+    } else if (task.status === 'progress') {
+      actionBar.innerHTML = `<button class="btn btn-primary" onclick="location.href='./expert-app-site-list.html?id=${taskId}'">继续检查</button>`;
+    } else {
+      actionBar.innerHTML = `<button class="btn btn-default" onclick="history.back()">返回</button>`;
+    }
+  </script>
+</body>
+</html>

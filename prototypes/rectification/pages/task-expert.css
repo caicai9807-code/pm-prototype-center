@@ -1,0 +1,1048 @@
+      /* ---------- 1. 步骤条 AntD 5.0 风格修正 ---------- */
+      body[data-page="task-expert"] .create-step-bar {
+        display: flex;
+        align-items: flex-start;
+        gap: 0;
+        background: #fff;
+        border-radius: 6px;
+        padding: 20px 28px;
+      }
+
+      body[data-page="task-expert"] .create-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      /* 已完成步骤：绿色对勾圆圈 */
+      body[data-page="task-expert"] .create-step.completed .create-step-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #52c41a;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+
+      body[data-page="task-expert"] .create-step.completed .create-step-dot--check {
+        font-size: 15px;
+      }
+
+      /* 进行中步骤：蓝色数字圆圈 */
+      body[data-page="task-expert"] .create-step.active .create-step-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #1677ff;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+
+      /* 步骤文字 */
+      body[data-page="task-expert"] .create-step-content {
+        padding-top: 2px;
+      }
+
+      body[data-page="task-expert"] .create-step-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #33425c;
+        white-space: nowrap;
+        line-height: 1.4;
+      }
+
+      body[data-page="task-expert"] .create-step.completed .create-step-title {
+        color: #33425c;
+      }
+
+      body[data-page="task-expert"] .create-step.active .create-step-title {
+        color: #1677ff;
+        font-weight: 500;
+      }
+
+      body[data-page="task-expert"] .create-step-desc {
+        font-size: 12px;
+        color: #8c99b0;
+        font-weight: 400;
+        margin-top: 2px;
+        white-space: nowrap;
+        line-height: 1.4;
+      }
+
+      /* 连接线 */
+      body[data-page="task-expert"] .create-step-connector {
+        width: 60px;
+        height: 1px;
+        background: #e0e6f0;
+        margin: 13px 16px 0;
+        flex-shrink: 0;
+      }
+
+      body[data-page="task-expert"] .create-step-connector--done {
+        background: #52c41a;
+      }
+
+      /* ---------- 2. 管理部卡片布局优化 ---------- */
+      body[data-page="task-expert"] .dept-card-body {
+        padding: 12px 14px;
+      }
+
+      /* 卡片内容区：站点标签 + 槽位分配 */
+      body[data-page="task-expert"] .dept-card-body {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 12px 0 4px;
+      }
+
+      /* 左侧站点标签区 */
+      body[data-page="task-expert"] .dept-site-label-col {
+        flex-shrink: 0;
+        width: 120px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
+      }
+
+      body[data-page="task-expert"] .dept-site-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #e6f4ff;
+        color: #1677ff;
+        border: 1px solid #91caff;
+        white-space: nowrap;
+      }
+
+      /* 右侧槽位分配区 */
+      body[data-page="task-expert"] .dept-slot-assign-col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      body[data-page="task-expert"] .dept-slot-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      body[data-page="task-expert"] .dept-slot-label {
+        font-size: 12px;
+        color: #8c99b0;
+        white-space: nowrap;
+      }
+
+      /* 虚线按钮 AntD 风格 */
+      body[data-page="task-expert"] .slot-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 30px;
+        padding: 0 12px;
+        border: 1px dashed #d9d9d9;
+        border-radius: 4px;
+        background: #fff;
+        color: #5a6b85;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      body[data-page="task-expert"] .slot-btn:hover {
+        border-color: #1677ff;
+        color: #1677ff;
+        background: #f0f5ff;
+      }
+
+      /* 槽位激活态（蓝色实线边框） */
+      body[data-page="task-expert"] .slot-btn.slot-btn--active {
+        border: 2px solid #1677ff;
+        color: #1677ff;
+        background: #f0f5ff;
+        box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+        font-weight: 500;
+      }
+
+      /* 候选池卡片勾选态 */
+      body[data-page="task-expert"] .expert-grid-card--selectable {
+        cursor: pointer;
+      }
+
+      body[data-page="task-expert"] .expert-grid-card--selectable:hover {
+        border-color: #1677ff;
+        box-shadow: 0 1px 6px rgba(22, 119, 255, 0.15);
+      }
+
+      body[data-page="task-expert"] .expert-grid-card--selectable.expert-grid-card--disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #fafafa;
+      }
+
+      body[data-page="task-expert"] .expert-grid-card--selectable.expert-grid-card--disabled:hover {
+        border-color: #e8ecf2;
+        box-shadow: none;
+      }
+
+      /* 候选池卡片内的 checkbox */
+      body[data-page="task-expert"] .expert-grid-checkbox {
+        flex-shrink: 0;
+        margin-right: 8px;
+        margin-top: 2px;
+        width: 16px;
+        height: 16px;
+        accent-color: #1677ff;
+        cursor: pointer;
+      }
+
+      body[data-page="task-expert"] .expert-grid-card--selectable.expert-grid-card--disabled .expert-grid-checkbox {
+        cursor: not-allowed;
+      }
+
+      /* 激活槽位时的提示条 */
+      body[data-page="task-expert"] .slot-activate-hint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background: #e6f4ff;
+        border: 1px solid #91caff;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #1677ff;
+        line-height: 1.5;
+      }
+
+      body[data-page="task-expert"] .slot-activate-hint-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #1677ff;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      /* 已分配专家卡片 */
+      body[data-page="task-expert"] .slot-filled {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        height: 30px;
+        padding: 0 10px;
+        border: 1px solid #b7dfb9;
+        border-radius: 4px;
+        background: #f6ffed;
+        color: #389e0d;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      body[data-page="task-expert"] .slot-filled-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #f6ffed;
+        color: #389e0d;
+        font-size: 12px;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+        line-height: 1;
+        margin-left: 2px;
+        transition: all 0.15s;
+      }
+
+      body[data-page="task-expert"] .slot-filled-remove:hover {
+        background: #d9f7be;
+        color: #237804;
+      }
+
+      /* 隐藏旧的 dept-sites 和 dept-slots */
+      body[data-page="task-expert"] .dept-sites,
+      body[data-page="task-expert"] .dept-slots {
+        display: none;
+      }
+
+      /* ---------- 3. 候选专家池网格卡片布局 ---------- */
+      body[data-page="task-expert"] .pool-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      /* 专家小卡片 */
+      body[data-page="task-expert"] .expert-grid-card {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: #fff;
+        border: 1px solid #e8ecf2;
+        border-radius: 4px;
+        transition: box-shadow 0.15s, border-color 0.15s;
+      }
+
+      body[data-page="task-expert"] .expert-grid-card:hover {
+        border-color: #b0bdd0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      body[data-page="task-expert"] .expert-grid-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      body[data-page="task-expert"] .expert-grid-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #33425c;
+        margin-bottom: 6px;
+        line-height: 1.3;
+      }
+
+      body[data-page="task-expert"] .expert-grid-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        font-size: 12px;
+        color: #8c99b0;
+        line-height: 1.6;
+      }
+
+      body[data-page="task-expert"] .expert-grid-status {
+        flex-shrink: 0;
+        margin-left: 8px;
+        align-self: flex-start;
+      }
+
+      /* 状态标签微调 */
+      body[data-page="task-expert"] .status-tag {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      body[data-page="task-expert"] .status-tag.status-pending {
+        background: #fff7e6;
+        color: #d48806;
+        border: 1px solid #ffe58f;
+      }
+
+      body[data-page="task-expert"] .status-tag.status-finished {
+        background: #f6ffed;
+        color: #389e0d;
+        border: 1px solid #b7dfb9;
+      }
+
+      body[data-page="task-expert"] .status-tag.status-progress {
+        background: #e6f4ff;
+        color: #1677ff;
+        border: 1px solid #91caff;
+      }
+
+      /* 隐藏旧的 pool-item 列表样式 */
+      body[data-page="task-expert"] .pool-item {
+        display: none;
+      }
+
+      /* ---------- 4. 抽取范围设置弹窗 ---------- */
+      .range-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .range-modal {
+        width: 780px;
+        max-height: 90vh;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .range-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .range-modal-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+
+      .range-modal-close {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: none;
+        font-size: 18px;
+        color: #8c99b0;
+        cursor: pointer;
+        border-radius: 4px;
+        display: grid;
+        place-items: center;
+        transition: all 0.15s;
+      }
+
+      .range-modal-close:hover {
+        background: #f5f5f5;
+        color: #33425c;
+      }
+
+      .range-modal-alert {
+        margin: 16px 24px 0;
+        padding: 10px 14px;
+        background: #fffbe6;
+        border: 1px solid #ffe58f;
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .range-modal-alert-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #faad14;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        margin-right: 6px;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+
+      .range-modal-alert-bold {
+        font-weight: 600;
+        color: #595959;
+      }
+
+      .range-modal-alert-warn {
+        font-weight: 600;
+        color: #d4380d;
+      }
+
+      .range-modal-body {
+        display: flex;
+        gap: 16px;
+        padding: 16px 24px;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      /* 左栏 */
+      .range-left {
+        flex: 7;
+        border: 1px solid #e8ecf2;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        min-height: 320px;
+      }
+
+      .range-left-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid #f0f2f5;
+        background: #fafbfc;
+        border-radius: 6px 6px 0 0;
+      }
+
+      .range-left-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #33425c;
+      }
+
+      .range-left-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .range-left-actions a {
+        font-size: 12px;
+        color: #1677ff;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .range-left-actions a:hover {
+        color: #4096ff;
+      }
+
+      .range-tree {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 0;
+      }
+
+      .range-tree-node {
+        display: flex;
+        align-items: center;
+        padding: 6px 14px;
+        cursor: pointer;
+        transition: background 0.1s;
+        user-select: none;
+      }
+
+      .range-tree-node:hover {
+        background: #f5f7fa;
+      }
+
+      .range-tree-node--top {
+        font-weight: 600;
+      }
+
+      .range-tree-node--child {
+        padding-left: 38px;
+        font-weight: 400;
+      }
+
+      .range-tree-expand {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #8c99b0;
+        margin-right: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: transform 0.15s;
+      }
+
+      .range-tree-expand--expanded {
+        transform: rotate(90deg);
+      }
+
+      .range-tree-expand--hidden {
+        visibility: hidden;
+      }
+
+      .range-tree-checkbox {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        accent-color: #1677ff;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .range-tree-label {
+        font-size: 13px;
+        color: #33425c;
+        line-height: 1.4;
+      }
+
+      .range-tree-children {
+        overflow: hidden;
+      }
+
+      .range-tree-children--collapsed {
+        display: none;
+      }
+
+      /* 右栏 */
+      .range-right {
+        flex: 3;
+        border: 1px solid #e8ecf2;
+        border-radius: 6px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 320px;
+      }
+
+      .range-right-label {
+        font-size: 12px;
+        color: #8c99b0;
+        font-weight: 400;
+      }
+
+      .range-right-count {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1677ff;
+        line-height: 1.3;
+      }
+
+      .range-right-count span {
+        font-size: 13px;
+        font-weight: 400;
+        color: #8c99b0;
+        margin-left: 2px;
+      }
+
+      .range-tag-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .range-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        background: #e6f4ff;
+        color: #1677ff;
+        border: 1px solid #91caff;
+        white-space: nowrap;
+        line-height: 1.6;
+      }
+
+      .range-right-tip {
+        margin-top: auto;
+        padding: 10px 12px;
+        background: #fff7e6;
+        border: 1px solid #ffe58f;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #8c6e00;
+        line-height: 1.7;
+      }
+
+      .range-right-tip-bold {
+        font-weight: 700;
+        color: #d46b08;
+      }
+
+      /* 底部操作区 */
+      .range-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 12px 24px;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      /* ---------- 5. 选择专家弹窗 ---------- */
+      .expert-modal-overlay2 {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .expert-modal2 {
+        width: 1100px;
+        max-height: 85vh;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 6px 30px rgba(0, 0, 0, 0.12);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .expert-modal2-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .expert-modal2-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+
+      .expert-modal2-close {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: none;
+        font-size: 18px;
+        color: #8c99b0;
+        cursor: pointer;
+        border-radius: 4px;
+        display: grid;
+        place-items: center;
+        transition: all 0.15s;
+      }
+
+      .expert-modal2-close:hover {
+        background: #f5f5f5;
+        color: #33425c;
+      }
+
+      .expert-modal2-body {
+        display: flex;
+        gap: 16px;
+        padding: 16px 24px;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      /* 左栏：组织部门列表 */
+      .expert-modal2-left {
+        width: 220px;
+        flex-shrink: 0;
+        border: 1px solid #e8ecf2;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .expert-modal2-left-title {
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #8c99b0;
+        border-bottom: 1px solid #f0f2f5;
+        background: #fafbfc;
+      }
+
+      .expert-modal2-tree {
+        flex: 1;
+        overflow-y: auto;
+        padding: 4px 0;
+      }
+
+      .expert-tree2-node {
+        display: flex;
+        align-items: center;
+        padding: 7px 14px;
+        cursor: pointer;
+        transition: background 0.1s;
+        user-select: none;
+      }
+
+      .expert-tree2-node:hover {
+        background: #f5f7fa;
+      }
+
+      .expert-tree2-node--active {
+        background: #e6f4ff;
+        color: #1677ff;
+      }
+
+      .expert-tree2-node--active:hover {
+        background: #d6efff;
+      }
+
+      .expert-tree2-node--top {
+        font-weight: 600;
+        font-size: 13px;
+        color: #33425c;
+      }
+
+      .expert-tree2-node--top.expert-tree2-node--active {
+        color: #1677ff;
+      }
+
+      .expert-tree2-node--child {
+        padding-left: 38px;
+        font-weight: 400;
+        font-size: 13px;
+        color: #5a6b85;
+      }
+
+      .expert-tree2-node--child.expert-tree2-node--active {
+        color: #1677ff;
+        font-weight: 500;
+      }
+
+      .expert-tree2-expand {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #8c99b0;
+        margin-right: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: transform 0.15s;
+      }
+
+      .expert-tree2-expand--expanded {
+        transform: rotate(90deg);
+      }
+
+      .expert-tree2-expand--hidden {
+        visibility: hidden;
+      }
+
+      .expert-tree2-label {
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .expert-tree2-children {
+        overflow: hidden;
+      }
+
+      .expert-tree2-children--collapsed {
+        display: none;
+      }
+
+      /* 右栏：筛选+表格 */
+      .expert-modal2-right {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* 筛选区 */
+      .expert-modal2-filter {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .expert-modal2-filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .expert-modal2-filter-field label {
+        font-size: 12px;
+        color: #8c99b0;
+        font-weight: 400;
+      }
+
+      .expert-modal2-filter-field input {
+        height: 30px;
+        padding: 0 8px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 12px;
+        width: 160px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+
+      .expert-modal2-filter-field input:focus {
+        border-color: #1677ff;
+        box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      }
+
+      .expert-modal2-filter-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      /* 黄色提示条 */
+      .expert-modal2-tip {
+        padding: 8px 12px;
+        background: #fffbe6;
+        border: 1px solid #ffe58f;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #595959;
+        line-height: 1.5;
+      }
+
+      .expert-modal2-tip-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #faad14;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        margin-right: 6px;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
+
+      /* 表格区 */
+      .expert-modal2-table-wrap {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+      }
+
+      .expert-modal2-table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      .expert-modal2-table-wrap thead th {
+        background: #fafbfc;
+        font-size: 12px;
+        font-weight: 500;
+        color: #8c99b0;
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid #f0f0f0;
+        white-space: nowrap;
+      }
+
+      .expert-modal2-table-wrap tbody td {
+        font-size: 12px;
+        color: #33425c;
+        padding: 8px 10px;
+        border-bottom: 1px solid #f5f6f8;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .expert-modal2-table-wrap tbody tr {
+        height: 40px;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .expert-modal2-table-wrap tbody tr:hover {
+        background: #f5f7fa;
+      }
+
+      .expert-modal2-table-wrap tbody tr.expert-row--selected {
+        background: #e6f4ff;
+      }
+
+      .expert-modal2-table-wrap .empty-cell {
+        text-align: center;
+        color: #b0b8c4;
+        padding: 32px 0;
+        font-size: 13px;
+      }
+
+      /* 分页 */
+      .expert-modal2-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 8px 0 0;
+        font-size: 12px;
+        color: #8c99b0;
+      }
+
+      .expert-modal2-pagination .pg-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        background: #fff;
+        color: #33425c;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .expert-modal2-pagination .pg-btn:hover {
+        border-color: #1677ff;
+        color: #1677ff;
+      }
+
+      .expert-modal2-pagination .pg-btn--active {
+        background: #1677ff;
+        border-color: #1677ff;
+        color: #fff;
+      }
+
+      .expert-modal2-pagination .pg-btn--active:hover {
+        background: #4096ff;
+        color: #fff;
+      }
+
+      .expert-modal2-pagination .pg-btn:disabled {
+        color: #d9d9d9;
+        border-color: #d9d9d9;
+        cursor: not-allowed;
+      }
+
+      .expert-modal2-pagination .pg-total {
+        margin-right: 8px;
+      }
+
+      /* 底部操作区 */
+      .expert-modal2-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 24px;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      .expert-modal2-footer-count {
+        font-size: 13px;
+        color: #5a6b85;
+      }
+
+      .expert-modal2-footer-count strong {
+        color: #1677ff;
+        font-weight: 600;
+      }
+
+      .expert-modal2-footer-actions {
+        display: flex;
+        gap: 10px;
+      }

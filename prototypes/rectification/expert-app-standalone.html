@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>专家App</title>
+<link rel="stylesheet" href="../../shared/styles/app-phone.css">
+<style>
+/* ===== 独立App独有样式 ===== */
+.cf-nav-bar{position:sticky;top:0;z-index:5;background:#fff;display:flex;align-items:center;height:36px;padding:0 12px;border-bottom:1px solid #edf0f2}
+.cf-back-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#4b7cf4;font-size:20px;border-radius:14px;flex-shrink:0}
+.cf-nav-title{flex:1;text-align:center;font-size:16px;font-weight:600;color:#111827;margin-right:28px}
+.cf-content{background:#f5f6f8;padding:12px;overflow-y:auto}
+.cf-card{background:#fff;border-radius:8px;padding:14px;margin-bottom:12px}
+.cf-card-title{font-size:14px;font-weight:600;color:#111827;margin-bottom:14px}
+.cf-field-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0;height:34px;line-height:34px;border-bottom:1px solid #edf0f2}
+.cf-field-row.cf-field-last{border-bottom:none}
+.cf-label{color:#8a8f99;font-size:12px;white-space:nowrap;flex-shrink:0}
+.cf-value{color:#111827;font-size:12px;text-align:right;overflow:hidden;text-overflow:ellipsis}
+.cf-btn-row{display:flex;gap:12px;padding:4px 0}
+.cf-btn-reject{flex:1;height:44px;border:1px solid #ff4d4f;border-radius:8px;background:#fff;color:#ff4d4f;font-size:15px;font-weight:600;cursor:pointer}
+.cf-btn-reject:active{background:#fff1f0}
+.cf-btn-confirm{flex:1;height:44px;border:none;border-radius:8px;background:#4b7cf4;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.cf-btn-confirm:active{background:#3a6be0}
+.app-demo-info{flex:1;min-width:0}
+.app-demo-info .info-card{background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px}
+.app-demo-info .info-card .info-title{font-size:16px;font-weight:600;color:#1d2129;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0}
+.app-demo-info .info-card .info-block{margin-bottom:12px}
+.app-demo-info .info-card .info-block .block-label{font-size:13px;font-weight:600;color:#1d2129;margin-bottom:4px}
+.app-demo-info .info-card .info-block .block-content{font-size:13px;color:#5a6577;line-height:1.8}
+.app-reject-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.app-reject-overlay.show{opacity:1;pointer-events:auto}
+.app-reject-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:392px;padding:24px 20px 32px}
+.app-reject-sheet .sheet-title{font-size:18px;font-weight:700;color:#1f2b3d;margin-bottom:16px;text-align:center}
+.app-reject-sheet textarea{width:100%;min-height:100px;border:1px solid #dce0e8;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;outline:none;background:#fafafa;color:#1f2b3d}
+.app-reject-sheet .sheet-actions{display:flex;gap:10px;margin-top:16px}
+.app-reject-sheet .app-btn{flex:1;height:44px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;border:none;text-align:center}
+.app-reject-sheet .app-btn-default{background:#f0f2f6;color:#52607a}
+.app-reject-sheet .app-btn-danger{background:#fff1f0;color:#f04438}
+body.embedded-mode{background:transparent !important;display:block !important;min-height:auto !important}
+body.embedded-mode .app-demo-layout{display:block !important;padding:0 !important}
+body.embedded-mode .app-phone-shell{width:100% !important;min-width:0 !important;max-width:none !important;border:none !important;box-shadow:none !important;background:transparent !important;padding:0 !important}
+body.embedded-mode .app-phone-screen{border-radius:0 !important;box-shadow:none !important;height:100vh !important}
+body.embedded-mode .app-phone-notch,
+body.embedded-mode .app-phone-homebar,
+body.embedded-mode .app-phone-home-bar,
+body.embedded-mode #appDemoInfo{display:none !important}
+</style>
+</head>
+<body style="margin:0;background:#eef0f5;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif">
+
+<div class="app-demo-layout" style="padding:0">
+  <div class="app-phone-shell">
+    <div class="app-phone-screen">
+      <div class="app-phone-notch"></div>
+      <div class="app-phone-statusbar" id="appStatusBar">面积核查</div>
+
+      <!-- 页面1：入口页 -->
+      <div class="app-page" id="appPageHome">
+        <div class="app-home-header">
+          <div class="greeting">工作台</div>
+          <div class="sub-greeting">张建国 专家，您好</div>
+        </div>
+        <div style="padding-top:4px">
+          <div class="app-entry-card" onclick="navTo('taskList')">
+            <div class="entry-hd">
+              <div class="entry-icon check">📋</div>
+              <div>
+                <div class="entry-title">面积检查任务</div>
+                <div class="entry-desc">查看和处理面积检查相关任务</div>
+              </div>
+            </div>
+            <div class="entry-stats" id="appCheckStats"></div>
+          </div>
+          <div class="app-entry-card" onclick="navTo('rectifyList')">
+            <div class="entry-hd">
+              <div class="entry-icon rectify">🔧</div>
+              <div>
+                <div class="entry-title">整改任务</div>
+                <div class="entry-desc">查看和处理整改相关任务</div>
+              </div>
+            </div>
+            <div class="entry-stats" id="appRectifyStats"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 页面2：任务列表 -->
+      <div class="app-page hidden" id="appPageTaskList">
+        <div class="app-nav-bar">
+          <div class="back-btn" onclick="navTo('home')">‹</div>
+          <div class="nav-title">任务列表</div>
+        </div>
+        <div class="app-search-bar">
+          <input type="text" placeholder="搜索任务名称" id="appTaskSearch" oninput="renderTaskList()">
+        </div>
+        <div class="app-segment" id="appTaskSegment"></div>
+        <div id="appTaskListContent" style="padding-bottom:12px"></div>
+      </div>
+
+      <!-- 页面3：任务确认 -->
+      <div class="app-page hidden" id="appPageTaskConfirm">
+        <div class="cf-nav-bar">
+          <div class="cf-back-btn" onclick="navTo('taskList')">‹</div>
+          <div class="cf-nav-title">任务确认</div>
+        </div>
+        <div id="appTaskConfirmContent" class="cf-content"></div>
+        <div class="app-reject-overlay" id="appRejectOverlay">
+          <div class="app-reject-sheet">
+            <div class="sheet-title">拒绝原因</div>
+            <textarea id="appRejectReason" placeholder="请输入拒绝原因..."></textarea>
+            <div class="sheet-actions">
+              <button class="app-btn app-btn-default" onclick="closeReject()">取消</button>
+              <button class="app-btn app-btn-danger" onclick="confirmReject()">确认拒绝</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 页面4：整改任务 -->
+      <div class="app-page hidden" id="appPageRectifyList">
+        <div class="app-nav-bar">
+          <div class="back-btn" onclick="navTo('home')">‹</div>
+          <div class="nav-title">整改任务</div>
+        </div>
+        <div class="app-segment" id="appRectifySegment"></div>
+        <div id="appRectifyListContent" style="padding-bottom:12px"></div>
+      </div>
+
+      <!-- 页面5：站点列表 -->
+      <div class="app-page hidden" id="appPageSiteList">
+        <div class="cf-nav-bar">
+          <div class="cf-back-btn" onclick="navTo('taskList')">‹</div>
+          <div class="cf-nav-title">站点列表</div>
+        </div>
+        <div id="appSiteListContent" class="cf-content"></div>
+      </div>
+
+      <!-- 页面6：站点详情 -->
+      <div class="app-page hidden" id="appPageSiteDetail">
+        <div class="cf-nav-bar">
+          <div class="cf-back-btn" onclick="navTo('siteList')">‹</div>
+          <div class="cf-nav-title" id="appSiteDetailTitle">站点详情</div>
+        </div>
+        <div id="appSiteDetailContent" class="cf-content"></div>
+      </div>
+
+      <!-- 页面7：检查记录单 -->
+      <div class="app-page hidden" id="appPageCheckRecordForm">
+        <div class="cf-nav-bar">
+          <div class="cf-back-btn" onclick="navTo('siteDetail')">‹</div>
+          <div class="cf-nav-title">填写检查记录单</div>
+        </div>
+        <div id="appCheckRecordFormContent" class="cf-content"></div>
+      </div>
+
+      <!-- 页面8：楼栋详情 -->
+      <div class="app-page hidden" id="appPageBuildingDetail">
+        <div class="cf-nav-bar">
+          <div class="cf-back-btn" onclick="navTo('siteDetail')">‹</div>
+          <div class="cf-nav-title">楼栋详情</div>
+        </div>
+        <div id="appBuildingDetailContent" class="cf-content"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 右侧说明区 -->
+  <div class="app-demo-info" id="appDemoInfo">
+    <div class="info-card">
+      <div class="info-title">📱 专家App — 功能说明</div>
+      <div class="info-block">
+        <div class="block-label">页面导航</div>
+        <div class="block-content">
+          <ul>
+            <li>工作台 → 面积检查任务 → 任务列表（搜索+segment切换）</li>
+            <li>工作台 → 整改任务 → 整改列表（待复查/已归档）</li>
+            <li>任务列表 → 点击卡片 → 站点列表 → 站点详情</li>
+            <li>任务列表 → 确认/拒绝 → 确认任务</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 复查审核弹窗 -->
+<div class="app-reject-overlay" id="appAuditOverlay" onclick="if(event.target===this)closeAuditSheet()">
+  <div class="app-reject-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-title" style="font-size:16px">复查结果</div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;gap:24px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;cursor:pointer;color:#333"><input type="radio" name="auditResult" value="pass" checked style="accent-color:#1677ff;width:16px;height:16px"> 通过</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;cursor:pointer;color:#333"><input type="radio" name="auditResult" value="reject" style="accent-color:#1677ff;width:16px;height:16px"> 驳回</label>
+      </div>
+      <div id="auditRejectSection" style="display:none">
+        <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:8px">驳回原因 <span style="color:#ff3141">*</span></div>
+        <textarea id="auditRejectReason" placeholder="请输入驳回原因" maxlength="300" style="width:100%;min-height:100px;border:1px solid #dce0e8;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;outline:none;background:#fafafa;color:#1f2b3d"></textarea>
+        <div style="text-align:right;font-size:12px;color:#bbb;margin-top:4px"><span id="auditCharCount">0</span>/300</div>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="app-btn app-btn-default" onclick="closeAuditSheet()">取消</button>
+      <button class="app-btn app-btn-danger" style="background:#1677ff;color:#fff" onclick="submitAudit()">提交</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Mock 数据 =====
+var APP_STATUS_MAP = {pending:'待确认',confirmed:'待开始',doing:'进行中',done:'已结束'};
+var APP_STATUS_TAG = {pending:'background:#fff7e6;color:#faad14',confirmed:'background:#e6f7ff;color:#1890ff',doing:'background:#e6f7ff;color:#1890ff',done:'background:#f6ffed;color:#52c41a'};
+
+var SHARED_TASKS = [
+  {id:'AT01',name:'2026 第27周 裕华片区常规面积核查任务',status:'doing',dept:'裕华管理部',period:'2026-07-01 至 2026-07-07',siteCount:3},
+  {id:'AT02',name:'2026 第27周 长安片区补充面积核查任务',status:'confirmed',dept:'长安管理部',period:'2026-07-01 至 2026-07-07',siteCount:2},
+  {id:'AT03',name:'2026 第26周 桥西片区专项面积核查任务',status:'done',dept:'桥西管理部',period:'2026-06-24 至 2026-06-30',siteCount:2},
+  {id:'AT04',name:'2026 第28周 长安中心站联合复核准备任务',status:'pending',dept:'长安管理部',period:'2026-07-08 至 2026-07-14',siteCount:1},
+  {id:'AT05',name:'2026 第27周 裕华片区异常转派补查任务',status:'doing',dept:'裕华管理部',period:'2026-07-01 至 2026-07-07',siteCount:1},
+];
+
+var APP_RECTIFY_TASKS = [
+  {id:'RT-202607-001',siteCode:'60218B001',siteName:'裕华区中心站',status:'pending',dept:'裕华管理部',address:'裕华区槐安路与翟营大街交叉口东行200米路北',lastSaveTime:'2026-07-04 19:25:12'},
+  {id:'RT-202607-002',siteCode:'60218B004',siteName:'裕华区万达站',status:'pending',dept:'裕华管理部',address:'裕华区槐中路与建华东大街交叉口东南角',lastSaveTime:'2026-07-03 16:20:08'},
+  {id:'RT-202607-003',siteCode:'60218B006',siteName:'桥西区北站',status:'pending',dept:'桥西管理部',address:'桥西区中山路与维明大街交叉口北行50米',lastSaveTime:'2026-07-04 08:40:52'},
+  {id:'RT-202607-004',siteCode:'60218B007',siteName:'长安区北站',status:'pending',dept:'长安管理部',address:'长安区和平路与建设大街交叉口西行100米',lastSaveTime:'2026-07-04 18:18:20'},
+  {id:'RT-202607-005',siteCode:'60218B008',siteName:'高新区南站',status:'pending',dept:'高新管理部',address:'高新区长江大道与珠峰大街交叉口南行200米',lastSaveTime:'2026-07-05 09:40:18'},
+  {id:'RT-202607-006',siteCode:'60218B003',siteName:'桥西区南站',status:'done',dept:'桥西管理部',address:'桥西区中华南大街与槐安路交叉口南行150米路东',lastSaveTime:'2026-07-01 17:30:22'},
+];
+
+var APP_SITES = [
+  {code:'60218B001',name:'裕华区中心站',dept:'裕华管理部',area:'裕华片区所',district:'裕华区',street:'裕东街道',address:'裕华区槐安路与翟营大街交叉口东行',contact:'王志强',phone:'138-0001-1001',status:'done',statusText:'已检查'},
+  {code:'60218B005',name:'裕华区南站',dept:'裕华管理部',area:'裕华片区所',district:'裕华区',street:'裕兴街道',address:'裕华区体育南大街与塔北路交叉口',contact:'—',phone:'—',status:'doing',statusText:'检查中'},
+  {code:'60218B006',name:'桥西区北站',dept:'桥西管理部',area:'桥西片区所',district:'桥西区',street:'维明街道',address:'桥西区中山路与维明大街交叉口',contact:'—',phone:'—',status:'unchecked',statusText:'待检查'},
+  {code:'60218B015',name:'桥西区中站',dept:'桥西管理部',area:'桥西片区所',district:'桥西区',street:'南长街道',address:'桥西区工农路与维明大街交口',contact:'刘工',phone:'138-0003-1003',status:'rectify',statusText:'待整改'},
+];
+
+var _page = 'home', _taskTab = 'doing', _rectifyTab = 'pending', _selectedTaskId = null, _selectedSiteIdx = 0;
+var _rejectTaskId = null;
+
+// ===== 导航 =====
+function navTo(page, opts) {
+  opts = opts || {};
+  var pages = {home:'appPageHome',taskList:'appPageTaskList',taskConfirm:'appPageTaskConfirm',rectifyList:'appPageRectifyList',siteList:'appPageSiteList',siteDetail:'appPageSiteDetail',checkRecordForm:'appPageCheckRecordForm',buildingDetail:'appPageBuildingDetail'};
+  document.querySelectorAll('.app-page').forEach(function(p){p.classList.add('hidden')});
+  var target = document.getElementById(pages[page]);
+  if(target) target.classList.remove('hidden');
+  _page = page;
+  var titles = {home:'面积核查',taskList:'任务列表',taskConfirm:'任务确认',rectifyList:'整改任务',siteList:'站点列表',siteDetail:'站点详情',checkRecordForm:'填写检查记录单',buildingDetail:'楼栋详情'};
+  document.getElementById('appStatusBar').textContent = titles[page] || '面积核查';
+  if(page==='home') renderHome();
+  else if(page==='taskList') renderTaskList();
+  else if(page==='taskConfirm') renderTaskConfirm();
+  else if(page==='rectifyList') renderRectifyList();
+  else if(page==='siteList') renderSiteList();
+  else if(page==='siteDetail') renderSiteDetail();
+  else if(page==='checkRecordForm') renderCheckRecordForm();
+  else if(page==='buildingDetail') renderBuildingDetail();
+}
+
+function getInitialPage() {
+  var params = new URLSearchParams(window.location.search);
+  var page = params.get('page');
+  if (page === 'taskList' || page === 'rectifyList' || page === 'taskConfirm' || page === 'siteList' || page === 'siteDetail' || page === 'checkRecordForm' || page === 'buildingDetail') {
+    return page;
+  }
+  return 'home';
+}
+
+// ===== 首页 =====
+function renderHome() {
+  var checkStats = [
+    {label:'待确认',count:1,hide:false},{label:'进行中',count:2,hide:false},{label:'已结束',count:1,hide:false}
+  ];
+  document.getElementById('appCheckStats').innerHTML = checkStats.map(function(s){
+    return '<span class="stat-item"><span class="stat-num">'+s.count+'</span>'+s.label+'</span>';
+  }).join('');
+  var rectifyStats = [
+    {label:'待复查',count:5,hide:false},{label:'已归档',count:1,hide:false}
+  ];
+  document.getElementById('appRectifyStats').innerHTML = rectifyStats.map(function(s){
+    return '<span class="stat-item highlight"><span class="stat-num">'+s.count+'</span>'+s.label+'</span>';
+  }).join('');
+}
+
+// ===== 任务列表 =====
+function renderTaskList() {
+  var kw = (document.getElementById('appTaskSearch').value||'').trim().toLowerCase();
+  var filtered = kw ? SHARED_TASKS.filter(function(t){return t.name.toLowerCase().indexOf(kw)>=0}) : SHARED_TASKS;
+  var segmentItems = ['pending','confirmed','doing','done'];
+  var tabsHtml = segmentItems.map(function(k){
+    var cnt = filtered.filter(function(t){return t.status===k}).length;
+    var label = APP_STATUS_MAP[k] || k;
+    return '<div class="app-segment-item'+(k===_taskTab?' active':'')+'" onclick="switchTaskTab(\''+k+'\')">'+label+'（'+cnt+'）</div>';
+  }).join('');
+  document.getElementById('appTaskSegment').innerHTML = tabsHtml;
+
+  var list = filtered.filter(function(t){return t.status===_taskTab});
+  if(list.length===0){
+    document.getElementById('appTaskListContent').innerHTML = '<div class="app-empty"><div class="empty-icon">📭</div><div class="empty-text">暂无任务</div></div>';
+    return;
+  }
+  document.getElementById('appTaskListContent').innerHTML = list.map(function(t){
+    var tagStyle = APP_STATUS_TAG[t.status] || 'background:#f5f5f5;color:#999';
+    var progressHtml = (t.status==='doing') ? '<div class="card-progress"><div class="card-progress-fill" style="width:'+Math.round(t.siteCount>0?((t.siteCount-1)/t.siteCount*100):0)+'%"></div></div>' : '';
+    var progTextHtml = (t.status==='doing') ? '<div class="card-info card-progress-text"><span class="value">'+(t.siteCount-1)+'/'+t.siteCount+' 站点已完成</span></div>' : '';
+    return '<div class="app-task-card" onclick="onTaskClick(\''+t.id+'\')">'+
+      '<div class="card-hd"><span class="t-name">'+t.name+'</span><span class="t-status" style="'+tagStyle+'">'+APP_STATUS_MAP[t.status]+'</span></div>'+
+      '<div class="card-info"><span class="label">部署：</span><span class="value">'+t.dept+'</span><span class="label">周期：</span><span class="value">'+t.period+'</span></div>'+
+      progTextHtml+progressHtml+
+      '<div class="card-ft"><span class="ft-right">'+(t.status==='pending'?'等待开始 ›':t.status==='confirmed'?'查看详情 ›':t.status==='doing'?'继续检查 ›':'查看结果 ›')+'</span></div>'+
+    '</div>';
+  }).join('');
+}
+
+function switchTaskTab(tab){_taskTab=tab;renderTaskList();}
+
+function onTaskClick(id){
+  var t = SHARED_TASKS.filter(function(s){return s.id===id})[0];
+  if(!t) return;
+  if(t.status==='pending') { showToast('任务尚未开始'); return; }
+  if(t.status==='confirmed' || t.status==='doing') {
+    _selectedTaskId = id;
+    navTo('siteList');
+  } else if(t.status==='done') {
+    showToast('任务已结束');
+  }
+}
+
+// ===== 站点列表 =====
+function renderSiteList() {
+  var task = SHARED_TASKS.filter(function(t){return t.id===_selectedTaskId})[0] || SHARED_TASKS[0];
+  document.querySelector('#appPageSiteList .cf-nav-title').textContent = task ? task.name+' - 站点列表' : '站点列表';
+  var listHtml = APP_SITES.map(function(site,idx){
+    var statusTag = site.status==='done'?'background:#f6ffed;color:#52c41a':site.status==='doing'?'background:#e6f7ff;color:#1890ff':site.status==='rectify'?'background:#fff7e6;color:#faad14':'background:#f5f5f5;color:#999';
+    var btnHtml = (site.status==='unchecked'||site.status==='doing')
+      ? '<button class="sl-card-btn primary" onclick="event.stopPropagation();navTo(\'siteDetail\')">开始检查</button>'
+      : '<button class="sl-card-btn done" onclick="event.stopPropagation();navTo(\'siteDetail\')">查看详情</button>';
+    return '<div class="sl-card" onclick="navTo(\'siteDetail\')">'+
+      '<div class="sl-card-top"><span class="sl-card-name">'+site.name+'</span><span class="sl-card-status" style="'+statusTag+'">'+site.statusText+'</span></div>'+
+      '<div class="sl-card-row"><span class="sl-card-label">用户编码</span><span class="sl-card-value">'+site.code+'</span></div>'+
+      '<div class="sl-card-row"><span class="sl-card-label">用热地址</span><span class="sl-card-value">'+site.address+'</span></div>'+
+      btnHtml+'</div>';
+  }).join('');
+  document.getElementById('appSiteListContent').innerHTML = listHtml;
+}
+
+// ===== 站点详情（简版） =====
+function renderSiteDetail() {
+  var site = APP_SITES[0];
+  document.getElementById('appSiteDetailTitle').textContent = (site||{}).name||'站点详情';
+  document.getElementById('appSiteDetailContent').innerHTML = ''+
+    '<div class="sd-main-card">'+
+      '<div class="sd-main-top"><span class="sd-main-name">'+(site.name||'')+'</span><span class="sd-result-badge" style="background:#ffeeee;color:#ff3141">不合格</span></div>'+
+      '<div class="sd-main-row"><span class="sd-main-label">检查完成时间</span><span class="sd-main-value">2026-07-02</span></div>'+
+      '<div class="sd-main-row"><span class="sd-main-label">确认进度</span><span class="sd-main-value">2/2</span></div>'+
+      '<div class="sd-main-row"><span class="sd-main-label">站点状态</span><span class="sd-main-value" style="color:#d48806">待整改</span></div>'+
+      '<button class="action-btn-full btn-primary" style="margin-top:10px" onclick="showAuditSheet()">审核</button>'+
+    '</div>'+
+    '<div class="sd-tabs">'+
+      '<div class="sd-tab active" onclick="switchSiteTab(this,\'info\')">基础信息</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'area\')">面积汇总</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'buildings\')">建筑物</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'plan\')">平面图</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'door\')">门头图</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'check\')">检查记录单</div>'+
+      '<div class="sd-tab" onclick="switchSiteTab(this,\'rectify\')">整改通知单</div>'+
+    '</div>'+
+    '<div id="sdTabContent"><div class="sd-info-card">'+
+      '<div class="sd-info-title">站点信息</div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">站点名称</span><span class="sd-info-value">'+(site.name||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">用户编码</span><span class="sd-info-value">'+(site.code||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">站点类型</span><span class="sd-info-value">自管站</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">所属管理部</span><span class="sd-info-value">'+(site.dept||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">片区所</span><span class="sd-info-value">'+(site.area||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">行政区</span><span class="sd-info-value">'+(site.district||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">办事处</span><span class="sd-info-value">'+(site.street||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">用热地址</span><span class="sd-info-value">'+(site.address||'')+'</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">联系人</span><span class="sd-info-value">赵国强</span></div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">联系电话</span><span class="sd-info-value">138-0004-4004</span></div>'+
+    '</div>'+
+    '<div class="sd-info-card">'+
+      '<div class="sd-info-title">普查信息</div>'+
+      '<div class="sd-info-row"><span class="sd-info-label">普查人</span><span class="sd-info-value">李普查</span></div>'+
+    '</div></div>';
+}
+
+function switchSiteTab(el, tab){
+  document.querySelectorAll('.sd-tab').forEach(function(t){t.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('sdTabContent').innerHTML = '<div class="sd-info-card" style="text-align:center;padding:40px;color:#8a8f99;font-size:13px">'+(tab==='buildings'?'建筑物列表（模拟数据）':tab==='check'?'检查记录（模拟数据）':'基础信息')+'</div>';
+}
+
+// ===== 检查记录单 =====
+function renderCheckRecordForm() {
+  document.getElementById('appCheckRecordFormContent').innerHTML = '<div class="sd-info-card" style="text-align:center;padding:40px;color:#8a8f99;font-size:13px">📝 检查记录单填写（模拟数据）</div>';
+}
+
+// ===== 楼栋详情 =====
+function renderBuildingDetail() {
+  document.getElementById('appBuildingDetailContent').innerHTML = '<div class="sd-info-card" style="text-align:center;padding:40px;color:#8a8f99;font-size:13px">🏢 楼栋详情（模拟数据）</div>';
+}
+
+// ===== 整改任务列表 =====
+function renderRectifyList() {
+  var segmentItems = ['pending','done'];
+  var labels = {pending:'待整改',done:'已归档'};
+  var tabsHtml = segmentItems.map(function(k){
+    var cnt = APP_RECTIFY_TASKS.filter(function(t){return t.status===k}).length;
+    return '<div class="app-segment-item'+(k===_rectifyTab?' active':'')+'" onclick="switchRectifyTab(\''+k+'\')">'+labels[k]+'（'+cnt+'）</div>';
+  }).join('');
+  document.getElementById('appRectifySegment').innerHTML = tabsHtml;
+
+  var list = APP_RECTIFY_TASKS.filter(function(t){return t.status===_rectifyTab});
+  if(list.length===0){
+    document.getElementById('appRectifyListContent').innerHTML = '<div class="app-empty"><div class="empty-icon">📭</div><div class="empty-text">暂无任务</div></div>';
+    return;
+  }
+  document.getElementById('appRectifyListContent').innerHTML = list.map(function(t){
+    var tagClass = t.status==='pending' ? 'background:#fff7e6;color:#d48806' : 'background:#f5f5f5;color:#999';
+    var tagText = t.status==='pending' ? '待整改' : '已归档';
+    return '<div class="rt-card" onclick="navTo(\'siteDetail\')">'+
+      '<div class="rt-top"><span class="rt-name">'+t.siteName+'</span><span class="rt-tag" style="'+tagClass+'">'+tagText+'</span></div>'+
+      '<div class="rt-row"><span class="rt-label">用户编码</span><span class="rt-value">'+t.siteCode+'</span></div>'+
+      '<div class="rt-row"><span class="rt-label">所属管理部</span><span class="rt-value">'+t.dept+'</span></div>'+
+      '<div class="rt-row"><span class="rt-label">用热地址</span><span class="rt-value">'+t.address+'</span></div>'+
+      '<div class="rt-row"><span class="rt-label">最近保存</span><span class="rt-value">'+t.lastSaveTime+'</span></div>'+
+      '<div class="rt-btn">查看整改</div>'+
+    '</div>';
+  }).join('');
+}
+
+function switchRectifyTab(tab){_rectifyTab=tab;renderRectifyList();}
+
+// ===== 任务确认 =====
+function renderTaskConfirm(){
+  var task = SHARED_TASKS.filter(function(t){return t.id===_selectedTaskId})[0] || SHARED_TASKS[0];
+  document.getElementById('appTaskConfirmContent').innerHTML = ''+
+    '<div class="cf-card">'+
+      '<div class="cf-card-title">任务信息</div>'+
+      '<div class="cf-field-row"><span class="cf-label">任务名称</span><span class="cf-value">'+(task.name||'')+'</span></div>'+
+      '<div class="cf-field-row"><span class="cf-label">所属部署</span><span class="cf-value">'+(task.dept||'')+'</span></div>'+
+      '<div class="cf-field-row"><span class="cf-label">任务周期</span><span class="cf-value">'+(task.period||'')+'</span></div>'+
+      '<div class="cf-field-row cf-field-last"><span class="cf-label">待处理站点</span><span class="cf-value">'+(task.siteCount||0)+' 个</span></div>'+
+    '</div>'+
+    '<div class="cf-card">'+
+      '<div class="cf-card-title">确认须知</div>'+
+      '<div style="font-size:12px;color:#4b5563;line-height:22px">请确认您接受此任务并按时完成检查。任务开始后将不可拒绝。</div>'+
+    '</div>'+
+    '<div class="cf-btn-row">'+
+      '<button class="cf-btn-reject" onclick="showRejectModal()">拒绝</button>'+
+      '<button class="cf-btn-confirm" onclick="confirmTask()">确认</button>'+
+    '</div>';
+}
+
+function showRejectModal(){document.getElementById('appRejectOverlay').classList.add('show')}
+function closeReject(){document.getElementById('appRejectOverlay').classList.remove('show');document.getElementById('appRejectReason').value=''}
+function confirmReject(){
+  var reason = document.getElementById('appRejectReason').value.trim();
+  if(!reason){showToast('请填写拒绝原因');return}
+  closeReject();showToast('已拒绝任务');setTimeout(function(){navTo('taskList')},800);
+}
+function confirmTask(){showToast('确认成功');setTimeout(function(){navTo('taskList')},800);}
+
+// ===== Toast =====
+var _toastTimer=null;
+function showToast(msg){
+  if(_toastTimer) clearTimeout(_toastTimer);
+  var el = document.getElementById('_toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id='_toast';
+    el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;padding:10px 20px;border-radius:8px;background:rgba(0,0,0,.75);color:#fff;font-size:14px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .3s ease';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+  el.style.opacity='1';
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){el.style.opacity='0'},1800);
+}
+
+// 审核弹窗
+function showAuditSheet(){
+  document.getElementById('appAuditOverlay').classList.add('show');
+}
+function closeAuditSheet(){
+  document.getElementById('appAuditOverlay').classList.remove('show');
+  document.getElementById('auditRejectReason').value='';
+  document.getElementById('auditRejectSection').style.display='none';
+  document.getElementById('auditCharCount').textContent='0';
+  var radios=document.querySelectorAll('input[name="auditResult"]');
+  if(radios.length) radios[0].checked=true;
+}
+function submitAudit(){
+  var result=document.querySelector('input[name="auditResult"]:checked');
+  if(!result){showToast('请选择审核结果');return;}
+  if(result.value==='reject'){
+    var reason=document.getElementById('auditRejectReason').value.trim();
+    if(!reason){showToast('请填写驳回原因');return;}
+  }
+  showToast('审核提交成功');
+  closeAuditSheet();
+}
+// radio联动驳回原因
+var _auditRadioListener=function(e){
+  if(e.target.name==='auditResult'){
+    document.getElementById('auditRejectSection').style.display=e.target.value==='reject'?'block':'none';
+  }
+  if(e.target.id==='auditRejectReason'){
+    document.getElementById('auditCharCount').textContent=e.target.value.length;
+  }
+};
+document.addEventListener('change',_auditRadioListener);
+document.addEventListener('input',_auditRadioListener);
+
+// ===== 初始化 =====
+navTo(getInitialPage());
+
+if (new URLSearchParams(window.location.search).get('embedded') === '1') {
+  document.body.classList.add('embedded-mode');
+}
+</script>
+</body>
+</html>
