@@ -1705,7 +1705,14 @@
               '<td>' + d.basis + '</td>' +
               '<td>' + d.attachment + '</td>' +
               '<td>' + d.remark + '</td>' +
-              '<td class="col-center"><a class="mc-action-link" href="javascript:void(0)">详情</a></td>' +
+              '<td class="col-center">' + (function(){
+                var html = '<a class="mc-action-link" href="javascript:void(0)">详情</a>';
+                if (d.basis && d.basis.indexOf('实测') !== -1) {
+                  html += '<span class="mc-action-divider" style="margin:0 6px;color:#d9d9d9;">|</span>';
+                  html += '<a class="mc-action-link mc-action-review-area" data-building-id="' + d.id + '" href="javascript:void(0)" style="color:#1677ff;">填写复核面积</a>';
+                }
+                return html;
+              })() + '</td>' +
               '</tr>';
           }
 
@@ -2325,6 +2332,7 @@
               bindNoticeEvents();
               bindConfirmEvents();
               bindVerificationEvents();
+              bindReviewAreaEntryEvents();
             });
           });
 
@@ -2358,6 +2366,9 @@
 
           // 实测复核事件
           bindVerificationEvents();
+
+          // 普查明细"填写复核面积"入口
+          bindReviewAreaEntryEvents();
 
           // 开始检查按钮
           var startBtn = document.getElementById('mc-btn-start-check');
@@ -2407,8 +2418,9 @@
             if (e.target === modal) closeModal();
           });
 
-          // 详情链接
+          // 详情链接（排除"填写复核面积"入口）
           document.querySelectorAll('.mc-action-link').forEach(function (link) {
+            if (link.classList.contains('mc-action-review-area')) return;
             link.addEventListener('click', function () {
               var row = this.closest('tr');
               if (!row || !modal) return;
@@ -2873,6 +2885,40 @@
               showToast('success', '✓', '整改通知单导出中…');
             });
           }
+        }
+
+        // ============================================================
+        // 跳转到实测复核Tab并定位到指定建筑物
+        // ============================================================
+        function jumpToVerificationBuilding(buildingId) {
+          switchMainTab('verification');
+          setTimeout(function () {
+            var input = document.getElementById('mc-ver-area-' + buildingId);
+            if (!input) {
+              showToast('warning', '⚠', '未找到对应建筑物的复核入口');
+              return;
+            }
+            input.focus();
+            var row = input.closest('tr');
+            if (row) {
+              row.style.background = '#fffbe6';
+              row.style.transition = 'background 0.3s';
+              setTimeout(function () { row.style.background = ''; }, 1600);
+            }
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 80);
+        }
+
+        // ============================================================
+        // 普查明细表格"填写复核面积"入口事件绑定
+        // ============================================================
+        function bindReviewAreaEntryEvents() {
+          document.querySelectorAll('.mc-action-review-area').forEach(function (link) {
+            link.addEventListener('click', function () {
+              var buildingId = this.getAttribute('data-building-id');
+              jumpToVerificationBuilding(buildingId);
+            });
+          });
         }
 
         // ---- 双专家确认事件绑定（调用 Store 真实会签） ----
