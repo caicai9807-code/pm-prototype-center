@@ -390,7 +390,7 @@
       if (!selectedId || currentSlotGroup < 0) return;
       var expert = expertModalPool.find(function (e) { return e.id === selectedId; });
       if (!expert) return;
-      deptGroups[currentSlotGroup].assigned[currentSlotIndex] = expert.realName;
+      deptGroups[currentSlotGroup].assigned[currentSlotIndex] = { name: expert.realName, level: slot, dept: expert.dept, confirmed: false };
       var poolExpert = expertPool.find(function (e) { return e.name === expert.realName; });
       if (poolExpert) poolExpert.status = "已分配";
       closeExpertModal();
@@ -425,7 +425,7 @@
             g.slots.map(function (slot, si) {
               var expert = g.assigned[si];
               var slotContent = expert
-                ? '<span class="slot-filled">' + expert + '</span>'
+                ? '<span class="slot-filled">' + (expert.name || expert) + '</span>'
                 : '<button class="slot-btn" data-group="' + gi + '" data-slot="' + si + '">' + slot + ' 点击选择</button>';
               return '<div class="dept-slot-row">' +
                 '<span class="dept-slot-label">' + slot + '专家槽位</span>' +

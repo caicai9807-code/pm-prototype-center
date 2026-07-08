@@ -416,9 +416,9 @@
         var taskIdParam = row.taskId ? '&taskId=' + row.taskId : '';
         var html = '<a class="rt-action-link" href="./rectification-detail.html?code=' + row.stationCode + taskIdParam + '">详情</a>';
         if (row.status === '待整改') {
-          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-receive" data-station="' + row.stationCode + '" data-deadline="' + row.deadline + '">接收</span>';
+          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-receive" data-station="' + row.stationCode + '" data-deadline="' + r.deadline + '" data-rectid="' + r.id + '">接收</span>';
         } else if (row.status === '整改中' || row.status === '已超期') {
-          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-fix">整改</span>';
+          html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-fix" data-rectid="' + r.id + '">整改</span>';
         }
         return html;
       }
@@ -641,6 +641,7 @@
       // 接收确认弹窗
       // ============================================================
       var receiveModalStation = '';
+      var _currentRectifyId = null;
 
       function openReceiveModal(station, deadline) {
         var modal = document.getElementById('rt-receive-modal');
@@ -648,6 +649,9 @@
         if (!modal) return;
 
         receiveModalStation = station;
+        // 从触发按钮获取 rectId
+        var btn = document.querySelector('.rt-action-receive[data-station="' + station + '"]');
+        _currentRectifyId = btn ? parseInt(btn.getAttribute('data-rectid')) : null;
         if (deadlineEl) deadlineEl.innerHTML = '整改截止时间：<strong>' + (deadline || '—') + '</strong>';
 
         modal.classList.add('active');
@@ -675,7 +679,20 @@
 
         if (confirmBtn) {
           confirmBtn.addEventListener('click', function () {
-            showToast('整改任务已接收：' + (receiveModalStation || '—') + '，计时已开始', 'success');
+            if (_currentRectifyId) {
+              try {
+                Store.transitionRectificationTask(_currentRectifyId, '整改中');
+                // 刷新列表
+                loadData();
+                renderPageContent();
+                bindPageEvents();
+                showToast('整改任务已接收：「' + (receiveModalStation || '—') + '」，计时已开始', 'success');
+              } catch(e) {
+                showToast('接收失败：' + e.message, 'warning');
+              }
+            } else {
+              showToast('整改任务已接收：' + (receiveModalStation || '—') + '，计时已开始', 'success');
+            }
             closeReceiveModal();
           });
         }
@@ -687,6 +704,10 @@
       function openFixModal() {
         var modal = document.getElementById('rt-fix-modal');
         if (!modal) return;
+
+        // 记录当前点击的整改任务ID
+        var btn = document.querySelector('.rt-action-fix');
+        _currentRectifyId = btn ? parseInt(btn.getAttribute('data-rectid')) : null;
 
         // 重置表单
         var textarea = document.getElementById('rt-fix-desc');
@@ -740,7 +761,24 @@
               if (textarea) textarea.focus();
               return;
             }
-            showToast('整改信息已保存', 'success');
+            if (_currentRectifyId) {
+              try {
+                Store.updateRectificationTask(_currentRectifyId, {
+                  rectificationInfo: desc,
+                  rectificationFiles: ['整改告知书.docx'] // 模拟上传文件
+                });
+                Store.transitionRectificationTask(_currentRectifyId, '待专家审核');
+                // 刷新列表
+                loadData();
+                renderPageContent();
+                bindPageEvents();
+                showToast('整改信息已保存，任务已提交专家审核', 'success');
+              } catch(e) {
+                showToast('保存失败：' + e.message, 'warning');
+              }
+            } else {
+              showToast('整改信息已保存', 'success');
+            }
             closeFixModal();
           });
         }

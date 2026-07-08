@@ -797,6 +797,10 @@
             if (typeof currentNoticeId !== 'undefined' && currentNoticeId) {
               try { Store.reviewNotice(currentNoticeId, result, opinion); } catch(e) {}
             }
+            // 刷新列表
+            loadData();
+            renderPageContent();
+            bindEvents();
             showToast('审核' + result + '：' + (opinion || '无意见'), 'success');
             closeModal();
           });

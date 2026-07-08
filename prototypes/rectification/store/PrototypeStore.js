@@ -43,9 +43,11 @@
   };
 
   var RECTIFY_STATES = {
-    '待整改': ['待复查'],
-    '待复查': ['已归档'],
-    '已归档': []
+    '待整改': ['整改中'],
+    '整改中': ['待专家审核', '已超期'],
+    '已超期': ['待专家审核'],
+    '待专家审核': ['已完成', '整改中'],
+    '已完成': []
   };
 
   // ============================================================
@@ -589,15 +591,8 @@
     notice.reviewOpinion = opinion || (result === '通过' ? '审核通过' : '审核驳回');
     save();
 
-    // 审核通过 → 推动整改任务进入"待复查"
-    if (result === '通过') {
-      Object.keys(state.rectificationTasks).forEach(function (rid) {
-        var rt = state.rectificationTasks[rid];
-        if (rt.noticeId === noticeId && rt.status === '待整改') {
-          transitionRectificationTask(rid, '待复查');
-        }
-      });
-    }
+    // 审核通过 → 通知单状态变化即完成，不自动推进整改任务
+    // 整改任务保持「待整改」状态，由 rectification-task.html 的「接收」动作推进
   }
 
   // ============================================================
@@ -660,8 +655,8 @@
     rt.status = toStatus;
     save();
 
-    // 归档时同步站点状态
-    if (toStatus === '已归档') {
+    // 完成时同步站点状态
+    if (toStatus === '已完成') {
       transitionSiteState(rt.siteCode, '已归档');
     }
   }
@@ -684,7 +679,7 @@
     if (siteCodes.length === 0) return;
     var allDone = siteCodes.every(function (code) {
       var ss = state.siteStates[code];
-      return ss && (ss.status === '已检查' || ss.status === '已归档' || ss.status === '已发送待整改');
+      return ss && (ss.status === '已检查' || ss.status === '已归档' || ss.status === '已发送待整改' || ss.status === '不合格');
     });
     if (allDone && state.tasks[taskId] && state.tasks[taskId].status === '进行中') {
       transitionTask(taskId, '已结束');
