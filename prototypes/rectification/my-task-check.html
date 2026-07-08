@@ -2012,14 +2012,12 @@
             var saved = verState[b.id] || {};
             var photoName = saved.photoName || '';
             var recheckArea = saved.recheckArea || '';
-            // 计算已有数据的误差状态
+            // 计算已有数据的误差状态（使用calcRecheckTolerance）
             var tolHtml = '<span style="color:#8c8c8c;font-size:11px;">输入后自动计算</span>';
             if (recheckArea) {
-              var tol = window.SharedUtils.calcTolerance(b.currentArea, parseFloat(recheckArea));
-              if (tol) {
-                var ok = !tol.isOverLimit;
-                tolHtml = '<div style="font-size:12px;font-weight:600;color:' + (ok ? '#52c41a' : '#ff4d4f') + ';">' + tol.relErrorDisplay + '</div>' +
-                  '<div style="font-size:11px;color:' + (ok ? '#52c41a' : '#ff4d4f') + ';">' + (ok ? '✅ 正常' : '❌ 超限') + '</div>';
+              var tol = calcRecheckTolerance(b.currentArea, parseFloat(recheckArea));
+              if (tol && tol.valid) {
+                tolHtml = renderToleranceResult(tol);
               }
             }
             rows += '\
@@ -2040,7 +2038,7 @@
                 <td style="text-align:center;">\
                   <input class="mc-ver-area-input" id="mc-ver-area-' + b.id + '" type="number" step="0.01" placeholder="㎡" value="' + recheckArea + '" style="width:90px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px;">\
                 </td>\
-                <td style="text-align:center;" id="mc-ver-tol-' + b.id + '">' + tolHtml + '</td>\
+                <td style="text-align:center;min-width:160px;" id="mc-ver-tol-' + b.id + '">' + tolHtml + '</td>\
               </tr>';
           }
 
@@ -2957,6 +2955,81 @@
           });
         }
 
+        // ============================================================
+        // 实测复核误差计算函数
+        // ============================================================
+        function calcRecheckTolerance(baseArea, recheckArea) {
+          var base = parseFloat(baseArea);
+          var recheck = parseFloat(recheckArea);
+
+          if (isNaN(base) || base <= 0 || isNaN(recheck)) {
+            return {
+              valid: false,
+              level: 'unknown',
+              message: '无法计算',
+              absDiff: null,
+              relDiff: null,
+              absDiffDisplay: '—',
+              relDiffDisplay: '—',
+              limitText: '无法计算',
+              isOverLimit: false
+            };
+          }
+
+          var absDiff = recheck - base;
+          var absDiffValue = Math.abs(absDiff);
+          var relDiff = absDiff / base * 100;
+          var relDiffValue = Math.abs(relDiff);
+
+          var limitText = '';
+          var isOverLimit = false;
+
+          if (base <= 500) {
+            limitText = '≤500㎡，相对误差≤±3%';
+            isOverLimit = relDiffValue > 3;
+          } else if (base <= 2000) {
+            limitText = '500㎡—2000㎡，相对误差≤±2%';
+            isOverLimit = relDiffValue > 2;
+          } else {
+            limitText = '>2000㎡，绝对误差≤±60㎡';
+            isOverLimit = absDiffValue > 60;
+          }
+
+          return {
+            valid: true,
+            level: isOverLimit ? 'over' : 'normal',
+            message: isOverLimit ? '超过允许误差，请重点核查' : '误差正常',
+            absDiff: absDiff,
+            relDiff: relDiff,
+            absDiffDisplay: (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2) + '㎡',
+            relDiffDisplay: (relDiff >= 0 ? '+' : '') + relDiff.toFixed(2) + '%',
+            limitText: limitText,
+            isOverLimit: isOverLimit
+          };
+        }
+
+        function renderToleranceResult(tol) {
+          if (!tol || !tol.valid) {
+            return '<span style="color:#8c8c8c;font-size:11px;">无法计算</span>';
+          }
+          if (tol.isOverLimit) {
+            return '\
+              <div style="background:#fff2f0;border:1px solid #ffccc7;border-radius:6px;padding:6px 8px;font-size:11px;text-align:left;">\
+                <div style="color:#ff4d4f;font-weight:600;margin-bottom:4px;">⚠ 超过允许误差，请重点核查</div>\
+                <div style="color:#595959;"><span style="color:#888;">相对误差：</span>' + tol.relDiffDisplay + '</div>\
+                <div style="color:#595959;"><span style="color:#888;">绝对误差：</span>' + tol.absDiffDisplay + '</div>\
+                <div style="color:#bbb;font-size:10px;margin-top:2px;">适用标准：' + tol.limitText + '</div>\
+              </div>';
+          }
+          return '\
+            <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;padding:6px 8px;font-size:11px;text-align:left;">\
+              <div style="color:#52c41a;font-weight:600;margin-bottom:4px;">误差正常</div>\
+              <div style="color:#595959;"><span style="color:#888;">相对误差：</span>' + tol.relDiffDisplay + '</div>\
+              <div style="color:#595959;"><span style="color:#888;">绝对误差：</span>' + tol.absDiffDisplay + '</div>\
+              <div style="color:#bbb;font-size:10px;margin-top:2px;">适用标准：' + tol.limitText + '</div>\
+            </div>';
+        }
+
         // ---- 实测复核事件绑定 ----
         function bindVerificationEvents() {
           // 选择照片按钮
@@ -3000,11 +3073,9 @@
                 if (surveyDetails[si].id == buildingId) { b = surveyDetails[si]; break; }
               }
               if (!b) return;
-              var tol = window.SharedUtils.calcTolerance(b.currentArea, parseFloat(areaVal));
-              if (!tol) return;
-              var ok = !tol.isOverLimit;
-              tolCell.innerHTML = '<div style="font-size:12px;font-weight:600;color:' + (ok ? '#52c41a' : '#ff4d4f') + ';">' + tol.relErrorDisplay + '</div>' +
-                '<div style="font-size:11px;color:' + (ok ? '#52c41a' : '#ff4d4f') + ';">' + (ok ? '✅ 正常' : '❌ 超限') + '</div>';
+              var tol = calcRecheckTolerance(b.currentArea, parseFloat(areaVal));
+              if (!tol || !tol.valid) return;
+              tolCell.innerHTML = renderToleranceResult(tol);
             });
           });
 
@@ -3020,13 +3091,20 @@
               }
 
               var surveyDetails = surveyDataMap[siteCode] || [];
+              // 只取实测建筑物
+              var measuredBuildings = [];
+              for (var mi = 0; mi < surveyDetails.length; mi++) {
+                if (surveyDetails[mi].basis && surveyDetails[mi].basis.indexOf('实测') !== -1) {
+                  measuredBuildings.push(surveyDetails[mi]);
+                }
+              }
+
               var verData = {};
               var allFilled = true;
               var missingNames = [];
 
-              for (var i = 0; i < surveyDetails.length; i++) {
-                var b = surveyDetails[i];
-                if (!b.basis || b.basis.indexOf('实测') === -1) continue;
+              for (var i = 0; i < measuredBuildings.length; i++) {
+                var b = measuredBuildings[i];
 
                 var fileInput = document.getElementById('mc-ver-file-' + b.id);
                 var areaInput = document.getElementById('mc-ver-area-' + b.id);
@@ -3043,7 +3121,20 @@
                   missingNames.push(b.building + '（复查面积）');
                 }
 
-                verData[b.id] = { photoName: photoName, recheckArea: recheckArea };
+                // 计算误差结果
+                var tolResult = recheckArea ? calcRecheckTolerance(b.currentArea, parseFloat(recheckArea)) : null;
+                verData[b.id] = {
+                  photoName: photoName,
+                  recheckArea: recheckArea,
+                  baseArea: b.currentArea,
+                  absDiff: tolResult && tolResult.valid ? tolResult.absDiff : null,
+                  relDiff: tolResult && tolResult.valid ? tolResult.relDiff : null,
+                  absDiffDisplay: tolResult && tolResult.valid ? tolResult.absDiffDisplay : '—',
+                  relDiffDisplay: tolResult && tolResult.valid ? tolResult.relDiffDisplay : '—',
+                  isOverLimit: tolResult && tolResult.valid ? tolResult.isOverLimit : false,
+                  limitText: tolResult && tolResult.valid ? tolResult.limitText : '—',
+                  reviewStatus: tolResult && tolResult.valid ? (tolResult.isOverLimit ? '重点核查' : '正常') : '未复核'
+                };
               }
 
               if (!allFilled) {
@@ -3051,21 +3142,16 @@
                 return;
               }
 
-              // 超限校验
+              // 超限校验（不阻断，只提示）
               var overLimitNames = [];
-              for (var oi = 0; oi < surveyDetails.length; oi++) {
-                var b2 = surveyDetails[oi];
-                if (!b2.basis || b2.basis.indexOf('实测') === -1) continue;
-                var areaVal = verData[b2.id] ? verData[b2.id].recheckArea : '';
-                if (areaVal) {
-                  var tol2 = window.SharedUtils.calcTolerance(b2.currentArea, parseFloat(areaVal));
-                  if (tol2 && tol2.isOverLimit) {
-                    overLimitNames.push(b2.building + '（' + tol2.relErrorDisplay + '）');
-                  }
+              for (var key in verData) {
+                if (verData[key].isOverLimit) {
+                  overLimitNames.push(verData[key].reviewStatus);
                 }
               }
-              if (overLimitNames.length) {
-                showToast('warning', '⚠', '以下建筑超出允许误差范围：' + overLimitNames.join('，') + '，仍可保存');
+              var hasOverLimit = Object.keys(verData).some(function (k) { return verData[k].isOverLimit; });
+              if (hasOverLimit) {
+                showToast('warning', '⚠', '存在建筑物复核误差超过允许范围，请重点核查');
               }
 
               if (!taskCheckState[siteCode].verification) taskCheckState[siteCode].verification = {};
@@ -3073,7 +3159,9 @@
                 taskCheckState[siteCode].verification[key] = verData[key];
               }
 
-              showToast('success', '✓', '实测复核数据已保存');
+              if (!hasOverLimit) {
+                showToast('success', '✓', '实测复核数据已保存');
+              }
             });
           }
         }
