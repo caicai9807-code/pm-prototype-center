@@ -82,6 +82,12 @@ function makeSelfContained(fileName, transformSource) {
     (match, attrs, content) => `<script${attrs}>${esc(transformJS(content))}</script>`
   );
 
+  // 重写 onclick="location.href='...'" -> __MERGED_NAVIGATE__
+  html = html.replace(
+    /onclick=(['"])location\.href\s*=\s*(['"])((?:\.\/|\.\.\/)[^'"]*\.html[^'"]*)\2\s*;?\s*\1/gi,
+    (match, q, q2, target) => `onclick=${q}window.__MERGED_NAVIGATE__(${JSON.stringify(target)})${q}`
+  );
+
   const bootstrap = `<script>
 (function(){
 window.__MERGED_NAVIGATE__=function(t){
@@ -89,8 +95,25 @@ window.__MERGED_NAVIGATE__=function(t){
   else if(window.frameElement&&parent.__MERGED_GET_HTML__){
     window.frameElement.setAttribute('data-merged-src',t);
     window.frameElement.srcdoc=parent.__MERGED_GET_HTML__(t);
+  } else {
+    window.__TOP_NAV__ = window.__TOP_NAV__ || window.__MERGED_NAVIGATE__;
   }
 };
+/* 劫持 location.href 赋值（覆盖 onclick="location.href='...'" 等） */
+try{
+  var __loc=window.location;
+  Object.defineProperty(window,'location',{
+    get:function(){return __loc;},
+    set:function(v){
+      if(v&&typeof v==='string'&&v.indexOf('.html')>=0){
+        window.__MERGED_NAVIGATE__(v);
+      } else { __loc.href=v; }
+    },
+    configurable:true
+  });
+}catch(e){}
+/* 劫持 Location.prototype.replace */
+try{var __rpl=window.Location.prototype.replace;window.Location.prototype.replace=function(v){if(v&&typeof v==='string'&&v.indexOf('.html')>=0){window.__MERGED_NAVIGATE__(v);}else{__rpl.call(this,v);}};}catch(e){}
 document.addEventListener('click',function(e){
   var a=e.target.closest?e.target.closest('a[href]'):null;
   if(!a){var el=e.target;while(el&&el.tagName!=='A')el=el.parentNode;a=el}
@@ -287,23 +310,13 @@ buildPack(
  * App 端
  * ============================================================ */
 buildPack(
-  ['expert-app-preview','expert-app','expert-app-task-list','expert-app-task-confirm',
+  ['expert-app','expert-app-task-list','expert-app-task-confirm',
    'expert-app-task-detail','expert-app-site-list','expert-app-site-detail',
    'expert-app-building-detail','expert-app-check-record','expert-app-signature',
    'dept-leader-app-preview','expert-app-standalone'],
-  {
-    'expert-app.html': 'expert-app-standalone.html',
-    'expert-app-task-list.html': 'expert-app-standalone.html',
-    'expert-app-task-confirm.html': 'expert-app-standalone.html',
-    'expert-app-task-detail.html': 'expert-app-standalone.html',
-    'expert-app-site-list.html': 'expert-app-standalone.html',
-    'expert-app-site-detail.html': 'expert-app-standalone.html',
-    'expert-app-building-detail.html': 'expert-app-standalone.html',
-    'expert-app-check-record.html': 'expert-app-standalone.html',
-    'expert-app-signature.html': 'expert-app-standalone.html',
-  },
+  {},  // App 端不需要别名，直接使用原始页面
   'rectification-app.html',
-  'expert-app-preview'
+  'expert-app'
 );
 
 console.log('\n🎉 全部完成！');

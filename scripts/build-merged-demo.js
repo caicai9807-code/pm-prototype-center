@@ -300,6 +300,7 @@ function buildShell(pages) {
   <script>
     const embeddedPages = ${embeddedPages};
     const pageOrder = ${JSON.stringify(pages.map((page) => page.fileName))};
+    const aliasMap = ${JSON.stringify(aliasMap)};
     const viewer = document.getElementById('viewer');
 
     function normalizeTarget(target) {
@@ -311,7 +312,7 @@ function buildShell(pages) {
 
     function getHtml(target) {
       const normalized = normalizeTarget(target);
-      const fileName = embeddedPages[normalized.fileName] ? normalized.fileName : pageOrder[0];
+      const fileName = resolveAlias(embeddedPages[normalized.fileName] ? normalized.fileName : pageOrder[0]);
       const pageHtml = embeddedPages[fileName] || embeddedPages[pageOrder[0]];
       const runtimeScript = '<script>(function(){window.__MERGED_QUERY__='
         + JSON.stringify(normalized.search || '')
@@ -329,7 +330,7 @@ function buildShell(pages) {
 
     function openPage(target) {
       const normalized = normalizeTarget(target);
-      const fileName = embeddedPages[normalized.fileName] ? normalized.fileName : pageOrder[0];
+      const fileName = resolveAlias(embeddedPages[normalized.fileName] ? normalized.fileName : pageOrder[0]);
       viewer.srcdoc = getHtml(target);
     }
 

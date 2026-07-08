@@ -126,29 +126,47 @@
     .info-value.empty { color: #ccc; }
 
     /* 安全区域 */
-    /* ===== 建筑物卡片 ===== */
+    /* ===== 建筑物卡片 - 方案②单列布局 ===== */
     .bld-card {
-      background: #fff; border-radius: 10px; padding: 12px;
-      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-      cursor: pointer; display: block; transition: transform 0.15s;
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: block; transition: box-shadow 0.2s, transform 0.15s;
+      border: 0.5px solid #f0f0f0;
     }
+    .bld-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
     .bld-card:active { transform: scale(0.98); }
-    .bld-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .bld-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .bld-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
     .bld-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; font-weight: 500; }
-    .bld-row { display: flex; justify-content: space-between; align-items: center; height: 22px; line-height: 22px; }
-    .bld-label { font-size: 12px; color: #999; }
-    .bld-value { font-size: 12px; color: #333; text-align: right; }
-    .bld-value.green { color: #00b578; font-weight: 600; }
-    .bld-arrow { color: #ccc; font-size: 14px; margin-left: 4px; }
-    .bld-link { font-size: 12px; color: #1677ff; text-align: center; padding: 4px 0 0; margin-top: 8px; }
+    /* 2x2 网格字段 */
+    .bld-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; padding: 8px 0; }
+    .bld-gitem { display: flex; justify-content: space-between; align-items: center; height: 24px; }
+    .bld-glabel { font-size: 12px; color: #999; }
+    .bld-gvalue { font-size: 12px; color: #333; text-align: right; }
+    /* 面积双卡片横排 */
+    .bld-area-row { display: flex; gap: 8px; }
+    .bld-area-card {
+      flex: 1; padding: 8px 10px; border-radius: 6px;
+      background: #f8f9fc; border: 0.5px solid #e8e8e8; text-align: center;
+    }
+    .bld-area-card .acl { font-size: 11px; color: #999; display: block; }
+    .bld-area-card .acv { font-size: 15px; font-weight: 600; color: #1a1a1a; display: block; margin-top: 2px; }
+    .bld-area-card .acv .acu { font-size: 11px; font-weight: 400; color: #999; margin-left: 2px; }
+    .bld-area-card.green { background: #f0fdf4; border-color: #bbf7d0; }
+    .bld-area-card.green .acv { color: #00b578; }
+    .bld-area-card.green .acv .acu { color: #00b578; }
+    .bld-area-card.red { background: #fef2f2; border-color: #fecaca; }
+    .bld-area-card.red .acv { color: #e24b4a; }
+    .bld-area-card.red .acv .acu { color: #e24b4a; }
+    .bld-area-card .acr { font-size: 10px; color: #00b578; display: block; }
+    .bld-area-card.red .acr { color: #e24b4a; }
 
-    /* 实测复核反显样式 */
+    /* 已复核徽标 */
     .bld-review-badge {
       margin-top: 8px; padding: 4px 8px;
       background: #f0fdf4; border: 1px solid #bbf7d0;
       border-radius: 4px; font-size: 11px; color: #16a34a;
-      display: flex; align-items: center; gap: 4px;
+      display: inline-flex; align-items: center; gap: 4px;
     }
     .bld-review-badge .badge-icon {
       width: 16px; height: 16px; border-radius: 50%;
@@ -156,6 +174,19 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; font-weight: 700; flex-shrink: 0;
     }
+
+    /* 底部操作栏 */
+    .bld-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 0.5px solid #f0f0f0; }
+    .bld-btn-review {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 14px; border-radius: 14px;
+      border: 0.5px solid #1677ff; background: #fff;
+      color: #1677ff; font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .bld-btn-review:hover { background: #e6f1fb; }
+    .bld-btn-review:active { background: #b5d4f4; }
+    .bld-link { font-size: 12px; color: #1677ff; cursor: pointer; padding: 4px 0; }
 
 
     .safe-area { height: 44px; }
@@ -188,6 +219,17 @@
     .audit-radio-row { display: flex; gap: 20px; }
     .audit-radio-row label { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; cursor: pointer; }
     .audit-radio-row input { accent-color: #1677ff; }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 2000;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease; white-space: nowrap;
+      background: #333; color: #fff; max-width: 80vw; white-space: normal; text-align: center;
+    }
+    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast.toast-warning { background: #fff7e6; color: #d46b08; border: 0.5px solid #ffd591; }
+    .toast.toast-success { background: #f6ffed; color: #52c41a; border: 0.5px solid #b7eb8f; }
 
     /* 隐藏内容 */
     /* 底部审核Sheet弹窗 */
@@ -358,9 +400,41 @@
     .notice-title { font-size: 14px; font-weight: 600; color: #d48806; margin-bottom: 8px; }
     .notice-item { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 4px; }
     .notice-item strong { color: #333; }
+
+    /* 整改告知书 */
+    .letter-card {
+      background: #f0f9ff; border: 1px solid #bae0ff; border-radius: 8px; padding: 12px;
+    }
+    .letter-title { font-size: 14px; font-weight: 600; color: #1677ff; margin-bottom: 8px; }
+    .letter-desc-box {
+      background: #fff; border-radius: 6px; padding: 10px; margin-bottom: 10px;
+      font-size: 13px; color: #333; line-height: 1.6; border: 0.5px solid #e8e8e8;
+    }
+    .letter-meta { font-size: 12px; color: #8c8c8c; margin-bottom: 10px; }
+    .letter-meta strong { color: #333; font-weight: 500; }
+    .letter-attachment {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      background: #fff; border-radius: 6px; border: 0.5px solid #e8e8e8;
+      margin-bottom: 6px;
+    }
+    .letter-attachment:last-child { margin-bottom: 0; }
+    .letter-att-icon { font-size: 18px; flex-shrink: 0; }
+    .letter-att-info { flex: 1; min-width: 0; }
+    .letter-att-name { font-size: 12px; font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .letter-att-meta { font-size: 11px; color: #999; margin-top: 2px; }
+    .letter-att-status {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #ebfaf3; color: #00b578; font-weight: 500; flex-shrink: 0;
+    }
+    .letter-empty {
+      text-align: center; padding: 40px 20px;
+    }
+    .letter-empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .letter-empty-text { font-size: 14px; color: #999; }
   </style>
 </head>
 <body>
+  <div id="toast" class="toast"></div>
   <div class="adm-nav-bar">
     <a href="javascript:history.back()" class="back">‹</a>
     <span class="title" id="pageTitle">站点详情</span>
@@ -378,6 +452,7 @@
       <div class="adm-tab" data-tab="plan">平面图</div>
       <div class="adm-tab" data-tab="door">门头图</div>
       <div class="adm-tab" data-tab="record">检查记录单</div>
+      <div class="adm-tab" data-tab="letter">整改告知书</div>
     </div>
 
     <!-- 基础信息 -->
@@ -476,6 +551,11 @@
     <!-- 整改通知单（仅检查不合格时显示） -->
     <div class="tab-panel" id="panel-rectify">
       <div id="rectifyContent"></div>
+    </div>
+
+    <!-- 整改告知书（展示PC端上传的整改反馈） -->
+    <div class="tab-panel" id="panel-letter">
+      <div id="letterContent"></div>
     </div>
   </div>
 
@@ -583,6 +663,15 @@
             { id: 6, title: '商业门头平面图是否一致？', result: '是', subItems: [], desc: '' },
             { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [], desc: '' },
           ]
+        },
+        rectifyLetter: {
+          fixDesc: '已按要求完成整改：补传了面积核查汇总表完整数据、平面图已补充绘制人签字、确权书及相关证明材料已补齐归档。',
+          rectifier: '赵国强', lastSaveTime: '2026-07-06 16:30',
+          attachments: [
+            { name: '面积核查汇总表（整改后）.xlsx', size: '2.3 MB' },
+            { name: '用热范围平面图（签字版）.pdf', size: '1.8 MB' },
+            { name: '确权书补充材料.zip', size: '4.5 MB' }
+          ]
         }
       }
     };
@@ -624,6 +713,13 @@
             { id: 5, title: '面积核查汇总表与现场是否一致？', result: '是', subItems: [], desc: '' },
             { id: 6, title: '商业门头平面图是否一致？', result: '是', subItems: [], desc: '' },
             { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [], desc: '' },
+          ]
+        },
+        rectifyLetter: {
+          fixDesc: '已补传商业裙楼面积数据至普查台账，平面图已补充绘制人签字。',
+          rectifier: '赵国强', lastSaveTime: '2026-07-05 10:15',
+          attachments: [
+            { name: '整改情况说明.docx', size: '1.2 MB' }
           ]
         }
       },
@@ -704,6 +800,7 @@
     }
 
     var site = siteData[siteCode] || siteData['60218B006'];
+    window._currentSiteData = site;
     document.getElementById('pageTitle').textContent = site.name;
 
     // 根据状态显示不同标签颜色和按钮
@@ -801,29 +898,46 @@
       });
     }
 
-    // 渲染建筑物卡片
+    // 渲染建筑物卡片 - 方案②单列布局 + 复核按钮
+    // 建立建筑数据引用供弹窗使用
+    if (!window._reviewBuildings) window._reviewBuildings = {};
     if (site.surveyDetails && site.surveyDetails.length > 0) {
       var cardsHtml = site.surveyDetails.map(function(d) {
+        window._reviewBuildings[d.id] = d;
         var diffSign = d.diff >= 0 ? '+' : '';
-        var diffClass = d.diff >= 0 ? 'text-green' : 'text-red';
+        var diffClass = d.diff >= 0 ? 'green' : 'red';
         var revDisplay = reviewDisplay[d.id];
         var isMeasured = d.basis && d.basis.indexOf('实测') >= 0;
         var revBadgeHtml = isMeasured && revDisplay
-          ? '<div class="bld-review-badge"><span class="badge-icon">✓</span> 已复核（' + revDisplay.area.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡）</div>'
+          ? '<div class="bld-review-badge"><span class="badge-icon">✓</span> 已复核（' + revDisplay.area.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡' + (revDisplay.photos && revDisplay.photos.length > 0 ? ' · ' + revDisplay.photos.length + '张照片' : '') + '）</div>'
           : '';
-        return '<div class="bld-card" onclick="location.href=\'./expert-app-building-detail.html?id=' + d.id + '&code=' + siteCode + '\'">' +
+        return '<div class="bld-card">' +
           '<div class="bld-top">' +
             '<span class="bld-name">' + d.building + '</span>' +
             '<span class="status-tag tag-green">' + d.status + '</span>' +
           '</div>' +
-          '<div class="bld-row"><span class="bld-label">层数</span><span class="bld-value">' + d.floors + '层</span></div>' +
-          '<div class="bld-row"><span class="bld-label">用热性质</span><span class="bld-value">' + d.heatNature + '</span></div>' +
-          '<div class="bld-row"><span class="bld-label">收费类别</span><span class="bld-value">' + d.chargeType + '</span></div>' +
-          '<div class="bld-row"><span class="bld-label">普查依据</span><span class="bld-value">' + d.basis + '</span></div>' +
-          '<div class="bld-row"><span class="bld-label">建筑面积</span><span class="bld-value">' + d.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡</span></div>' +
-          '<div class="bld-row"><span class="bld-label">面积变化</span><span class="bld-value ' + diffClass + '">' + diffSign + d.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡（' + d.rate + '）</span></div>' +
-          '<div class="bld-link">查看详情 ›</div>' +
+          '<div class="bld-grid">' +
+            '<div class="bld-gitem"><span class="bld-glabel">层数</span><span class="bld-gvalue">' + d.floors + '层</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">用热性质</span><span class="bld-gvalue">' + d.heatNature + '</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">收费类别</span><span class="bld-gvalue">' + d.chargeType + '</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">普查依据</span><span class="bld-gvalue">' + d.basis + '</span></div>' +
+          '</div>' +
+          '<div class="bld-area-row">' +
+            '<div class="bld-area-card">' +
+              '<span class="acl">建筑面积</span>' +
+              '<span class="acv">' + d.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span>' +
+            '</div>' +
+            '<div class="bld-area-card ' + diffClass + '">' +
+              '<span class="acl">面积变化</span>' +
+              '<span class="acv">' + diffSign + d.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span>' +
+              '<span class="acr">' + d.rate + '</span>' +
+            '</div>' +
+          '</div>' +
           revBadgeHtml +
+          '<div class="bld-footer">' +
+            '<button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + d.id + ')">复核</button>' +
+            '<span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + d.id + '&code=' + siteCode + '\'">查看详情 ›</span>' +
+          '</div>' +
         '</div>';
       }).join('');
       document.getElementById('buildingCards').innerHTML = cardsHtml;
@@ -899,6 +1013,37 @@
       `;
     }
 
+    // 渲染整改告知书（展示PC端上传的整改反馈）
+    var letter = site.rectifyLetter;
+    if (letter && letter.fixDesc) {
+      var attHtml = (letter.attachments || []).map(function(a) {
+        return '<div class="letter-attachment">' +
+          '<div class="letter-att-icon">📄</div>' +
+          '<div class="letter-att-info">' +
+            '<div class="letter-att-name">' + a.name + '</div>' +
+            '<div class="letter-att-meta">' + (a.size || '—') + '</div>' +
+          '</div>' +
+          '<span class="letter-att-status">已上传</span>' +
+        '</div>';
+      }).join('');
+      document.getElementById('letterContent').innerHTML = '' +
+        '<div class="adm-card letter-card">' +
+          '<div class="letter-title">📋 整改告知书</div>' +
+          '<div class="letter-desc-box">' + letter.fixDesc + '</div>' +
+          '<div class="letter-meta">整改人：<strong>' + (letter.rectifier || '—') + '</strong> &nbsp;&nbsp; 最近保存：<strong>' + (letter.lastSaveTime || '—') + '</strong></div>' +
+          (attHtml ? '<div style="margin-top:10px;"><div style="font-size:13px;font-weight:500;color:#333;margin-bottom:6px;">整改附件</div>' + attHtml + '</div>' : '') +
+        '</div>';
+    } else {
+      document.getElementById('letterContent').innerHTML = '' +
+        '<div class="adm-card">' +
+          '<div class="letter-empty">' +
+            '<div class="letter-empty-icon">📋</div>' +
+            '<div class="letter-empty-text">暂无整改告知书</div>' +
+            '<div style="font-size:12px;color:#bbb;margin-top:6px;">整改负责人上传告知书后将在此展示</div>' +
+          '</div>' +
+        '</div>';
+    }
+
     // Tab 切换
     document.getElementById('tabBar').addEventListener('click', function(e) {
       const tab = e.target.closest('.adm-tab');
@@ -948,6 +1093,183 @@
         document.getElementById('auditCount').textContent = e.target.value.length;
       }
     });
+
+    // ====== 复核弹窗（完整版） ======
+    var reviewModal = null;
+    var reviewBuildingId = null;
+    var reviewPhotos = [];
+
+    function openReviewModal(buildingId) {
+      var bd = window._reviewBuildings && window._reviewBuildings[buildingId];
+      if (!bd) { showToast('建筑数据未找到'); return; }
+      reviewBuildingId = buildingId;
+      reviewPhotos = [];
+      if (!reviewModal) {
+        reviewModal = document.createElement('div');
+        reviewModal.id = 'reviewModal';
+        reviewModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.2s ease;';
+        reviewModal.addEventListener('click', function(e) { if (e.target === this) closeReviewModal(); });
+        document.body.appendChild(reviewModal);
+      }
+      // 构建弹窗内容
+      reviewModal.innerHTML =
+        '<div style="background:#fff;border-radius:12px;width:100%;max-width:340px;max-height:90vh;overflow-y:auto;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:0.5px solid #f0f0f0;">' +
+            '<span style="font-size:17px;font-weight:600;color:#1a1a1a;">建筑物复核</span>' +
+            '<span onclick="closeReviewModal()" style="width:28px;height:28px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:16px;color:#999;cursor:pointer;">✕</span>' +
+          '</div>' +
+          '<div style="padding:16px 20px;">' +
+            // 建筑信息提示
+            '<div style="background:#f8f9fc;border-radius:8px;padding:10px 12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">' +
+              '<span style="font-size:13px;font-weight:500;color:#1a1a1a;">' + bd.building + '</span>' +
+              '<span style="font-size:12px;color:#999;">普查面积 <b style="color:#333;">' + bd.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡</b></span>' +
+            '</div>' +
+            // 复核照片
+            '<div style="margin-bottom:16px;">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                '<span style="font-size:13px;font-weight:500;color:#1a1a1a;">复核照片</span>' +
+                '<span style="font-size:11px;color:#999;" id="reviewPhotoCount">0 张</span>' +
+              '</div>' +
+              '<div style="display:flex;gap:8px;flex-wrap:wrap;" id="reviewPhotoList"></div>' +
+              '<div onclick="document.getElementById(\'reviewFileInput\').click()" style="margin-top:8px;width:100%;height:44px;border:1px dashed #d9d9d9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#1677ff;cursor:pointer;">+ 上传复核照片</div>' +
+              '<input type="file" id="reviewFileInput" accept="image/*" multiple style="display:none" onchange="handleReviewPhotoSelect(this)">' +
+            '</div>' +
+            // 复查面积
+            '<div style="margin-bottom:16px;">' +
+              '<label style="font-size:13px;font-weight:500;color:#1a1a1a;display:block;margin-bottom:6px;">复查面积 <span style="color:#e24b4a;">*</span></label>' +
+              '<div style="display:flex;align-items:center;border:0.5px solid #d9d9d9;border-radius:8px;padding:0 12px;height:40px;background:#fafafa;">' +
+                '<input type="number" id="reviewAreaInput" step="0.01" min="0" placeholder="请输入复查面积" style="flex:1;border:none;outline:none;font-size:14px;color:#333;background:transparent;" value="' + bd.currentArea.toFixed(2) + '">' +
+                '<span style="font-size:12px;color:#999;flex-shrink:0;">㎡</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;padding:12px 20px 20px;gap:12px;">' +
+            '<button onclick="closeReviewModal()" style="flex:1;height:40px;border-radius:20px;border:0.5px solid #d9d9d9;background:#fff;font-size:14px;color:#333;cursor:pointer;">取消</button>' +
+            '<button onclick="submitReview()" style="flex:1;height:40px;border-radius:20px;border:none;background:#1677ff;font-size:14px;color:#fff;cursor:pointer;font-weight:500;">提交复核</button>' +
+          '</div>' +
+        '</div>';
+      setTimeout(function() { reviewModal.style.opacity = '1'; reviewModal.style.pointerEvents = 'auto'; }, 10);
+    }
+
+    function closeReviewModal() {
+      if (reviewModal) {
+        reviewModal.style.opacity = '0';
+        reviewModal.style.pointerEvents = 'none';
+      }
+    }
+
+    function handleReviewPhotoSelect(input) {
+      var files = input.files;
+      if (!files || files.length === 0) return;
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var reader = new FileReader();
+        reader.onload = (function(fileName) {
+          return function(e) {
+            reviewPhotos.push({ name: fileName, dataUrl: e.target.result });
+            renderReviewPhotos();
+          };
+        })(f.name);
+        reader.readAsDataURL(f);
+      }
+      input.value = '';
+    }
+
+    function renderReviewPhotos() {
+      var list = document.getElementById('reviewPhotoList');
+      var count = document.getElementById('reviewPhotoCount');
+      if (!list) return;
+      if (reviewPhotos.length === 0) {
+        list.innerHTML = '';
+        if (count) count.textContent = '0 张';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < reviewPhotos.length; i++) {
+        html +=
+          '<div style="position:relative;width:72px;height:72px;border-radius:6px;overflow:hidden;border:0.5px solid #e8e8e8;">' +
+            '<img src="' + reviewPhotos[i].dataUrl + '" style="width:100%;height:100%;object-fit:cover;">' +
+            '<span onclick="removeReviewPhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;">✕</span>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+      if (count) count.textContent = reviewPhotos.length + ' 张';
+    }
+
+    function removeReviewPhoto(index) {
+      reviewPhotos.splice(index, 1);
+      renderReviewPhotos();
+    }
+
+    function submitReview() {
+      var areaInput = document.getElementById('reviewAreaInput');
+      var area = parseFloat(areaInput.value);
+      if (reviewPhotos.length === 0) {
+        var toast = document.getElementById('toast');
+        if (toast) { toast.textContent = '请至少上传 1 张复核照片'; toast.className = 'toast toast-warning show'; setTimeout(function(){toast.className='toast'},2000); }
+        return;
+      }
+      if (isNaN(area) || area <= 0) {
+        var toast = document.getElementById('toast');
+        if (toast) { toast.textContent = '请输入有效的复查面积'; toast.className = 'toast toast-warning show'; setTimeout(function(){toast.className='toast'},2000); }
+        return;
+      }
+      // 保存复核数据
+      reviewDisplay[reviewBuildingId] = {
+        photos: reviewPhotos.map(function(p) { return p.name; }),
+        area: area,
+        date: new Date().toISOString().slice(0,10)
+      };
+      closeReviewModal();
+      // 刷新建筑物卡片
+      if (typeof renderSiteBuildings === 'function') {
+        renderSiteBuildings();
+      } else {
+        // 手动触发刷新：找到当前站点的surveyDetails重新渲染
+        var sc = getSiteCode ? getSiteCode() : '';
+        if (sc && window._reviewBuildings) {
+          // 重新执行卡片渲染逻辑
+          var bldContainer = document.getElementById('buildingCards');
+          if (bldContainer && window._currentSiteData) {
+            var s = window._currentSiteData;
+            if (s.surveyDetails && s.surveyDetails.length > 0) {
+              bldContainer.innerHTML = s.surveyDetails.map(function(bi) {
+                var ds = bi.diff >= 0 ? '+' : '';
+                var dc = bi.diff >= 0 ? 'green' : 'red';
+                var rd = reviewDisplay[bi.id];
+                var im = bi.basis && bi.basis.indexOf('实测') >= 0;
+                var rb = im && rd ? '<div class="bld-review-badge"><span class="badge-icon">✓</span> 已复核（' + rd.area.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡' + (rd.photos && rd.photos.length > 0 ? ' · ' + rd.photos.length + '张照片' : '') + '）</div>' : '';
+                return '<div class="bld-card">' +
+                  '<div class="bld-top"><span class="bld-name">' + bi.building + '</span><span class="status-tag tag-green">' + bi.status + '</span></div>' +
+                  '<div class="bld-grid">' +
+                    '<div class="bld-gitem"><span class="bld-glabel">层数</span><span class="bld-gvalue">' + bi.floors + '层</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">用热性质</span><span class="bld-gvalue">' + bi.heatNature + '</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">收费类别</span><span class="bld-gvalue">' + bi.chargeType + '</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">普查依据</span><span class="bld-gvalue">' + bi.basis + '</span></div>' +
+                  '</div>' +
+                  '<div class="bld-area-row">' +
+                    '<div class="bld-area-card"><span class="acl">建筑面积</span><span class="acv">' + bi.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span></div>' +
+                    '<div class="bld-area-card ' + dc + '"><span class="acl">面积变化</span><span class="acv">' + ds + bi.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span><span class="acr">' + bi.rate + '</span></div>' +
+                  '</div>' +
+                  rb +
+                  '<div class="bld-footer"><button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + bi.id + ')">复核</button><span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + bi.id + '&code=' + sc + '\'">查看详情 ›</span></div>' +
+                '</div>';
+              }).join('');
+            }
+          }
+        }
+      }
+      showToast('✓ 复核数据已提交');
+    }
+
+    // ====== Toast 提示 ======
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'toast show';
+      setTimeout(function() { el.className = 'toast'; }, 2200);
+    }
   </script>
 </body>
 </html>
