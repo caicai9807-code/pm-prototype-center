@@ -1447,8 +1447,16 @@
           }
 
           var summaryText = failCount > 0
-            ? '经现场核查，' + site.name + '（' + site.code + '）共发现 <strong style="color:#ff4d4f;">' + failCount + ' 项</strong>不合格：' + failItems.join('；') + '。检查结论为<strong style="color:#ff4d4f;">' + state.conclusion + '</strong>。'
-            : '经现场核查，' + site.name + '（' + site.code + '）未发现不合格项。检查结论为<strong style="color:#52c41a;">' + (state.conclusion || '合格') + '</strong>。';
+            ? '经现场核查，' + site.name + '（' + site.code + '）共发现 <strong style="color:#ff4d4f;">' + failCount + ' 项</strong>不合格：' + failItems.join('；') + '。系统判定为<strong style="color:#ff4d4f;">' + state.conclusion + '</strong>。'
+            : '经现场核查，' + site.name + '（' + site.code + '）未发现不合格项。系统判定为<strong style="color:#52c41a;">' + (state.conclusion || '合格') + '</strong>。';
+
+          // 从Store读取签名状态
+          var storeCR = window.PrototypeStore ? window.PrototypeStore.getCheckRecord(site.code) : null;
+          var signatures = (storeCR && storeCR.signatures) || [];
+          var sigHtml = signatures.length > 0 ? signatures.map(function(s){
+            var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;';
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;font-size:12px;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span>' + (s.signTime ? '<span style="color:#999;">' + s.signTime + '</span>' : '') + '</div>';
+          }).join('') : '<div style="font-size:12px;color:#999;padding:4px 0;">待会签</div>';
 
           return '\
             <div class="mc-record-display-card" id="mc-checklist-display-card">\
@@ -1462,12 +1470,16 @@
                 <div class="mc-record-display-tags">\
                   <span class="mc-status-tag ' + (state.conclusion === '不合格' ? 'fail' : 'done') + '">' + state.conclusion + '</span>\
                   <span class="mc-status-tag done">已提交</span>\
-                  ' + renderConfirmTags('checklist', clConfirmState) + '\
+                  ' + renderSignTags(site.code) + '\
                 </div>\
               </div>\
               <div class="mc-record-display-summary">\
                 <p>' + summaryText + '</p>\
                 ' + (state.problemDesc ? '<p><strong>问题描述：</strong>' + state.problemDesc + '</p>' : '') + '\
+              </div>\
+              <div class="mc-record-display-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
+                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签状态</div>\
+                ' + sigHtml + '\
               </div>\
               <table class="mc-record-display-table">\
                 <thead>\
@@ -1530,11 +1542,13 @@
               <div class="mc-record-sub-title">' + site.name + ' (' + site.code + ')</div>\
               ' + itemsHtml + '\
               <div class="mc-record-form-group" style="margin-top:16px;">\
-                <div class="mc-record-form-label"><span class="mc-required">*</span>检查结论</div>\
+                <div class="mc-record-form-label">系统判定结果</div>\
                 <div class="mc-record-radio-group">\
-                  <label class="mc-record-radio"><input type="radio" name="mc-modal-conclusion" value="合格" /> 合格</label>\
-                  <label class="mc-record-radio"><input type="radio" name="mc-modal-conclusion" value="不合格" /> 不合格</label>\
+                  <div id="mc-system-conclusion" style="font-size:14px;font-weight:600;padding:6px 0;color:#999;">待生成</div>\
                 </div>\
+              </div>\
+              <div id="mc-system-conclusion-hint" style="margin:0 0 10px 0;padding:8px 12px;border-radius:6px;font-size:12px;line-height:1.5;background:#f5f5f5;color:#999;display:none;">\
+                提示信息\
               </div>\
               <div class="mc-record-form-group">\
                 <div class="mc-record-form-label">问题描述</div>\
@@ -1823,6 +1837,19 @@
         }
 
         // ---- 双专家确认辅助函数 ----
+        // 从Store读取签名状态渲染标签
+        function renderSignTags(siteCode) {
+          var cr = window.PrototypeStore ? window.PrototypeStore.getCheckRecord(siteCode) : null;
+          var sigs = (cr && cr.signatures) || [];
+          if (sigs.length === 0) return '<span class="mc-status-tag pending" style="margin-left:4px;">待会签</span>';
+          var allAgreed = sigs.every(function(s){return s.status==='已同意'});
+          if (allAgreed) return '<span class="mc-status-tag done" style="margin-left:4px;">已会签</span>';
+          return sigs.map(function(s){
+            var sc = s.status==='已同意'?'done':s.status==='不同意'?'fail':'pending';
+            return '<span class="mc-status-tag ' + sc + '" style="margin-left:4px;">' + s.expertName + '：' + s.status + '</span>';
+          }).join('');
+        }
+
         function renderConfirmTags(type, confirmState) {
           if (!confirmState) return '';
           var tags = '';
@@ -2494,13 +2521,6 @@
           var submitBtn = document.getElementById('mc-modal-checklist-submit');
           if (submitBtn) {
             submitBtn.addEventListener('click', function () {
-              // 校验检查结论
-              var conclusion = document.querySelector('input[name="mc-modal-conclusion"]:checked');
-              if (!conclusion) {
-                showToast('warning', '⚠', '请先选择检查结论');
-                return;
-              }
-
               // 校验所有检查项的radio
               var allChecked = true;
               var items = document.querySelectorAll('.mc-check-item');
@@ -2563,14 +2583,16 @@
                 storedItems.push({ id: itemId, value: value, reason: reason });
               });
 
-              // 保存到状态
-              var conclusionValue = conclusion.value;
+              // 保存到状态 - 结论由系统根据检查项自动生成
+              var systemConclusion = window.PrototypeStore && window.PrototypeStore.deriveCheckConclusion
+                ? window.PrototypeStore.deriveCheckConclusion(storedItems)
+                : (function(items){return items.some(function(i){return i.value==='否'})?'不合格':'合格';})(storedItems);
               var problemDesc = document.getElementById('mc-modal-problem-desc');
               var siteNote = document.getElementById('mc-modal-site-note');
               if (!taskCheckState[siteCode]) taskCheckState[siteCode] = {};
               var checklistRecord = {
                 submitted: true,
-                conclusion: conclusionValue,
+                conclusion: systemConclusion,
                 problemDesc: problemDesc ? problemDesc.value : '',
                 siteNote: siteNote ? siteNote.value : '',
                 items: storedItems,
@@ -2591,8 +2613,8 @@
                 checklistPanel.innerHTML = renderChecklistPanel(site);
               }
 
-              if (hasRejected || conclusionValue === '不合格') {
-                showToast('warning', '⚠', '存在不合格项，请填写整改通知单');
+              if (hasRejected || systemConclusion === '不合格') {
+                showToast('success', '✓', '检查记录已提交，将进入双专家会签');
                 if (clModal) clModal.style.display = 'none';
                 // 自动切换到整改通知单Tab + 高亮提示
                 switchMainTab('notice');
@@ -2623,7 +2645,7 @@
         }
 
         function bindChecklistRadioEvents() {
-          // 所有检查项radio change → 控制子项显示
+          // 所有检查项radio change → 控制子项显示 + 更新系统判定
           document.querySelectorAll('.mc-check-item input[type="radio"]').forEach(function (radio) {
             radio.addEventListener('change', function () {
               // 找到所属的check-item容器
@@ -2643,8 +2665,56 @@
                 var otherInput = item.querySelector('.mc-check-other-input');
                 if (otherInput) otherInput.value = '';
               }
+              // 实时更新系统判定结果
+              updateSystemConclusion();
             });
           });
+          // 子项checkbox change也更新判定
+          document.querySelectorAll('.mc-check-sub-box').forEach(function (cb) {
+            cb.addEventListener('change', updateSystemConclusion);
+          });
+        }
+
+        // 实时更新系统判定结果
+        function updateSystemConclusion() {
+          var allRadios = document.querySelectorAll('.mc-check-item input[type="radio"]');
+          var allChecked = true;
+          var hasNo = false;
+          allRadios.forEach(function (r) {
+            if (r.checked) {
+              if (r.value === '否') hasNo = true;
+            } else {
+              allChecked = false;
+            }
+          });
+          var el = document.getElementById('mc-system-conclusion');
+          var hint = document.getElementById('mc-system-conclusion-hint');
+          if (!el) return;
+          if (!allChecked) {
+            el.textContent = '待生成';
+            el.style.color = '#999';
+            if (hint) { hint.style.display = 'none'; }
+            return;
+          }
+          if (hasNo) {
+            el.textContent = '不合格';
+            el.style.color = '#ff4d4f';
+            if (hint) {
+              hint.style.display = 'block';
+              hint.style.background = '#fff2f0';
+              hint.style.color = '#ff4d4f';
+              hint.textContent = '存在不合格检查项，系统将自动判定为"不合格"。';
+            }
+          } else {
+            el.textContent = '合格';
+            el.style.color = '#52c41a';
+            if (hint) {
+              hint.style.display = 'block';
+              hint.style.background = '#f6ffed';
+              hint.style.color = '#52c41a';
+              hint.textContent = '当前检查项均未发现问题，系统将自动判定为"合格"。';
+            }
+          }
         }
 
         // ---- 整改通知单事件绑定 ----
