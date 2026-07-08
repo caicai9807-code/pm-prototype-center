@@ -51,6 +51,26 @@
   };
 
   // ============================================================
+  // 片区所所长映射
+  // ============================================================
+  var AREA_DIRECTORS = {
+    "裕华片区所": "刘建军",
+    "长安片区所": "王海涛",
+    "桥西片区所": "赵国强"
+  };
+
+  // ============================================================
+  // 检查结论推导函数
+  // ============================================================
+  function deriveCheckConclusion(items) {
+    if (!items || !items.length) return '待生成';
+    var hasNo = items.some(function (item) {
+      return item.value === '否' || item.result === '否' || item.value === 'no';
+    });
+    return hasNo ? '不合格' : '合格';
+  }
+
+  // ============================================================
   // 内部工具
   // ============================================================
   function assertTransition(fromState, toState, stateMap, label) {
@@ -171,8 +191,13 @@
         stationCode: siteCode,
         dept: sp ? sp.dept : '—',
         deadlineDays: deadlineDays,
+        deadlineUnit: '工作日',
         status: deadlineDays > 30 ? '待审核' : '审核通过',
-        deadline: deadlineDays + '天',
+        signStatus: '已会签',
+        signatures: [
+          { expertName: '张建国', status: '已同意', signTime: '2026-07-15 14:00' },
+          { expertName: '李建华', status: '已同意', signTime: '2026-07-15 15:00' }
+        ],
         taskName: '2026 第29周 常规合同面积检查任务',
         content: cr.problemDesc || '—',
         opinion: '1. 补录新增用热面积\n2. 更新台账及附件\n3. 提交整改说明',
@@ -182,58 +207,49 @@
         createdAt: '2026-07-15',
         reviewer: deadlineDays > 30 ? '—' : '系统（自动通过）',
         reviewTime: deadlineDays > 30 ? '—' : '2026-07-16 10:00',
-        reviewOpinion: deadlineDays > 30 ? '—' : '整改期限 ≤ 30天，自动审核通过'
+        reviewOpinion: deadlineDays > 30 ? '—' : '整改期限 ≤ 30工作日，自动审核通过'
       };
     }
 
-    // 从不合格checkRecord生成notice
+    // 从不合格checkRecord生成notice（种子数据模拟已会签通过的场景）
     Object.keys(checkRecords).forEach(function(code) {
       var cr = checkRecords[code];
       if (cr.submitted && cr.conclusion === '不合格') {
         var notice = genNoticeFromCR(code, cr);
         rectificationNotices[notice.id] = notice;
-        // 更新site状态
-        if (siteStates[code]) siteStates[code].status = '待整改';
+        // 种子中已审核通过的notice同步生成整改任务
+        if (notice.status === '审核通过') {
+          // 构建一个简易notice对象用于createRectificationTask
+          var fakeNotice = { id: notice.id, deadlineDays: notice.deadlineDays, siteCode: code, taskId: notice.taskId };
+          var rtId = rectIdSeq + 1;
+          rectIdSeq++;
+          var sp2 = md.sitePool ? md.sitePool.find(function(s){return s.code===code}) : null;
+          var area = sp2 ? (sp2.area || '—') : '—';
+          var assignee = area === '裕华片区所' ? '刘建军' : area === '长安片区所' ? '王海涛' : area === '桥西片区所' ? '赵国强' : '—';
+          rectificationTasks[rtId] = {
+            id: rtId, noticeId: notice.id, taskId: notice.taskId, siteCode: code,
+            taskName: notice.taskName || '—', stationName: notice.stationName || code, stationCode: code,
+            dept: notice.dept || '—', area: area, status: '待整改', assignee: assignee,
+            assigneeSource: '站点所属片区所所长',
+            deadline: '2026-07-25', overdueDays: 0, rectificationInfo: '', rectificationFiles: [],
+            signStatus: '待会签',
+            signatures: [
+              { expertName: '张建国', status: '待确认', signTime: '' },
+              { expertName: '李建华', status: '待确认', signTime: '' }
+            ],
+            createdAt: '2026-07-15'
+          };
+        }
+        if (siteStates[code]) siteStates[code].status = '不合格';
       } else if (cr.submitted && cr.conclusion === '合格') {
         if (siteStates[code]) siteStates[code].status = '已检查';
       }
     });
 
-    // ——— 7. rectificationTasks ——— 从不合格checkRecord生成
-    var rectificationTasks = {};
-    var rectIdSeq = 0;
-
-    function genRectFromNotice(notice) {
-      rectIdSeq++;
-      var sp = md.sitePool ? md.sitePool.find(function(s){return s.code===notice.siteCode}) : null;
-      var status = '待整改';
-      // 审核通过的可以到"待复查"
-      if (notice.status === '审核通过') status = '待复查';
-      return {
-        id: rectIdSeq,
-        noticeId: notice.id,
-        taskId: notice.taskId || 1,
-        siteCode: notice.siteCode,
-        taskName: notice.taskName || '—',
-        stationName: notice.stationName || notice.siteCode,
-        stationCode: notice.siteCode,
-        dept: notice.dept || '—',
-        area: sp ? (sp.area || '—') : '—',
-        status: status,
-        assignee: '—',
-        deadline: '2026-07-25',
-        overdueDays: 0,
-        rectificationInfo: '',
-        rectificationFiles: [],
-        createdAt: '2026-07-15'
-      };
-    }
-
-    Object.keys(rectificationNotices).forEach(function(nid) {
-      var notice = rectificationNotices[nid];
-      var rt = genRectFromNotice(notice);
-      rectificationTasks[rt.id] = rt;
-    });
+    // ——— 7. rectificationTasks ——— 已在上方notice循环中同步生成（仅审核通过的notice生成）
+    // 此处仅声明空对象，已有任务已写入 rectificationTasks
+    if (typeof rectificationTasks === 'undefined') var rectificationTasks = {};
+    var rectIdSeq = Object.keys(rectificationTasks).length;
 
     // ——— 8. next IDs ———
     var maxTaskId = 0;
@@ -301,7 +317,7 @@
       var totalSites = siteCodes.length;
       var doneSites = siteCodes.filter(function (c) {
         var ss = state.siteStates[c];
-        return ss && (ss.status === '已检查' || ss.status === '不合格' || ss.status === '已归档' || ss.status === '已发送待整改');
+        return ss && (ss.status === '已检查' || ss.status === '不合格');
       }).length;
       t.progress = doneSites + '/' + totalSites;
       // 专家计数
@@ -502,28 +518,73 @@
   // ============================================================
   // Check Record 操作
   // ============================================================
-  function getCheckRecord(siteCode) {
-    return clone(state.checkRecords[siteCode] || null);
-  }
-
   function saveCheckRecord(siteCode, record) {
+    // 确保结论由系统自动生成
+    var items = record.items || [];
+    record.conclusion = deriveCheckConclusion(items);
+    record.conclusionSource = 'system';
+
     state.checkRecords[siteCode] = clone(record);
     state.checkRecords[siteCode].submittedAt = new Date().toISOString();
     save();
 
-    // 自动推进站点状态
-    var isQualified = record.conclusion === '合格';
-    if (isQualified) {
-      transitionSiteState(siteCode, '已检查');
+    // 不立即推进站点状态，等待双专家会签完成后统一处理
+    return siteCode;
+  }
+
+  // ============================================================
+  // 检查记录双专家会签
+  // ============================================================
+  function getCheckRecord(siteCode) {
+    return clone(state.checkRecords[siteCode] || null);
+  }
+
+  function signCheckRecord(siteCode, expertName, agree) {
+    var cr = state.checkRecords[siteCode];
+    if (!cr) throw new Error('检查记录不存在: ' + siteCode);
+
+    if (!cr.signatures) cr.signatures = [];
+    var existing = cr.signatures.find(function (s) { return s.expertName === expertName; });
+    if (existing) {
+      existing.status = agree ? '已同意' : '不同意';
+      existing.signTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
     } else {
-      transitionSiteState(siteCode, '不合格');
-      // 不合格 → 自动生成整改通知单
-      createRectificationNotice(siteCode, record);
+      cr.signatures.push({
+        expertName: expertName,
+        status: agree ? '已同意' : '不同意',
+        signTime: new Date().toISOString().slice(0, 16).replace('T', ' ')
+      });
+    }
+    save();
+
+    // 检查是否双专家会签完成
+    var bothDone = cr.signatures && cr.signatures.length >= 2 &&
+      cr.signatures.every(function (s) { return s.status === '已同意'; });
+    var anyReject = cr.signatures && cr.signatures.some(function (s) { return s.status === '不同意'; });
+
+    if (anyReject) {
+      // 任一专家不同意 → 返回修改（重置 submitted）
+      cr.submitted = false;
+      save();
+      return { status: 'rejected', message: '检查记录单被退回修改' };
     }
 
-    // 检查是否所有站点已完成 → 推进任务状态
-    updateTaskProgress(record.taskId);
-    return siteCode;
+    if (bothDone) {
+      // 双专家会签完成
+      var conclusion = deriveCheckConclusion(cr.items);
+      if (conclusion === '合格') {
+        transitionSiteState(siteCode, '已检查');
+      } else {
+        transitionSiteState(siteCode, '不合格');
+        // 生成整改通知书
+        createRectificationNotice(siteCode, cr);
+      }
+      // 推进任务进度
+      updateTaskProgress(cr.taskId);
+      return { status: 'completed', conclusion: conclusion };
+    }
+
+    return { status: 'pending' };
   }
 
   // ============================================================
@@ -548,7 +609,6 @@
     var sp = (window.MockData && window.MockData.sitePool) ? window.MockData.sitePool.find(function(s){return s.code===siteCode}) : null;
     var taskId = state.siteStates[siteCode] ? state.siteStates[siteCode].taskId : null;
     var task = taskId ? state.tasks[taskId] : null;
-    var deadlineDays = 30; // 默认30天
 
     var notice = {
       id: id,
@@ -558,41 +618,103 @@
       stationName: sp ? sp.name : siteCode,
       stationCode: siteCode,
       dept: sp ? sp.dept : '—',
-      deadlineDays: deadlineDays,
-      status: deadlineDays > 30 ? '待审核' : '审核通过',
-      deadline: deadlineDays + '天',
+      deadlineDays: null, // 不设默认值，由用户填写
+      deadlineUnit: '工作日',
+      status: '待会签',
+      signStatus: '会签中',
+      signatures: [
+        { expertName: '张建国', status: '待确认', signTime: '' },
+        { expertName: '李建华', status: '待确认', signTime: '' }
+      ],
       taskName: task ? task.name : '—',
-      content: checkRecord.problemDesc || checkRecord.items.filter(function(it){return it.result==='否'}).map(function(it){return it.title}).join('；') || '—',
-      opinion: '请按要求完成整改',
+      content: checkRecord.problemDesc || (checkRecord.items ? checkRecord.items.filter(function(it){return it.value==='否'||it.result==='否'}).map(function(it){return it.title||it.text||''}).join('；') : '') || '—',
+      opinion: '',
       inspectedPerson: '—',
       inspector: checkRecord.inspector || '赵立成',
       phone: '138-0001-1001',
       createdAt: new Date().toISOString().slice(0, 10),
-      reviewer: deadlineDays > 30 ? '—' : '系统（自动通过）',
-      reviewTime: deadlineDays > 30 ? '—' : new Date().toISOString().slice(0, 16).replace('T', ' '),
-      reviewOpinion: deadlineDays > 30 ? '—' : '整改期限 ≤ 30天，自动审核通过'
+      reviewer: '',
+      reviewTime: '',
+      reviewOpinion: ''
     };
 
     state.rectificationNotices[id] = notice;
     save();
-
-    // 自动生成整改任务
-    createRectificationTask(siteCode, taskId, notice);
+    // 不再自动生成整改任务。任务在审核通过/自动通过后生成
     return id;
+  }
+
+  // ============================================================
+  // 整改通知书双专家会签
+  // ============================================================
+  function signRectificationNotice(noticeId, expertName, agree) {
+    var notice = state.rectificationNotices[noticeId];
+    if (!notice) throw new Error('整改通知单不存在: ' + noticeId);
+
+    if (!notice.signatures) notice.signatures = [
+      { expertName: '张建国', status: '待确认', signTime: '' },
+      { expertName: '李建华', status: '待确认', signTime: '' }
+    ];
+    var existing = notice.signatures.find(function (s) { return s.expertName === expertName; });
+    if (existing) {
+      existing.status = agree ? '已同意' : '不同意';
+      existing.signTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    }
+    save();
+
+    var allAgreed = notice.signatures.every(function (s) { return s.status === '已同意'; });
+    var anyReject = notice.signatures.some(function (s) { return s.status === '不同意'; });
+
+    if (anyReject) {
+      notice.status = '待会签';
+      save();
+      return { status: 'rejected', message: '整改通知书被退回修改' };
+    }
+
+    if (allAgreed) {
+      var dd = parseInt(notice.deadlineDays);
+      if (isNaN(dd) || dd <= 0) {
+        return { status: 'error', message: '整改期限无效' };
+      }
+      if (dd <= 30) {
+        // 自动审核通过
+        notice.status = '审核通过';
+        notice.reviewer = '系统（自动通过）';
+        notice.reviewTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        notice.reviewOpinion = '整改期限 ≤ 30工作日，自动审核通过';
+        save();
+        // 生成整改任务
+        createRectificationTask(notice.siteCode, notice.taskId, notice);
+        return { status: 'auto_approved', message: '系统自动审核通过' };
+      } else {
+        // 进入业务管理员审核
+        notice.status = '待审核';
+        save();
+        return { status: 'pending_review', message: '已进入业务管理员审核' };
+      }
+    }
+
+    return { status: 'pending' };
   }
 
   function reviewNotice(noticeId, result, opinion) {
     var notice = state.rectificationNotices[noticeId];
     if (!notice) throw new Error('整改通知单不存在: ' + noticeId);
-    assertTransition(notice.status, result === '通过' ? '审核通过' : '审核驳回', NOTICE_STATES, 'Notice');
-    notice.status = result === '通过' ? '审核通过' : '审核驳回';
+
+    if (result === '通过') {
+      notice.status = '审核通过';
+    } else {
+      notice.status = '审核驳回';
+    }
     notice.reviewer = '恩泽';
     notice.reviewTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
     notice.reviewOpinion = opinion || (result === '通过' ? '审核通过' : '审核驳回');
     save();
 
-    // 审核通过 → 通知单状态变化即完成，不自动推进整改任务
-    // 整改任务保持「待整改」状态，由 rectification-task.html 的「接收」动作推进
+    if (result === '通过') {
+      // 审核通过 → 生成整改任务
+      createRectificationTask(notice.siteCode, notice.taskId, notice);
+    }
   }
 
   // ============================================================
@@ -620,7 +742,12 @@
     var task = taskId ? state.tasks[taskId] : null;
     var now = new Date();
     var deadline = new Date(now);
-    deadline.setDate(deadline.getDate() + 7);
+    var dd = parseInt(notice.deadlineDays) || 30;
+    deadline.setDate(deadline.getDate() + dd);
+
+    // 根据站点所属片区所自动取所长为负责人
+    var area = sp ? (sp.area || '—') : '—';
+    var assignee = AREA_DIRECTORS[area] || '—';
 
     var rect = {
       id: id,
@@ -631,13 +758,19 @@
       stationName: sp ? sp.name : siteCode,
       stationCode: siteCode,
       dept: sp ? sp.dept : '—',
-      area: sp ? (sp.area || '—') : '—',
+      area: area,
       status: '待整改',
-      assignee: '—',
+      assignee: assignee,
+      assigneeSource: '站点所属片区所所长',
       deadline: deadline.toISOString().slice(0, 10),
       overdueDays: 0,
       rectificationInfo: '',
       rectificationFiles: [],
+      signStatus: '待会签',
+      signatures: [
+        { expertName: '张建国', status: '待确认', signTime: '' },
+        { expertName: '李建华', status: '待确认', signTime: '' }
+      ],
       createdAt: now.toISOString().slice(0, 10)
     };
     state.rectificationTasks[id] = rect;
@@ -671,15 +804,53 @@
   }
 
   // ============================================================
+  // 整改审核双专家会签
+  // ============================================================
+  function signRectificationReview(rectId, expertName, agree) {
+    var rt = state.rectificationTasks[rectId];
+    if (!rt) throw new Error('整改任务不存在: ' + rectId);
+
+    if (!rt.signatures) rt.signatures = [
+      { expertName: '张建国', status: '待确认', signTime: '' },
+      { expertName: '李建华', status: '待确认', signTime: '' }
+    ];
+    var existing = rt.signatures.find(function (s) { return s.expertName === expertName; });
+    if (existing) {
+      existing.status = agree ? '已同意' : '不同意';
+      existing.signTime = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    }
+    save();
+
+    var allAgreed = rt.signatures.every(function (s) { return s.status === '已同意'; });
+    var anyReject = rt.signatures.some(function (s) { return s.status === '不同意'; });
+
+    if (anyReject) {
+      rt.status = '整改中';
+      save();
+      return { status: 'rejected', message: '整改审核未通过，退回整改中' };
+    }
+
+    if (allAgreed) {
+      rt.status = '已完成';
+      save();
+      transitionSiteState(rt.siteCode, '已归档');
+      return { status: 'completed', message: '整改审核通过，任务已完成' };
+    }
+
+    return { status: 'pending' };
+  }
+
+  // ============================================================
   // 内部：推动任务进度
   // ============================================================
   function updateTaskProgress(taskId) {
     if (!taskId) return;
     var siteCodes = state.taskSites[taskId] || [];
     if (siteCodes.length === 0) return;
+    // 主任务完成只看检查是否完成：已检查或不合格（即检查记录单会签完成）
     var allDone = siteCodes.every(function (code) {
       var ss = state.siteStates[code];
-      return ss && (ss.status === '已检查' || ss.status === '已归档' || ss.status === '已发送待整改' || ss.status === '不合格');
+      return ss && (ss.status === '已检查' || ss.status === '不合格');
     });
     if (allDone && state.tasks[taskId] && state.tasks[taskId].status === '进行中') {
       transitionTask(taskId, '已结束');
@@ -772,6 +943,10 @@
     save: save,
     reset: reset,
 
+    // 工具
+    deriveCheckConclusion: deriveCheckConclusion,
+    AREA_DIRECTORS: AREA_DIRECTORS,
+
     // Tasks
     getTasks: getTasks,
     getTask: getTask,
@@ -798,15 +973,20 @@
     // Check Records
     getCheckRecord: getCheckRecord,
     saveCheckRecord: saveCheckRecord,
+    signCheckRecord: signCheckRecord,
 
     // Rectification Notices
     getRectificationNotices: getRectificationNotices,
+    createRectificationNotice: createRectificationNotice,
+    signRectificationNotice: signRectificationNotice,
     reviewNotice: reviewNotice,
 
     // Rectification Tasks
     getRectificationTasks: getRectificationTasks,
+    createRectificationTask: createRectificationTask,
     updateRectificationTask: updateRectificationTask,
     transitionRectificationTask: transitionRectificationTask,
+    signRectificationReview: signRectificationReview,
 
     // My Tasks (expert view)
     getMyTasks: getMyTasks
