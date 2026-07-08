@@ -2877,38 +2877,65 @@
           }
         }
 
-        // ---- 双专家确认事件绑定 ----
+        // ---- 双专家确认事件绑定（调用 Store 真实会签） ----
         function bindConfirmEvents() {
           var confirmBtns = document.querySelectorAll('[id^="mc-confirm-"]');
           confirmBtns.forEach(function (btn) {
             btn.addEventListener('click', function () {
-              var id = this.id; // e.g. mc-confirm-checklist-1
+              var id = this.id;
               var parts = id.split('-');
               var type = parts[2]; // "checklist" or "notice"
               var expertNum = parseInt(parts[3], 10); // 1 or 2
 
               var activeTab = document.querySelector('.mc-station-tab.active');
               var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
-              if (!siteCode || !taskCheckState[siteCode]) {
+              if (!siteCode) {
                 showToast('warning', '⚠', '站点状态异常');
                 return;
               }
 
-              var targetState = taskCheckState[siteCode][type];
-              if (!targetState) return;
+              var ps = window.PrototypeStore;
+              if (!ps) { showToast('warning', '⚠', 'Store未就绪'); return; }
 
-              if (expertNum === 1) {
-                targetState.confirmExpert1 = true;
-              } else if (expertNum === 2) {
-                targetState.confirmExpert2 = true;
-              }
+              var expertName = expertNum === 1 ? '张建国' : '李建华';
 
-              // 如果两个专家都确认了，标记为已生效
-              if (targetState.confirmExpert1 && targetState.confirmExpert2) {
-                targetState.confirmed = true;
-                showToast('success', '✓', (type === 'checklist' ? '检查记录单' : '整改通知单') + '已生效');
-              } else {
-                showToast('success', '✓', '第' + (expertNum === 1 ? '一' : '二') + '专家确认成功');
+              if (type === 'checklist') {
+                // 检查记录单会签 — 调用 Store.signCheckRecord
+                try {
+                  var result = ps.signCheckRecord(siteCode, expertName, true);
+                  if (result.status === 'rejected') {
+                    showToast('warning', '⚠', result.message);
+                  } else if (result.status === 'completed') {
+                    showToast('success', '✓', '双专家会签完成，站点检查' +
+                      (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
+                  } else {
+                    showToast('success', '✓', expertName + ' 已同意');
+                  }
+                } catch(e) {
+                  showToast('warning', '⚠', '会签失败: ' + e.message);
+                }
+              } else if (type === 'notice') {
+                // 整改通知书会签 — 调用 Store.signRectificationNotice
+                try {
+                  var notices = ps.getRectificationNotices({ siteCode: siteCode });
+                  var targetNotice = notices && notices.length ? notices[0] : null;
+                  if (!targetNotice) {
+                    showToast('warning', '⚠', '未找到当前站点的整改通知书');
+                    return;
+                  }
+                  var result = ps.signRectificationNotice(targetNotice.id, expertName, true);
+                  if (result.status === 'rejected') {
+                    showToast('warning', '⚠', result.message);
+                  } else if (result.status === 'auto_approved') {
+                    showToast('success', '✓', '双专家会签通过，系统自动审核通过并已生成整改任务');
+                  } else if (result.status === 'pending_review') {
+                    showToast('success', '✓', '双专家会签通过，已进入业务管理员审核');
+                  } else {
+                    showToast('success', '✓', expertName + ' 已同意');
+                  }
+                } catch(e) {
+                  showToast('warning', '⚠', '会签失败: ' + e.message);
+                }
               }
 
               // 刷新当前面板

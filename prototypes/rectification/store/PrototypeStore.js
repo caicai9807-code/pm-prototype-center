@@ -597,6 +597,7 @@
     });
     if (filter) {
       if (filter.status) list = list.filter(function (n) { return n.status === filter.status; });
+      if (filter.siteCode) list = list.filter(function (n) { return n.siteCode === filter.siteCode || n.stationCode === filter.siteCode; });
       if (filter.keyword) {
         var kw = filter.keyword;
         list = list.filter(function (n) { return n.taskName.indexOf(kw) !== -1 || n.stationName.indexOf(kw) !== -1; });
