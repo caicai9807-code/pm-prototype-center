@@ -797,10 +797,10 @@
             if (typeof currentNoticeId !== 'undefined' && currentNoticeId) {
               try { Store.reviewNotice(currentNoticeId, result, opinion); } catch(e) {}
             }
-            // 刷新列表
+            // 刷新列表：从 Store 重载数据，重新 enrich，仅更新表格区域
             loadData();
-            renderPageContent();
-            bindEvents();
+            enrichedData = mockData.map(enrichRow);
+            renderTable(enrichedData);
             showToast('审核' + result + '：' + (opinion || '无意见'), 'success');
             closeModal();
           });

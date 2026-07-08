@@ -390,7 +390,8 @@
       if (!selectedId || currentSlotGroup < 0) return;
       var expert = expertModalPool.find(function (e) { return e.id === selectedId; });
       if (!expert) return;
-      deptGroups[currentSlotGroup].assigned[currentSlotIndex] = { name: expert.realName, level: slot, dept: expert.dept, confirmed: false };
+      var slotLevel = deptGroups[currentSlotGroup].slots[currentSlotIndex];
+      deptGroups[currentSlotGroup].assigned[currentSlotIndex] = { name: expert.realName, level: slotLevel, dept: expert.dept, confirmed: false };
       var poolExpert = expertPool.find(function (e) { return e.name === expert.realName; });
       if (poolExpert) poolExpert.status = "已分配";
       closeExpertModal();
