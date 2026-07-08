@@ -1175,6 +1175,303 @@
         border-color: #d9d9d9;
         cursor: not-allowed;
       }
+
+      /* ===== 确认区样式 ===== */
+      .mc-countersign-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-top: 16px;
+      }
+      .mc-countersign-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 12px;
+      }
+      .mc-countersign-alert {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #1890ff;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-countersign-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+        word-wrap: break-word;
+      }
+      .mc-countersign-table th,
+      .mc-countersign-table td {
+        padding: 10px 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mc-countersign-table th {
+        border-bottom: 2px solid #f0f0f0;
+        background: #fafbfc;
+        font-weight: 500;
+        color: #5a5f6d;
+        text-align: left;
+        white-space: nowrap;
+      }
+      .mc-countersign-table td {
+        border-bottom: 1px solid #f0f0f0;
+        color: #262626;
+      }
+      .mc-countersign-opinion {
+        margin-top: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .mc-countersign-opinion label {
+        font-size: 13px;
+        color: #595959;
+        white-space: nowrap;
+        line-height: 32px;
+        font-weight: 500;
+      }
+      .mc-countersign-opinion textarea {
+        flex: 1;
+        height: 32px;
+        padding: 5px 10px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 32px;
+      }
+      .mc-countersign-opinion textarea:focus {
+        border-color: #1890ff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+      }
+      .mc-countersign-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .mc-cs-btn-agree {
+        padding: 4px 16px;
+        background: #1890ff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .mc-cs-btn-agree:hover { background: #40a9ff; }
+      .mc-cs-btn-reject {
+        padding: 4px 16px;
+        background: #fff;
+        color: #ff4d4f;
+        border: 1px solid #ff4d4f;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .mc-cs-btn-reject:hover { background: #fff2f0; }
+
+      /* ===== 操作记录区样式 ===== */
+      .mc-operation-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-top: 16px;
+      }
+      .mc-operation-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 14px;
+      }
+      .mc-operation-timeline {
+        position: relative;
+        padding-left: 20px;
+      }
+      .mc-operation-timeline::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 4px;
+        bottom: 4px;
+        width: 2px;
+        background: #f0f0f0;
+      }
+      .mc-operation-item {
+        position: relative;
+        padding: 0 0 14px 16px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .mc-operation-item:last-child {
+        padding-bottom: 0;
+      }
+      .mc-operation-item::before {
+        content: '';
+        position: absolute;
+        left: -18px;
+        top: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d9d9d9;
+        border: 2px solid #fff;
+      }
+      .mc-operation-item.op-active::before {
+        background: #1890ff;
+      }
+      .mc-operation-time {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-left: 8px;
+      }
+      .mc-operation-desc {
+        color: #595959;
+      }
+      .mc-operation-type {
+        font-weight: 500;
+        color: #262626;
+      }
+      .mc-operation-empty {
+        text-align: center;
+        padding: 30px 20px;
+        color: #8c8c8c;
+        font-size: 13px;
+      }
+
+      /* ===== 用户切换器 ===== */
+      .mc-user-switcher {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        font-size: 13px;
+        color: #595959;
+      }
+      .mc-user-switcher select {
+        padding: 3px 8px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #262626;
+        background: #fff;
+        cursor: pointer;
+      }
+      .mc-user-switcher select:focus {
+        border-color: #1890ff;
+        outline: none;
+      }
+      .mc-user-badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 500;
+        margin-left: 4px;
+      }
+      .mc-user-badge.is-me {
+        background: #e6f7ff;
+        color: #1890ff;
+      }
+      .mc-user-badge.is-filler {
+        background: #f6ffed;
+        color: #52c41a;
+      }
+
+      /* ===== 检查记录单状态卡片 ===== */
+      .mc-checklist-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-alert-error {
+        background: #fff2f0;
+        border: 1px solid #ffccc7;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #cf1322;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-alert-info {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #1890ff;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #262626;
+      }
+      .mc-checklist-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
+      .mc-action-btn {
+        padding: 4px 14px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        color: #595959;
+        white-space: nowrap;
+      }
+      .mc-action-btn:hover { border-color: #1890ff; color: #1890ff; }
+      .mc-action-btn.primary {
+        background: #1890ff;
+        color: #fff;
+        border-color: #1890ff;
+      }
+      .mc-action-btn.primary:hover { background: #40a9ff; }
+      .mc-action-btn.danger {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+      }
+      .mc-action-btn.danger:hover { background: #fff2f0; }
+
+      /* ===== 系统判定提示 ===== */
+      .mc-sys-judge-hint {
+        margin-top: 10px;
+        padding: 6px 12px;
+        background: #fafafa;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #8c8c8c;
+        border-left: 3px solid #d9d9d9;
+      }
+
+      /* ===== 确认进度标签 ===== */
+      .mc-sign-progress {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+      .mc-sign-progress .done { color: #52c41a; }
+      .mc-sign-progress .pending { color: #faad14; }
+      .mc-sign-progress .rejected { color: #ff4d4f; }
     </style>
   </head>
   <body data-page="my-task-check" data-menu="my-task-list">
@@ -1210,11 +1507,12 @@
           name: '2026 第27周 裕华片区常规面积核查任务',
           status: '进行中',
           year: '2026',
-          expert: '赵立成',
+          expert: '赵立成、李建华',
           start: '2026-07-01',
           end: '2026-07-07',
           issuedAt: '2026-06-30 09:30',
-          progress: '1/3 站点已完成'
+          progress: '1/3 站点已完成',
+          executionStatus: '正常执行'
         };
 
         var myCheckSites = [
@@ -1365,7 +1663,109 @@
           }
         ];
 
-        // 站点检查/整改状态（模拟已提交数据）
+        // ============================================================
+        // 双人确认统一数据对象
+        // ============================================================
+        var mockCheckData = {
+          currentUser: '赵立成',
+          users: ['赵立成', '李建华'],
+          siteSignState: {}
+        };
+
+        function getInspectors(code) {
+          if (!mockCheckData.siteSignState[code]) {
+            mockCheckData.siteSignState[code] = {
+              filler: null,
+              inspectors: [
+                { name: '赵立成', role: '检查人', isFiller: false, status: 'pending', time: null, opinion: '' },
+                { name: '李建华', role: '检查人', isFiller: false, status: 'pending', time: null, opinion: '' }
+              ],
+              operations: [
+                { operator: '系统', type: '任务下发', time: '2026-06-30 09:30', desc: '任务已下发给检查人：赵立成、李建华' }
+              ]
+            };
+          }
+          return mockCheckData.siteSignState[code];
+        }
+
+        function addOperation(code, operator, type, desc) {
+          var state = getInspectors(code);
+          var now = new Date();
+          var timeStr = now.toISOString().slice(0, 16).replace('T', ' ');
+          state.operations.push({ operator: operator, type: type, time: timeStr, desc: desc });
+        }
+
+        function getChecklistStatus(code) {
+          var cl = taskCheckState[code] && taskCheckState[code].checklist;
+          if (!cl || !cl.submitted) {
+            var signState = mockCheckData.siteSignState[code];
+            if (signState && signState.filler) return 'filling';
+            return 'pending_fill';
+          }
+          if (cl.completed) return 'completed';
+          if (cl.rejected) return 'rejected';
+          if (cl.countersigning) return 'countersigning';
+          return 'submitted';
+        }
+
+        function isCurrentUserFiller(code) {
+          var signState = mockCheckData.siteSignState[code];
+          return signState && signState.filler === mockCheckData.currentUser;
+        }
+
+        function isCurrentUserInspector() {
+          return mockCheckData.users.indexOf(mockCheckData.currentUser) >= 0;
+        }
+
+        function getMyInspectorStatus(code) {
+          var signState = getInspectors(code);
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].name === mockCheckData.currentUser) {
+              return signState.inspectors[i];
+            }
+          }
+          return null;
+        }
+
+        function getInspectorStatusClass(status) {
+          switch (status) {
+            case 'agreed': return 'mc-status-tag status-done';
+            case 'rejected': return 'mc-status-tag status-fail';
+            case 'pending': return 'mc-status-tag status-pending';
+            default: return 'mc-status-tag status-pending';
+          }
+        }
+
+        function getInspectorStatusText(status) {
+          switch (status) {
+            case 'agreed': return '已同意';
+            case 'rejected': return '已驳回';
+            case 'pending': return '待确认';
+            default: return '—';
+          }
+        }
+
+        function getChecklistStatusTag(status) {
+          switch (status) {
+            case 'pending_fill': return '<span class="mc-status-tag status-pending">待填写</span>';
+            case 'filling': return '<span class="mc-status-tag status-doing">填写中</span>';
+            case 'countersigning':
+            case 'submitted': return '<span class="mc-status-tag status-doing">专家确认中</span>';
+            case 'rejected': return '<span class="mc-status-tag status-fail">已驳回</span>';
+            case 'completed': return '<span class="mc-status-tag status-done">已完成</span>';
+            default: return '';
+          }
+        }
+
+        function getSignProgressHtml(code) {
+          var signState = getInspectors(code);
+          var agreed = 0;
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].status === 'agreed') agreed++;
+          }
+          var total = signState.inspectors.length;
+          return '<span class="mc-sign-progress">确认进度：<span class="' + (agreed === total ? 'done' : '') + '">' + agreed + '</span>/' + total + '</span>';
+        }
         var taskCheckState = {
           '60218B001': {
             checklist: {
@@ -1411,94 +1811,323 @@
           }
         };
 
-        // ---- 渲染检查记录单 ----
+        // ---- 渲染检查记录单（双人确认重构版）----
         function renderChecklistPanel(site) {
-          var state = taskCheckState[site.code] && taskCheckState[site.code].checklist;
-          if (!state || !state.submitted) {
-            return '\
-              <div class="mc-record-card" style="text-align:center;padding:60px 20px;">\
-                <div style="font-size:16px;color:#262626;margin-bottom:8px;">' + site.name + '</div>\
-                <div style="font-size:13px;color:#8c8c8c;margin-bottom:24px;">' + site.code + '</div>\
-                <button class="mc-btn-primary mc-btn" id="mc-btn-open-checklist" style="padding:8px 32px;font-size:15px;">填写检查记录单</button>\
-              </div>';
+          var code = site.code;
+          var cl = taskCheckState[code] && taskCheckState[code].checklist;
+          var signState = getInspectors(code);
+          var status = getChecklistStatus(code);
+          var isFiller = isCurrentUserFiller(code);
+          var myStatus = getMyInspectorStatus(code);
+          var hasItems = cl && cl.items && cl.items.length > 0;
+
+          function renderAlert() {
+            if (!hasItems) return '';
+            var failCount = 0;
+            var failReasons = [];
+            for (var i = 0; i < cl.items.length; i++) {
+              if (cl.items[i].value === '否' || cl.items[i].value === '不合格') {
+                failCount++;
+                if (cl.items[i].reason && cl.items[i].reason !== '-') failReasons.push(cl.items[i].reason);
+              }
+            }
+            var isQualified = failCount === 0;
+            if (status === 'pending_fill' || status === 'filling') {
+              if (cl && cl.items && cl.items.length > 0) {
+                if (!isQualified) {
+                  return '<div class="mc-checklist-alert-error">⚠ 当前存在 <strong>' + failCount + '</strong> 项检查不合格，请确认检查结果后再提交确认。</div>';
+                }
+                return '<div class="mc-checklist-alert-info">✅ 当前检查项均合格，请核对检查结果并提交确认。</div>';
+              }
+              return '';
+            }
+            if (status === 'countersigning' || status === 'submitted') {
+              if (!isQualified) {
+                return '<div class="mc-checklist-alert-error">⚠ 该检查记录单存在 <strong>' + failCount + '</strong> 项不合格，请确认人核对检查结果后进行同意或驳回。</div>';
+              }
+              return '<div class="mc-checklist-alert-info">✅ 该检查记录单检查项均合格，请确认人核对后进行确认。</div>';
+            }
+            if (status === 'rejected') {
+              var rejectReason = '';
+              for (var i = 0; i < signState.inspectors.length; i++) {
+                if (signState.inspectors[i].status === 'rejected') {
+                  rejectReason = signState.inspectors[i].opinion;
+                }
+              }
+              return '<div class="mc-checklist-alert-error">⚠ 检查记录单已被驳回。驳回原因：' + (rejectReason || '未填写') + '。请填写人修改后重新提交确认。</div>';
+            }
+            if (status === 'completed') {
+              if (!isQualified) {
+                return '<div class="mc-checklist-alert-info">🔒 该检查记录单已完成确认。检查结论：不合格。</div>';
+              }
+              return '<div class="mc-checklist-alert-info">🔒 该检查记录单已完成确认。检查结论：合格。</div>';
+            }
+            return '';
           }
 
-          // 已提交：展示态
-          var failCount = 0;
-          var failItems = [];
-          var tableRows = '';
-          var showNotice = state.conclusion === '不合格';
-          var clConfirmState = { confirmed: state.confirmed, expert1: state.confirmExpert1, expert2: state.confirmExpert2 };
-          for (var i = 0; i < checkRecordItems.length; i++) {
-            var item = checkRecordItems[i];
-            var stored = state.items[item.id - 1] || { value: '-', reason: '-' };
-            var valueClass = stored.value === '否' ? 'style="color:#ff4d4f;font-weight:500;"' : (stored.value === '是' ? 'style="color:#52c41a;font-weight:500;"' : '');
-            var reasonClass = stored.value === '否' ? 'style="color:#ff7a45;"' : '';
-            tableRows += '\
-              <tr>\
-                <td style="text-align:left;">' + item.id + '. ' + item.text + '</td>\
-                <td style="width:90px;text-align:center;" ' + valueClass + '>' + stored.value + '</td>\
-                <td style="width:220px;text-align:center;" ' + reasonClass + '>' + (stored.reason || '-') + '</td>\
-              </tr>';
-            if (stored.value === '否') {
-              failCount++;
-              failItems.push(item.text + '（' + stored.reason + '）');
+          function renderTitleActions() {
+            var btns = '';
+            if (status === 'pending_fill') {
+              btns = '<button class="mc-action-btn primary" id="mc-btn-start-fill">开始填写</button>';
+            } else if (status === 'filling') {
+              if (isFiller) {
+                btns = '<button class="mc-action-btn" id="mc-btn-edit-checklist">编辑检查记录单</button><button class="mc-action-btn" id="mc-btn-draft-checklist">暂存</button><button class="mc-action-btn primary" id="mc-btn-submit-checklist">提交</button>';
+              } else {
+                btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+              }
+            } else if (status === 'countersigning' || status === 'submitted') {
+              btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+            } else if (status === 'rejected') {
+              if (isFiller) {
+                btns = '<button class="mc-action-btn" id="mc-btn-edit-checklist">修改检查记录单</button><button class="mc-action-btn primary" id="mc-btn-submit-checklist">重新提交确认</button>';
+              } else {
+                btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+              }
+            } else if (status === 'completed') {
+              btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+            }
+            return btns ? '<div class="mc-checklist-actions">' + btns + '</div>' : '';
+          }
+
+          function renderItemsTable() {
+            if (!hasItems) {
+              return '<div style="text-align:center;padding:30px 0;color:#8c8c8c;font-size:13px;">暂无检查项数据</div>';
+            }
+            var rows = '';
+            for (var i = 0; i < cl.items.length; i++) {
+              var item = cl.items[i];
+              var itemDef = checkRecordItems[i];
+              var resultText = item.value || '—';
+              var resultClass = item.value === '否' || item.value === '不合格' ? 'status-fail' : (item.value === '是' || item.value === '合格' ? 'status-done' : '');
+              var reasonText = item.reason && item.reason !== '-' ? item.reason : '<span style="color:#bfbfbf;">—</span>';
+              rows += '<tr>' +
+                '<td style="text-align:center;">' + (i + 1) + '</td>' +
+                '<td>' + (itemDef ? itemDef.text : '—') + '</td>' +
+                '<td style="text-align:center;"><span class="mc-status-tag ' + resultClass + '">' + resultText + '</span></td>' +
+                '<td style="color:' + (item.value === '否' ? '#cf1322' : '#595959') + ';">' + reasonText + '</td>' +
+                '<td style="color:#8c8c8c;">—</td>' +
+              '</tr>';
+            }
+            return '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:680px;"><thead><tr>' +
+              '<th style="width:40px;text-align:center;">序号</th>' +
+              '<th style="width:auto;">检查项</th>' +
+              '<th style="width:80px;text-align:center;">检查结果</th>' +
+              '<th style="width:140px;">原因描述</th>' +
+              '<th style="width:80px;">备注</th>' +
+              '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+          }
+
+          // 填写中且非填写人时显示提示
+          var fillingHint = '';
+          if (status === 'filling' && !isFiller) {
+            fillingHint = '<div class="mc-checklist-alert-info">当前检查记录单正在由 <strong>' + signState.filler + '</strong> 填写，提交确认后您可进行确认。</div>';
+          }
+
+          var html = '';
+          html += '<div class="mc-record-card">';
+          // 标题行
+          html += '<div class="mc-checklist-title-row">';
+          html += '<span class="mc-checklist-title">面积核查检查记录单</span>';
+          html += getChecklistStatusTag(status);
+          if (hasItems) {
+            html += '<span style="font-size:12px;color:#8c8c8c;margin-left:4px;">共' + cl.items.length + '项</span>';
+          }
+          html += renderTitleActions();
+          html += '</div>';
+
+          // 状态提示
+          html += fillingHint;
+          html += renderAlert();
+
+          // 检查项表格
+          html += renderItemsTable();
+
+          // 底部检查人/日期
+          if (hasItems) {
+            html += '<div style="margin-top:12px;font-size:12px;color:#8c8c8c;display:flex;gap:24px;">';
+            html += '<span>核查检查人：' + (cl.inspector || '—') + '</span>';
+            html += '<span>核查检查日期：' + (cl.checkDate || '—') + '</span>';
+            html += '</div>';
+          }
+
+          // 系统判定提示
+          if (hasItems) {
+            html += '<div class="mc-sys-judge-hint">系统根据检查记录单填写内容自动判定，可在编辑检查记录单时调整原始填写项。</div>';
+          }
+
+          html += '</div>';
+
+          // 确认区
+          html += renderCountersignArea(code, status, signState, isFiller, myStatus, cl);
+
+          return html;
+        }
+
+        // ---- 渲染确认区 ----
+        function renderCountersignArea(code, status, signState, isFiller, myStatus, cl) {
+          if (status === 'pending_fill' || status === 'filling') {
+            if (status === 'filling' && !isFiller) {
+              // 非填写人在填写中可见确认区（预览）
+            } else {
+              return ''; // 待填写和填写人自己在填写中时隐藏确认区
             }
           }
 
-          var summaryText = failCount > 0
-            ? '经现场核查，' + site.name + '（' + site.code + '）共发现 <strong style="color:#ff4d4f;">' + failCount + ' 项</strong>不合格：' + failItems.join('；') + '。系统判定为<strong style="color:#ff4d4f;">' + state.conclusion + '</strong>。'
-            : '经现场核查，' + site.name + '（' + site.code + '）未发现不合格项。系统判定为<strong style="color:#52c41a;">' + (state.conclusion || '合格') + '</strong>。';
+          var isReadonly = (status === 'completed');
+          var isCountersigning = (status === 'countersigning' || status === 'submitted' || status === 'rejected');
+          var showButtons = !isReadonly && isCountersigning;
 
-          // 从Store读取签名状态
-          var storeCR = window.PrototypeStore ? window.PrototypeStore.getCheckRecord(site.code) : null;
-          var signatures = (storeCR && storeCR.signatures) || [];
-          var sigHtml = signatures.length > 0 ? signatures.map(function(s){
-            var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;';
-            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;font-size:12px;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span>' + (s.signTime ? '<span style="color:#999;">' + s.signTime + '</span>' : '') + '</div>';
-          }).join('') : '<div style="font-size:12px;color:#999;padding:4px 0;">待会签</div>';
+          var html = '';
+          html += '<div class="mc-countersign-card">';
+          html += '<div class="mc-countersign-title">检查结果确认</div>';
+          html += '<div class="mc-countersign-alert">' +
+            '1. 本任务只需一名检查人完成检查记录单填写。<br>' +
+            '2. 两名检查人全部同意后，当前站点才算完成。<br>' +
+            '3. 任意一人驳回，则检查记录单退回修改。<br>' +
+            '4. 填写人本人也需要参与确认。' +
+            '</div>';
 
-          return '\
-            <div class="mc-record-display-card" id="mc-checklist-display-card">\
-              <div class="mc-record-display-header">\
-                <div class="mc-record-display-actions" style="position:absolute;top:0;right:0;display:flex;gap:8px;">\
-                  ' + (showNotice ? '<button class="mc-btn mc-btn-default" id="mc-btn-view-notice" style="padding:4px 12px;font-size:13px;">查看整改通知书</button>' : '') + '\
-                  <button class="mc-btn mc-btn-default" id="mc-btn-edit-checklist" style="padding:4px 12px;font-size:13px;">编辑</button>\
-                </div>\
-                <div class="mc-record-display-title">面积核查检查记录单</div>\
-                <div class="mc-record-display-subtitle">' + site.name + '（' + site.code + '）</div>\
-                <div class="mc-record-display-tags">\
-                  <span class="mc-status-tag ' + (state.conclusion === '不合格' ? 'fail' : 'done') + '">' + state.conclusion + '</span>\
-                  <span class="mc-status-tag done">已提交</span>\
-                  ' + renderSignTags(site.code) + '\
-                </div>\
-              </div>\
-              <div class="mc-record-display-summary">\
-                <p>' + summaryText + '</p>\
-                ' + (state.problemDesc ? '<p><strong>问题描述：</strong>' + state.problemDesc + '</p>' : '') + '\
-              </div>\
-              <div class="mc-record-display-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
-                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签</div>\
-                ' + sigHtml + '\
-                <div style="margin-top:8px;display:flex;gap:6px;">\
-                  <button class="mc-btn mc-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'张建国\',true)">张建国 同意</button>\
-                  <button class="mc-btn mc-btn-default" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'张建国\',false)">张建国 不同意</button>\
-                  <button class="mc-btn mc-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'李建华\',true)">李建华 同意</button>\
-                  <button class="mc-btn mc-btn-default" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'李建华\',false)">李建华 不同意</button>\
-                </div>\
-              </div>\
-              <table class="mc-record-display-table">\
-                <thead>\
-                  <tr><th style="text-align:left;">检查项</th><th style="width:90px;text-align:center;">结果</th><th style="width:220px;text-align:center;">不合格原因</th></tr>\
-                </thead>\
-                <tbody>' + tableRows + '</tbody>\
-              </table>\
-              <div class="mc-record-display-footer">\
-                <span>检查人：' + (state.inspector || '赵立成') + '</span>\
-                <span>检查日期：' + (state.checkDate || '2026-07-03') + '</span>\
-              </div>\
-              ' + renderConfirmSection('checklist', clConfirmState, site) + '\
-            </div>';
+          // 确认表格
+          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:560px;"><thead><tr>' +
+            '<th style="width:100px;">检查人</th>' +
+            '<th style="width:120px;">角色</th>' +
+            '<th style="width:90px;text-align:center;">状态</th>' +
+            '<th style="width:120px;">确认时间</th>' +
+            '<th style="width:auto;">意见</th>' +
+            '<th style="width:100px;text-align:center;">操作</th>' +
+            '</tr></thead><tbody>';
+
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            var ins = signState.inspectors[i];
+            var isMe = ins.name === mockCheckData.currentUser;
+            var nameDisplay = ins.name + (isMe ? ' <span class="mc-user-badge is-me">您</span>' : '');
+            var roleDisplay = (ins.name === signState.filler) ? '填写人 / 确认人' : '确认人';
+            var statusClass = getInspectorStatusClass(ins.status);
+            var statusText = getInspectorStatusText(ins.status);
+            var timeDisplay = ins.time || '<span style="color:#bfbfbf;">—</span>';
+            var opinionDisplay = ins.opinion || '<span style="color:#bfbfbf;">—</span>';
+
+            var actionHtml = '';
+            if (isMe && !isReadonly && ins.status === 'pending') {
+              // 填写人本人默认已同意（规则9），但需展示
+              // 如果在确认中状态且当前人待确认，展示按钮
+              actionHtml = '<button class="mc-cs-btn-agree" data-cs-action="agree" data-inspector="' + ins.name + '">同意</button>' +
+                '<button class="mc-cs-btn-reject" data-cs-action="reject" data-inspector="' + ins.name + '">驳回</button>';
+            } else if (ins.status === 'agreed') {
+              actionHtml = '<span style="color:#52c41a;font-weight:500;">已同意</span>';
+            } else if (ins.status === 'rejected') {
+              actionHtml = '<span style="color:#ff4d4f;font-weight:500;">已驳回</span>';
+            } else {
+              actionHtml = '<span style="color:#bfbfbf;">—</span>';
+            }
+
+            html += '<tr>' +
+              '<td>' + nameDisplay + '</td>' +
+              '<td>' + roleDisplay + '</td>' +
+              '<td style="text-align:center;"><span class="mc-status-tag ' + statusClass + '">' + statusText + '</span></td>' +
+              '<td>' + timeDisplay + '</td>' +
+              '<td>' + opinionDisplay + '</td>' +
+              '<td style="text-align:center;">' + actionHtml + '</td>' +
+              '</tr>';
+          }
+
+          html += '</tbody></table></div>';
+
+          // 确认意见输入区
+          if (showButtons) {
+            var myStatusObj = getMyInspectorStatus(code);
+            if (myStatusObj && myStatusObj.status === 'pending') {
+              html += '<div class="mc-countersign-opinion">';
+              html += '<label>确认意见：</label>';
+              html += '<textarea id="mc-cs-opinion" placeholder="请输入确认意见。同意时非必填，驳回时必填。"></textarea>';
+              html += '</div>';
+            }
+          }
+
+          // 底部确认按钮（放在确认Card内）
+          if (showButtons) {
+            var myStatusObj = getMyInspectorStatus(code);
+            if (myStatusObj && myStatusObj.status === 'pending') {
+              html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">';
+              html += '<button class="mc-cs-btn-reject" id="mc-btn-cs-reject" style="padding:6px 20px;">驳回</button>';
+              html += '<button class="mc-cs-btn-agree" id="mc-btn-cs-agree" style="padding:6px 20px;">同意</button>';
+              html += '</div>';
+            }
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染操作记录区 ----
+        function renderOperationLog(code) {
+          var signState = getInspectors(code);
+          var ops = signState.operations;
+
+          var html = '<div class="mc-operation-card">';
+          html += '<div class="mc-operation-title">操作记录</div>';
+
+          if (ops.length === 0) {
+            html += '<div class="mc-operation-empty">暂无操作记录</div>';
+          } else {
+            html += '<div class="mc-operation-timeline">';
+            for (var i = ops.length - 1; i >= 0; i--) {
+              var op = ops[i];
+              var isLatest = (i === ops.length - 1);
+              html += '<div class="mc-operation-item' + (isLatest ? ' op-active' : '') + '">';
+              html += '<span class="mc-operation-type">' + op.type + '</span>';
+              html += '<span class="mc-operation-time">' + op.time + '</span>';
+              html += '<div class="mc-operation-desc">' + op.operator + '：' + op.desc + '</div>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染底部操作栏 ----
+        function renderBottomBar(site) {
+          if (!site) return '';
+          var code = site.code;
+          var status = getChecklistStatus(code);
+          var isFiller = isCurrentUserFiller(code);
+          var btns = '<button class="mc-btn" onclick="history.back()">返回</button>';
+
+          if (status === 'pending_fill') {
+            btns += '<button class="mc-btn-success mc-btn" id="mc-btn-start-check">开始填写</button>';
+          } else if (status === 'filling') {
+            if (isFiller) {
+              btns += '<button class="mc-btn" id="mc-btn-draft-checklist">暂存</button>';
+              btns += '<button class="mc-btn-success mc-btn" id="mc-btn-submit-checklist">提交</button>';
+            }
+          } else if (status === 'countersigning' || status === 'submitted') {
+            // 确认中不展示底部操作按钮（确认按钮在确认Card内）
+          } else if (status === 'rejected') {
+            if (isFiller) {
+              btns += '<button class="mc-btn" id="mc-btn-edit-checklist">修改检查记录单</button>';
+              btns += '<button class="mc-btn-success mc-btn" id="mc-btn-submit-checklist">重新提交确认</button>';
+            }
+          } else if (status === 'completed') {
+            // 只展示返回
+          }
+
+          return '<div class="mc-start-check-bar">' + btns + '</div>';
+        }
+
+        // ---- 渲染用户切换器 ----
+        function renderUserSwitcherHtml() {
+          var html = '<div class="mc-user-switcher">';
+          html += '<span>当前用户：</span>';
+          html += '<select id="mc-user-select">';
+          for (var i = 0; i < mockCheckData.users.length; i++) {
+            var sel = mockCheckData.users[i] === mockCheckData.currentUser ? ' selected' : '';
+            html += '<option value="' + mockCheckData.users[i] + '"' + sel + '>' + mockCheckData.users[i] + '</option>';
+          }
+          html += '</select>';
+          html += '</div>';
+          return html;
         }
 
         // ---- 渲染检查记录单弹窗内容 ----
@@ -1630,6 +2259,10 @@
                 <div class="mc-station-info-item"><span class="mc-station-info-label">普查人员：</span><span class="mc-station-info-value">' + (detail.censusUser || '—') + '</span></div>\
                 <div class="mc-station-info-item"><span class="mc-station-info-label">普查日期：</span><span class="mc-station-info-value">' + (detail.censusDate || '—') + '</span></div>\
                 <div class="mc-station-info-item"><span class="mc-station-info-label">未入网建筑物数量：</span><span class="mc-station-info-value">' + (detail.unregisteredBuildings !== undefined ? detail.unregisteredBuildings : '—') + '</span></div>\
+                <div class="mc-station-info-item" style="grid-column:span 3;border-top:1px dashed #f0f0f0;padding-top:8px;margin-top:4px;"><span class="mc-station-info-label">当前站点状态：</span><span class="mc-station-info-value">' + getChecklistStatusTag(getChecklistStatus(site.code)) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">检查记录单状态：</span><span class="mc-station-info-value">' + getChecklistStatusTag(getChecklistStatus(site.code)) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">当前填写人：</span><span class="mc-station-info-value">' + (getInspectors(site.code).filler || '<span style="color:#bfbfbf;">—</span>') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">确认进度：</span><span class="mc-station-info-value">' + getSignProgressHtml(site.code) + '</span></div>\
               </div>\
             </div>';
         }
@@ -1839,8 +2472,8 @@
                 <button class="mc-btn mc-btn-primary" id="nf-edit">编辑</button>\
               </div>\
               <div class="mc-notice-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
-                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签（整改通知书）</div>\
-                ' + (function(){ try { var ps = window.PrototypeStore; var notices = ps && ps.getRectificationNotices ? ps.getRectificationNotices({siteCode:site.code}) : []; var n = notices && notices.length ? notices[0] : null; var sigs = (n && n.signatures) || []; if (sigs.length === 0) return '<div style="color:#999;">待会签</div>'; var nid = n ? n.id : ''; var ret = sigs.map(function(s){ var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;'; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:11px;">' + (s.signTime||'') + '</span></div>'; }).join(''); ret += '<div style="margin-top:6px;display:flex;gap:6px;"><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',true)">张建国 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',false)">张建国 不同意</button><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',true)">李建华 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',false)">李建华 不同意</button></div>'; return ret; } catch(e){return '';}})() + '\
+                <div style="font-weight:600;margin-bottom:6px;color:#333;">双人确认（整改通知书）</div>\
+                ' + (function(){ try { var ps = window.PrototypeStore; var notices = ps && ps.getRectificationNotices ? ps.getRectificationNotices({siteCode:site.code}) : []; var n = notices && notices.length ? notices[0] : null; var sigs = (n && n.signatures) || []; if (sigs.length === 0) return '<div style="color:#999;">待确认</div>'; var nid = n ? n.id : ''; var ret = sigs.map(function(s){ var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;'; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:11px;">' + (s.signTime||'') + '</span></div>'; }).join(''); ret += '<div style="margin-top:6px;display:flex;gap:6px;"><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',true)">张建国 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',false)">张建国 不同意</button><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',true)">李建华 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',false)">李建华 不同意</button></div>'; return ret; } catch(e){return '';}})() + '\
               </div>\
             </div>';
         }
@@ -1850,9 +2483,9 @@
         function renderSignTags(siteCode) {
           var cr = window.PrototypeStore ? window.PrototypeStore.getCheckRecord(siteCode) : null;
           var sigs = (cr && cr.signatures) || [];
-          if (sigs.length === 0) return '<span class="mc-status-tag pending" style="margin-left:4px;">待会签</span>';
+          if (sigs.length === 0) return '<span class="mc-status-tag pending" style="margin-left:4px;">待确认</span>';
           var allAgreed = sigs.every(function(s){return s.status==='已同意'});
-          if (allAgreed) return '<span class="mc-status-tag done" style="margin-left:4px;">已会签</span>';
+          if (allAgreed) return '<span class="mc-status-tag done" style="margin-left:4px;">已确认</span>';
           return sigs.map(function(s){
             var sc = s.status==='已同意'?'done':s.status==='不同意'?'fail':'pending';
             return '<span class="mc-status-tag ' + sc + '" style="margin-left:4px;">' + s.expertName + '：' + s.status + '</span>';
@@ -2036,7 +2669,7 @@
                   </div>\
                 </td>\
                 <td style="text-align:center;">\
-                  <input class="mc-ver-area-input" id="mc-ver-area-' + b.id + '" type="number" step="0.01" placeholder="请输入" value="' + recheckArea + '" style="width:90px;padding:4px 6px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px;">\
+                  <input class="mc-ver-area-input" id="mc-ver-area-' + b.id + '" type="text" inputmode="decimal" placeholder="请输入复查面积" value="' + recheckArea + '" style="width:100px;padding:4px 6px;border:1px solid #1890ff;border-radius:4px;font-size:13px;background:#f0f8ff;">\
                 </td>\
                 <td style="text-align:center;min-width:160px;" id="mc-ver-tol-' + b.id + '">' + tolHtml + '</td>\
               </tr>';
@@ -2046,7 +2679,8 @@
             <div class="mc-record-card">\
               <div style="font-size:16px;font-weight:600;color:#262626;margin-bottom:12px;">实测复核</div>\
               <div style="font-size:13px;color:#8c8c8c;margin-bottom:16px;">以下建筑物普查依据为"实测核实"，需上传实测复核照片并填写复查面积</div>\
-              <table class="mc-survey-table">\
+              <div class="mc-table-wrapper">\
+              <table class="mc-survey-table" style="min-width:840px;table-layout:fixed;">\
                 <thead><tr>\
                   <th style="width:40px;text-align:center;">序号</th>\
                   <th style="width:140px;">建筑物名称</th>\
@@ -2055,19 +2689,18 @@
                   <th style="width:90px;text-align:right;">普查面积(㎡)</th>\
                   <th style="width:70px;text-align:center;">普查依据</th>\
                   <th style="width:180px;">实测复核照片</th>\
-                  <th style="width:90px;text-align:center;">复核面积(㎡)</th>\
+                  <th style="width:120px;text-align:center;">复核面积(㎡)</th>\
                   <th style="width:100px;text-align:center;">误差</th>\
                 </tr></thead>\
                 <tbody>' + rows + '</tbody>\
               </table>\
+              </div>\
               <div style="margin-top:10px;padding:8px 12px;background:#fafafa;border-radius:6px;font-size:12px;color:#666;display:flex;gap:16px;">\
                 <span style="font-weight:600;">误差标准：</span>\
                 <span>≤500㎡: ±3%</span>\
                 <span>500~2000㎡: ±2%</span>\
                 <span>&gt;2000㎡: ±60㎡</span>\
               </div>\
-              <div class="mc-ver-footer" style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;">\
-                <button class="mc-btn mc-btn-primary" id="mc-ver-submit">保存复核数据</button>\
               </div>\
             </div>';
         }
@@ -2099,7 +2732,7 @@
                   <span class="mc-info-title">' + task.name + '</span>\
                   <span class="mc-status-tag ' + statusTagClass(task.status) + '">' + task.status + '</span>\
                 </div>\
-                <a class="mc-btn" href="./my-task-list.html">返回我的任务</a>\
+                <div style="display:flex;align-items:center;gap:12px;">' + renderUserSwitcherHtml() + '<a class="mc-btn" href="./my-task-list.html">返回我的任务</a></div>\
               </div>\
               <div class="mc-info-grid">\
                 <div class="mc-info-item">\
@@ -2125,6 +2758,10 @@
                 <div class="mc-info-item">\
                   <span class="mc-info-label">当前进度：</span>\
                   <span class="mc-info-value mc-font-highlight">' + task.progress + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">任务执行状态：</span>\
+                  <span class="mc-info-value">' + (task.executionStatus || '正常') + '</span>\
                 </div>\
               </div>\
             </div>';
@@ -2211,12 +2848,8 @@
               </div>\
             </div>';
 
-          // 开始检查底部操作栏
-          var actionBar = '\
-            <div class="mc-start-check-bar">\
-              <button class="mc-btn" id="mc-btn-back">返回</button>\
-              <button class="mc-btn-success mc-btn" id="mc-btn-start-check">开始检查</button>\
-            </div>';
+          // 底部操作栏（动态渲染）
+          var actionBar = renderBottomBar(currentSite);
 
           // Toast容器
           var toast = '<div class="mc-toast" id="mc-toast"><span class="mc-toast-icon"></span><span id="mc-toast-text"></span></div>';
@@ -2238,8 +2871,135 @@
           return infoCard + stationTabs + tabSystem + detailModal + actionBar + toast + checklistModal;
         }
 
+        // ---- 打开检查记录单弹窗 ----
+        function openChecklistModal(siteCode, readOnly) {
+          var modal = document.getElementById('mc-checklist-modal');
+          var content = document.getElementById('mc-checklist-modal-content');
+          if (!modal || !content) return;
+          // 查找站点数据
+          var site = null;
+          for (var i = 0; i < myCheckSites.length; i++) {
+            if (myCheckSites[i].code === siteCode) { site = myCheckSites[i]; break; }
+          }
+          if (!site) return;
+          // 渲染弹窗内容（复用原有 renderChecklistModalContent）
+          content.innerHTML = renderChecklistModalContent(site);
+          modal.style.display = 'flex';
+          // 绑定radio事件
+          if (typeof bindChecklistRadioEvents === 'function') bindChecklistRadioEvents();
+          // 只读模式
+          if (readOnly) {
+            content.querySelectorAll('input,textarea,button').forEach(function(el) {
+              if (el.id !== 'mc-modal-checklist-close') el.disabled = true;
+            });
+          }
+        }
+
         // ---- 事件绑定 ----
         function bindMyTaskCheckEvents() {
+          // ---- 用户切换 ----
+          var userSelect = document.getElementById('mc-user-select');
+          if (userSelect) {
+            userSelect.addEventListener('change', function () {
+              mockCheckData.currentUser = this.value;
+              // 重新渲染当前站点
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              if (activeTab) activeTab.click();
+            });
+          }
+
+          // ---- 检查记录单按钮事件委托 ----
+          document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[id^="mc-btn-"]');
+            if (!btn) return;
+            var id = btn.id;
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            if (!siteCode) return;
+
+            if (id === 'mc-btn-start-fill') {
+              // 开始填写
+              var signState = getInspectors(siteCode);
+              if (signState.filler && signState.filler !== mockCheckData.currentUser) {
+                showToast('warning', '⚠', '当前检查记录单正在由 ' + signState.filler + ' 填写');
+                return;
+              }
+              signState.filler = mockCheckData.currentUser;
+              addOperation(siteCode, mockCheckData.currentUser, '开始填写', mockCheckData.currentUser + ' 开始填写检查记录单');
+              // 打开填表弹窗
+              openChecklistModal(siteCode);
+            } else if (id === 'mc-btn-edit-checklist' || id === 'mc-btn-submit-checklist') {
+              openChecklistModal(siteCode);
+            } else if (id === 'mc-btn-view-checklist') {
+              var cl = taskCheckState[siteCode] && taskCheckState[siteCode].checklist;
+              if (cl && cl.submitted) {
+                openChecklistModal(siteCode, true);
+              }
+            } else if (id === 'mc-btn-draft-checklist') {
+              showToast('info', '•', '已暂存');
+              addOperation(siteCode, mockCheckData.currentUser, '暂存', mockCheckData.currentUser + ' 暂存了检查记录单');
+            }
+          });
+
+          // ---- 确认按钮事件委托 ----
+          document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-cs-action]');
+            if (!btn) return;
+            var action = btn.getAttribute('data-cs-action');
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            if (!siteCode) return;
+
+            var signState = getInspectors(siteCode);
+            var myStatus = getMyInspectorStatus(siteCode);
+            if (!myStatus) return;
+
+            if (action === 'agree') {
+              myStatus.status = 'agreed';
+              myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              var opinion = document.getElementById('mc-cs-opinion');
+              myStatus.opinion = opinion ? opinion.value.trim() : '';
+              addOperation(siteCode, mockCheckData.currentUser, '同意', mockCheckData.currentUser + ' 同意了确认' + (myStatus.opinion ? '，意见：' + myStatus.opinion : ''));
+
+              // 检查是否全部同意
+              var allAgreed = true;
+              for (var i = 0; i < signState.inspectors.length; i++) {
+                if (signState.inspectors[i].status !== 'agreed') allAgreed = false;
+              }
+              if (allAgreed) {
+                if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
+                taskCheckState[siteCode].checklist.completed = true;
+                addOperation(siteCode, '系统', '任务完成', '两名检查人全部同意，当前站点已完成');
+                showToast('success', '✓', '全部同意，当前站点已完成');
+              } else {
+                showToast('success', '✓', '已同意，等待其他检查人确认');
+              }
+              // 刷新
+              var activeTabEl = document.querySelector('.mc-station-tab.active');
+              if (activeTabEl) activeTabEl.click();
+            } else if (action === 'reject') {
+              var opinion = document.getElementById('mc-cs-opinion');
+              var reason = opinion ? opinion.value.trim() : '';
+              if (!reason) {
+                showToast('warning', '请填写原因');
+                return;
+              }
+              myStatus.status = 'rejected';
+              myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              myStatus.opinion = reason;
+              if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
+              taskCheckState[siteCode].checklist.rejected = true;
+              taskCheckState[siteCode].checklist.submitted = true;
+              taskCheckState[siteCode].checklist.countersigning = false;
+              addOperation(siteCode, mockCheckData.currentUser, '不同意', mockCheckData.currentUser + ' 驳回了确认，原因：' + reason);
+              showToast('warning', '已驳回，检查记录单退回修改');
+              // 刷新
+              var activeTabEl = document.querySelector('.mc-station-tab.active');
+              if (activeTabEl) activeTabEl.click();
+            }
+          });
+
+          // 站点Tab切换
           // 站点Tab切换
           var stationTabs = document.querySelectorAll('.mc-station-tab');
           stationTabs.forEach(function (tab) {
@@ -2407,9 +3167,8 @@
             if (e.target === modal) closeModal();
           });
 
-          // 详情链接（排除"填写复核面积"入口）
+          // 详情链接
           document.querySelectorAll('.mc-action-link').forEach(function (link) {
-            if (link.classList.contains('mc-action-review-area')) return;
             link.addEventListener('click', function () {
               var row = this.closest('tr');
               if (!row || !modal) return;
@@ -2622,7 +3381,7 @@
               }
 
               if (hasRejected || systemConclusion === '不合格') {
-                showToast('success', '✓', '检查记录已提交，将进入双专家会签');
+                showToast('success', '✓', '检查记录已提交，将进入双人确认');
                 if (clModal) clModal.style.display = 'none';
                 // 自动切换到整改通知单Tab + 高亮提示
                 switchMainTab('notice');
@@ -2876,7 +3635,7 @@
           }
         }
 
-        // ---- 双专家确认事件绑定（调用 Store 真实会签） ----
+        // ---- 双专家确认事件绑定（调用 Store 真实确认） ----
         function bindConfirmEvents() {
           var confirmBtns = document.querySelectorAll('[id^="mc-confirm-"]');
           confirmBtns.forEach(function (btn) {
@@ -2899,22 +3658,22 @@
               var expertName = expertNum === 1 ? '张建国' : '李建华';
 
               if (type === 'checklist') {
-                // 检查记录单会签 — 调用 Store.signCheckRecord
+                // 检查记录单确认 — 调用 Store.signCheckRecord
                 try {
                   var result = ps.signCheckRecord(siteCode, expertName, true);
                   if (result.status === 'rejected') {
                     showToast('warning', '⚠', result.message);
                   } else if (result.status === 'completed') {
-                    showToast('success', '✓', '双专家会签完成，站点检查' +
+                    showToast('success', '✓', '双人确认完成，站点检查' +
                       (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
                   } else {
                     showToast('success', '✓', expertName + ' 已同意');
                   }
                 } catch(e) {
-                  showToast('warning', '⚠', '会签失败: ' + e.message);
+                  showToast('warning', '⚠', '确认失败: ' + e.message);
                 }
               } else if (type === 'notice') {
-                // 整改通知书会签 — 调用 Store.signRectificationNotice
+                // 整改通知书确认 — 调用 Store.signRectificationNotice
                 try {
                   var notices = ps.getRectificationNotices({ siteCode: siteCode });
                   var targetNotice = notices && notices.length ? notices[0] : null;
@@ -2926,14 +3685,14 @@
                   if (result.status === 'rejected') {
                     showToast('warning', '⚠', result.message);
                   } else if (result.status === 'auto_approved') {
-                    showToast('success', '✓', '双专家会签通过，系统自动审核通过并已生成整改任务');
+                    showToast('success', '✓', '双人确认通过，系统自动审核通过并已生成整改任务');
                   } else if (result.status === 'pending_review') {
-                    showToast('success', '✓', '双专家会签通过，已进入业务管理员审核');
+                    showToast('success', '✓', '双人确认通过，已进入业务管理员审核');
                   } else {
                     showToast('success', '✓', expertName + ' 已同意');
                   }
                 } catch(e) {
-                  showToast('warning', '⚠', '会签失败: ' + e.message);
+                  showToast('warning', '⚠', '确认失败: ' + e.message);
                 }
               }
 
@@ -2986,13 +3745,13 @@
           var isOverLimit = false;
 
           if (base <= 500) {
-            limitText = '≤500㎡，相对误差≤±3%';
+            limitText = '≤500㎡，误差≤±3%';
             isOverLimit = relDiffValue > 3;
           } else if (base <= 2000) {
-            limitText = '500㎡—2000㎡，相对误差≤±2%';
+            limitText = '500㎡—2000㎡，误差≤±2%';
             isOverLimit = relDiffValue > 2;
           } else {
-            limitText = '>2000㎡，绝对误差≤±60㎡';
+            limitText = '>2000㎡，面积差异≤±60㎡';
             isOverLimit = absDiffValue > 60;
           }
 
@@ -3017,8 +3776,8 @@
             return '\
               <div style="background:#fff2f0;border:1px solid #ffccc7;border-radius:6px;padding:6px 8px;font-size:11px;text-align:left;">\
                 <div style="color:#ff4d4f;font-weight:600;margin-bottom:4px;">⚠ 超过允许误差，请重点核查</div>\
-                <div style="color:#595959;"><span style="color:#888;">相对误差：</span>' + tol.relDiffDisplay + '</div>\
-                <div style="color:#595959;"><span style="color:#888;">绝对误差：</span>' + tol.absDiffDisplay + '</div>\
+                <div style="color:#595959;"><span style="color:#888;">误差：</span>' + tol.relDiffDisplay + '</div>\
+                <div style="color:#595959;"><span style="color:#888;">面积差异：</span>' + tol.absDiffDisplay + '</div>\
                 <div style="color:#bbb;font-size:10px;margin-top:2px;">适用标准：' + tol.limitText + '</div>\
               </div>';
           }
@@ -3054,7 +3813,45 @@
             });
           });
 
-          // 复查面积实时计算误差
+          // 保存单条复核数据（失焦自动保存）
+          function saveSingleRecheck(siteCode, buildingId) {
+            if (!siteCode || !taskCheckState[siteCode]) return;
+            var surveyDetails = surveyDataMap[siteCode] || [];
+            var b = null;
+            for (var si = 0; si < surveyDetails.length; si++) {
+              if (surveyDetails[si].id == buildingId) { b = surveyDetails[si]; break; }
+            }
+            if (!b) return;
+
+            var fileInput = document.getElementById('mc-ver-file-' + buildingId);
+            var areaInput = document.getElementById('mc-ver-area-' + buildingId);
+            var photoName = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0].name : '';
+            var recheckArea = (areaInput && areaInput.value) ? areaInput.value : '';
+
+            var tolResult = recheckArea ? calcRecheckTolerance(b.currentArea, parseFloat(recheckArea)) : null;
+            var data = {
+              photoName: photoName,
+              recheckArea: recheckArea,
+              baseArea: b.currentArea,
+              absDiff: tolResult && tolResult.valid ? tolResult.absDiff : null,
+              relDiff: tolResult && tolResult.valid ? tolResult.relDiff : null,
+              absDiffDisplay: tolResult && tolResult.valid ? tolResult.absDiffDisplay : '—',
+              relDiffDisplay: tolResult && tolResult.valid ? tolResult.relDiffDisplay : '—',
+              isOverLimit: tolResult && tolResult.valid ? tolResult.isOverLimit : false,
+              limitText: tolResult && tolResult.valid ? tolResult.limitText : '—',
+              reviewStatus: tolResult && tolResult.valid ? (tolResult.isOverLimit ? '重点核查' : '正常') : '未复核'
+            };
+
+            if (!taskCheckState[siteCode].verification) taskCheckState[siteCode].verification = {};
+            taskCheckState[siteCode].verification[buildingId] = data;
+
+            // 静默保存，不弹提示（仅在超限时提示）
+            if (data.isOverLimit) {
+              showToast('warning', '⚠', b.building + ' 复核误差超过允许范围，请重点核查');
+            }
+          }
+
+          // 复查面积实时计算误差 + 失焦保存
           document.querySelectorAll('.mc-ver-area-input').forEach(function (input) {
             input.addEventListener('input', function () {
               var areaVal = this.value.trim();
@@ -3064,7 +3861,6 @@
                 if (tolCell) tolCell.innerHTML = '<span style="color:#8c8c8c;font-size:11px;">输入后自动计算</span>';
                 return;
               }
-              // 查找对应的普查面积
               var surveyDetails = [];
               var activeTab = document.querySelector('.mc-station-tab.active');
               var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
@@ -3078,93 +3874,14 @@
               if (!tol || !tol.valid) return;
               tolCell.innerHTML = renderToleranceResult(tol);
             });
-          });
 
-          // 保存复核数据
-          var saveBtn = document.getElementById('mc-ver-submit');
-          if (saveBtn) {
-            saveBtn.addEventListener('click', function () {
+            input.addEventListener('blur', function () {
+              var buildingId = this.id.replace('mc-ver-area-', '');
               var activeTab = document.querySelector('.mc-station-tab.active');
               var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
-              if (!siteCode || !taskCheckState[siteCode]) {
-                showToast('warning', '⚠', '站点状态异常');
-                return;
-              }
-
-              var surveyDetails = surveyDataMap[siteCode] || [];
-              // 只取实测建筑物
-              var measuredBuildings = [];
-              for (var mi = 0; mi < surveyDetails.length; mi++) {
-                if (surveyDetails[mi].basis && surveyDetails[mi].basis.indexOf('实测') !== -1) {
-                  measuredBuildings.push(surveyDetails[mi]);
-                }
-              }
-
-              var verData = {};
-              var allFilled = true;
-              var missingNames = [];
-
-              for (var i = 0; i < measuredBuildings.length; i++) {
-                var b = measuredBuildings[i];
-
-                var fileInput = document.getElementById('mc-ver-file-' + b.id);
-                var areaInput = document.getElementById('mc-ver-area-' + b.id);
-
-                var photoName = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0].name : '';
-                var recheckArea = (areaInput && areaInput.value) ? areaInput.value : '';
-
-                if (!photoName) {
-                  allFilled = false;
-                  missingNames.push(b.building + '（照片）');
-                }
-                if (!recheckArea) {
-                  allFilled = false;
-                  missingNames.push(b.building + '（复查面积）');
-                }
-
-                // 计算误差结果
-                var tolResult = recheckArea ? calcRecheckTolerance(b.currentArea, parseFloat(recheckArea)) : null;
-                verData[b.id] = {
-                  photoName: photoName,
-                  recheckArea: recheckArea,
-                  baseArea: b.currentArea,
-                  absDiff: tolResult && tolResult.valid ? tolResult.absDiff : null,
-                  relDiff: tolResult && tolResult.valid ? tolResult.relDiff : null,
-                  absDiffDisplay: tolResult && tolResult.valid ? tolResult.absDiffDisplay : '—',
-                  relDiffDisplay: tolResult && tolResult.valid ? tolResult.relDiffDisplay : '—',
-                  isOverLimit: tolResult && tolResult.valid ? tolResult.isOverLimit : false,
-                  limitText: tolResult && tolResult.valid ? tolResult.limitText : '—',
-                  reviewStatus: tolResult && tolResult.valid ? (tolResult.isOverLimit ? '重点核查' : '正常') : '未复核'
-                };
-              }
-
-              if (!allFilled) {
-                showToast('warning', '⚠', '以下数据不完整：' + missingNames.join('，'));
-                return;
-              }
-
-              // 超限校验（不阻断，只提示）
-              var overLimitNames = [];
-              for (var key in verData) {
-                if (verData[key].isOverLimit) {
-                  overLimitNames.push(verData[key].reviewStatus);
-                }
-              }
-              var hasOverLimit = Object.keys(verData).some(function (k) { return verData[k].isOverLimit; });
-              if (hasOverLimit) {
-                showToast('warning', '⚠', '存在建筑物复核误差超过允许范围，请重点核查');
-              }
-
-              if (!taskCheckState[siteCode].verification) taskCheckState[siteCode].verification = {};
-              for (var key in verData) {
-                taskCheckState[siteCode].verification[key] = verData[key];
-              }
-
-              if (!hasOverLimit) {
-                showToast('success', '✓', '实测复核数据已保存');
-              }
+              saveSingleRecheck(siteCode, buildingId);
             });
-          }
+          });
         }
 
         // ---- Toast提示 ----
@@ -3197,7 +3914,7 @@
         });
 
         // ============================================================
-        // 双专家会签全局函数
+        // 双人确认全局函数
         // ============================================================
         window.signCheckRecord = function(siteCode, expertName, agree) {
           try {
@@ -3207,7 +3924,7 @@
             if (result.status === 'rejected') {
               showToast('warning', '⚠', result.message);
             } else if (result.status === 'completed') {
-              showToast('success', '✓', '双专家会签完成，站点检查' + (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
+              showToast('success', '✓', '双人确认完成，站点检查' + (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
             } else {
               showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
             }
@@ -3224,7 +3941,7 @@
               var noticePanel = document.getElementById('mc-tab-notice');
               if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
             }
-          } catch(e) { showToast('warning', '⚠', '会签操作失败: ' + e.message); }
+          } catch(e) { showToast('warning', '⚠', '确认操作失败: ' + e.message); }
         };
 
         window.signNoticeSign = function(noticeId, expertName, agree) {
@@ -3235,9 +3952,9 @@
             if (result.status === 'rejected') {
               showToast('warning', '⚠', result.message);
             } else if (result.status === 'auto_approved') {
-              showToast('success', '✓', '双专家会签通过，系统自动审核通过并已生成整改任务');
+              showToast('success', '✓', '双人确认通过，系统自动审核通过并已生成整改任务');
             } else if (result.status === 'pending_review') {
-              showToast('success', '✓', '双专家会签通过，已进入业务管理员审核');
+              showToast('success', '✓', '双人确认通过，已进入业务管理员审核');
             } else {
               showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
             }
@@ -3252,7 +3969,7 @@
               var noticePanel = document.getElementById('mc-tab-notice');
               if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
             }
-          } catch(e) { showToast('warning', '⚠', '会签操作失败: ' + e.message); }
+          } catch(e) { showToast('warning', '⚠', '确认操作失败: ' + e.message); }
         };
       })();
     </script>
