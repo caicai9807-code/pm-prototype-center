@@ -315,9 +315,10 @@
       // 补充派生字段
       var siteCodes = state.taskSites[id] || [];
       var totalSites = siteCodes.length;
+      var doneStatuses = ['已检查', '不合格', '待整改', '已发送待整改', '已归档'];
       var doneSites = siteCodes.filter(function (c) {
         var ss = state.siteStates[c];
-        return ss && (ss.status === '已检查' || ss.status === '不合格');
+        return ss && doneStatuses.indexOf(ss.status) !== -1;
       }).length;
       t.progress = doneSites + '/' + totalSites;
       // 专家计数
@@ -697,6 +698,17 @@
     return { status: 'pending' };
   }
 
+  function updateRectificationNotice(noticeId, data) {
+    var notice = state.rectificationNotices[noticeId];
+    if (!notice) throw new Error('整改通知单不存在: ' + noticeId);
+    // 只允许修改指定字段
+    var allowed = ['content', 'opinion', 'deadlineDays', 'deadlineUnit', 'inspectedPerson', 'phone', 'inspector'];
+    Object.keys(data).forEach(function (k) {
+      if (allowed.indexOf(k) !== -1) notice[k] = data[k];
+    });
+    save();
+  }
+
   function reviewNotice(noticeId, result, opinion) {
     var notice = state.rectificationNotices[noticeId];
     if (!notice) throw new Error('整改通知单不存在: ' + noticeId);
@@ -847,10 +859,12 @@
     if (!taskId) return;
     var siteCodes = state.taskSites[taskId] || [];
     if (siteCodes.length === 0) return;
-    // 主任务完成只看检查是否完成：已检查或不合格（即检查记录单会签完成）
+    // 主任务完成只看检查是否完成
+    // 判断标准：已检查（合格）、不合格、待整改、已发送待整改、已归档 均视为检查流程已完成
+    var doneStatuses = ['已检查', '不合格', '待整改', '已发送待整改', '已归档'];
     var allDone = siteCodes.every(function (code) {
       var ss = state.siteStates[code];
-      return ss && (ss.status === '已检查' || ss.status === '不合格');
+      return ss && doneStatuses.indexOf(ss.status) !== -1;
     });
     if (allDone && state.tasks[taskId] && state.tasks[taskId].status === '进行中') {
       transitionTask(taskId, '已结束');
@@ -979,6 +993,7 @@
     getRectificationNotices: getRectificationNotices,
     createRectificationNotice: createRectificationNotice,
     signRectificationNotice: signRectificationNotice,
+    updateRectificationNotice: updateRectificationNotice,
     reviewNotice: reviewNotice,
 
     // Rectification Tasks

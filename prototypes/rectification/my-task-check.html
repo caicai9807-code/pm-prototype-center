@@ -1478,8 +1478,14 @@
                 ' + (state.problemDesc ? '<p><strong>问题描述：</strong>' + state.problemDesc + '</p>' : '') + '\
               </div>\
               <div class="mc-record-display-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
-                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签状态</div>\
+                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签</div>\
                 ' + sigHtml + '\
+                <div style="margin-top:8px;display:flex;gap:6px;">\
+                  <button class="mc-btn mc-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'张建国\',true)">张建国 同意</button>\
+                  <button class="mc-btn mc-btn-default" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'张建国\',false)">张建国 不同意</button>\
+                  <button class="mc-btn mc-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'李建华\',true)">李建华 同意</button>\
+                  <button class="mc-btn mc-btn-default" style="font-size:11px;padding:4px 10px;" onclick="signCheckRecord(\'' + site.code + '\',\'李建华\',false)">李建华 不同意</button>\
+                </div>\
               </div>\
               <table class="mc-record-display-table">\
                 <thead>\
@@ -1772,7 +1778,7 @@
                 <div class="mc-notice-form-row">\
                   <div class="mc-notice-form-item">\
                     <div class="mc-notice-form-label">整改期限（工作日）</div>\
-                    <input class="mc-notice-form-input" id="nf-deadline-days" type="number" value="5" min="1" max="30">\
+                    <input class="mc-notice-form-input" id="nf-deadline-days" type="number" min="1" placeholder="请输入工作日数">\
                   </div>\
                 </div>\
                 <div class="mc-notice-form-row">\
@@ -1832,7 +1838,10 @@
                 <button class="mc-btn mc-btn-default" id="nf-export" style="margin-right:8px;">导出通知单</button>\
                 <button class="mc-btn mc-btn-primary" id="nf-edit">编辑</button>\
               </div>\
-              ' + renderConfirmSection('notice', { confirmed: state.confirmed, expert1: state.confirmExpert1, expert2: state.confirmExpert2 }, site) + '\
+              <div class="mc-notice-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
+                <div style="font-weight:600;margin-bottom:6px;color:#333;">双专家会签（整改通知书）</div>\
+                ' + (function(){ try { var ps = window.PrototypeStore; var notices = ps && ps.getRectificationNotices ? ps.getRectificationNotices({siteCode:site.code}) : []; var n = notices && notices.length ? notices[0] : null; var sigs = (n && n.signatures) || []; if (sigs.length === 0) return '<div style="color:#999;">待会签</div>'; var nid = n ? n.id : ''; var ret = sigs.map(function(s){ var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;'; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:11px;">' + (s.signTime||'') + '</span></div>'; }).join(''); ret += '<div style="margin-top:6px;display:flex;gap:6px;"><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',true)">张建国 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',false)">张建国 不同意</button><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',true)">李建华 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',false)">李建华 不同意</button></div>'; return ret; } catch(e){return '';} )() + '\
+              </div>\
             </div>';
         }
 
@@ -2773,8 +2782,19 @@
                 }
               }
 
-              var days = deadlineDays ? parseInt(deadlineDays.value, 10) : 5;
-              if (isNaN(days) || days < 1) days = 5;
+              // 校验整改期限
+              var deadlineVal = deadlineDays ? deadlineDays.value.trim() : '';
+              if (!deadlineVal) {
+                showToast('warning', '⚠', '请填写整改期限（工作日）');
+                if (deadlineDays) deadlineDays.focus();
+                return;
+              }
+              var days = parseInt(deadlineVal, 10);
+              if (isNaN(days) || days < 1 || !/^\d+$/.test(deadlineVal)) {
+                showToast('warning', '⚠', '整改期限必须为正整数');
+                if (deadlineDays) { deadlineDays.value = ''; deadlineDays.focus(); }
+                return;
+              }
 
               // 保存到状态
               if (!taskCheckState[siteCode]) taskCheckState[siteCode] = {};
@@ -2794,25 +2814,24 @@
               };
               taskCheckState[siteCode].notice = noticeRecord;
 
-              // === PrototypeStore: 持久化整改通知单并生成整改任务 ===
+              // === PrototypeStore: 将整改通知书内容写入 Store ===
               try {
                 var ps = window.PrototypeStore;
-                // 如果已有 checkRecord，直接用它触发生成
-                var existingCR = ps.getCheckRecord(siteCode);
-                if (existingCR && existingCR.submitted) {
-                  // 通知单已通过检查记录生成，无需重复创建
-                } else {
-                  // 手动提交通知单，模拟一个checkRecord
-                  ps.saveCheckRecord(siteCode, {
-                    submitted: true,
-                    conclusion: '不合格',
-                    problemDesc: noticeRecord.content || '',
-                    items: [],
-                    inspector: noticeRecord.inspector,
-                    taskId: parseInt(taskId)
+                // 查找当前站点对应的Store整改通知书
+                var allNotices = ps.getRectificationNotices({ siteCode: siteCode });
+                var targetNotice = allNotices && allNotices.length ? allNotices[0] : null;
+                if (targetNotice && ps.updateRectificationNotice) {
+                  ps.updateRectificationNotice(targetNotice.id, {
+                    content: noticeRecord.content || '—',
+                    opinion: noticeRecord.opinion || '',
+                    deadlineDays: days,
+                    deadlineUnit: '工作日',
+                    inspectedPerson: noticeRecord.inspectedPerson || '—',
+                    phone: noticeRecord.phone || '—',
+                    inspector: noticeRecord.inspector || '赵立成'
                   });
                 }
-              } catch(e) {}
+              } catch(e) { console.warn('notice save error', e); }
 
               // 刷新整改通知单面板为展示态
               var noticePanel = document.getElementById('mc-tab-notice');
@@ -3060,6 +3079,65 @@
             showToast('info', '•', '当前为原型预览，分页未实现');
           }
         });
+
+        // ============================================================
+        // 双专家会签全局函数
+        // ============================================================
+        window.signCheckRecord = function(siteCode, expertName, agree) {
+          try {
+            var ps = window.PrototypeStore;
+            if (!ps || !ps.signCheckRecord) { showToast('warning', '⚠', 'Store未就绪'); return; }
+            var result = ps.signCheckRecord(siteCode, expertName, agree);
+            if (result.status === 'rejected') {
+              showToast('warning', '⚠', result.message);
+            } else if (result.status === 'completed') {
+              showToast('success', '✓', '双专家会签完成，站点检查' + (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
+            } else {
+              showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
+            }
+            // 刷新当前站点面板
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var sc = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            var site = null;
+            for (var k = 0; k < myCheckSites.length; k++) {
+              if (myCheckSites[k].code === sc) { site = myCheckSites[k]; break; }
+            }
+            if (site) {
+              var checklistPanel = document.getElementById('mc-tab-checklist');
+              if (checklistPanel) checklistPanel.innerHTML = renderChecklistPanel(site);
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
+            }
+          } catch(e) { showToast('warning', '⚠', '会签操作失败: ' + e.message); }
+        };
+
+        window.signNoticeSign = function(noticeId, expertName, agree) {
+          try {
+            var ps = window.PrototypeStore;
+            if (!ps || !ps.signRectificationNotice) { showToast('warning', '⚠', 'Store未就绪'); return; }
+            var result = ps.signRectificationNotice(parseInt(noticeId), expertName, agree);
+            if (result.status === 'rejected') {
+              showToast('warning', '⚠', result.message);
+            } else if (result.status === 'auto_approved') {
+              showToast('success', '✓', '双专家会签通过，系统自动审核通过并已生成整改任务');
+            } else if (result.status === 'pending_review') {
+              showToast('success', '✓', '双专家会签通过，已进入业务管理员审核');
+            } else {
+              showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
+            }
+            // 刷新
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var sc = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            var site = null;
+            for (var k = 0; k < myCheckSites.length; k++) {
+              if (myCheckSites[k].code === sc) { site = myCheckSites[k]; break; }
+            }
+            if (site) {
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
+            }
+          } catch(e) { showToast('warning', '⚠', '会签操作失败: ' + e.message); }
+        };
       })();
     </script>
     <script src="./app.js"></script>
