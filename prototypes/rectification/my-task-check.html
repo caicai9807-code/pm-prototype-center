@@ -996,6 +996,31 @@
         margin-top: 20px;
       }
 
+      /* ---- 整改通知书确认区 ---- */
+      .mc-notice-countersign-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 16px 20px;
+        margin-top: 16px;
+      }
+      .mc-notice-countersign-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 12px;
+      }
+      .mc-notice-countersign-alert {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #0050b3;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
       /* ---- 开始检查主按钮 ---- */
       .mc-start-check-bar {
         position: sticky;
@@ -1717,6 +1742,76 @@
           return mockCheckData.users.indexOf(mockCheckData.currentUser) >= 0;
         }
 
+        // ============================================================
+        // 整改通知书状态管理（对齐检查记录单模式）
+        // ============================================================
+        var mockRectifyData = {
+          currentUser: '赵立成',
+          users: ['赵立成', '李建华'],
+          siteRectifyState: {}
+        };
+
+        function getRectifySignState(code) {
+          if (!mockRectifyData.siteRectifyState[code]) {
+            mockRectifyData.siteRectifyState[code] = {
+              filler: null,
+              inspectors: [
+                { name: '赵立成', role: '检查人', status: 'pending', time: null, opinion: '' },
+                { name: '李建华', role: '检查人', status: 'pending', time: null, opinion: '' }
+              ],
+              operations: [
+                { operator: '系统', type: '任务下发', time: '2026-06-30 09:30', desc: '整改通知书任务已创建' }
+              ]
+            };
+          }
+          return mockRectifyData.siteRectifyState[code];
+        }
+
+        function addRectifyOperation(code, operator, type, desc) {
+          var state = getRectifySignState(code);
+          var now = new Date();
+          var timeStr = now.toISOString().slice(0, 16).replace('T', ' ');
+          state.operations.push({ operator: operator, type: type, time: timeStr, desc: desc });
+        }
+
+        function getRectifyStatus(code) {
+          var notice = taskCheckState[code] && taskCheckState[code].notice;
+          if (!notice || !notice.submitted) {
+            var signState = mockRectifyData.siteRectifyState[code];
+            if (signState && signState.filler) return 'filling';
+            return 'pending_fill';
+          }
+          if (notice.completed) return 'completed';
+          if (notice.submitted) return 'countersigning';
+          return 'submitted';
+        }
+
+        function isCurrentUserRectifyFiller(code) {
+          var signState = mockRectifyData.siteRectifyState[code];
+          return signState && signState.filler === mockRectifyData.currentUser;
+        }
+
+        function getMyRectifyStatus(code) {
+          var signState = getRectifySignState(code);
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].name === mockRectifyData.currentUser) {
+              return signState.inspectors[i];
+            }
+          }
+          return null;
+        }
+
+        function getRectifyStatusTag(status) {
+          switch (status) {
+            case 'pending_fill': return '<span class="mc-status-tag status-pending">待填写</span>';
+            case 'filling': return '<span class="mc-status-tag status-doing">填写中</span>';
+            case 'countersigning':
+            case 'submitted': return '<span class="mc-status-tag status-doing">确认中</span>';
+            case 'completed': return '<span class="mc-status-tag status-done">已完成</span>';
+            default: return '';
+          }
+        }
+
         function getMyInspectorStatus(code) {
           var signState = getInspectors(code);
           for (var i = 0; i < signState.inspectors.length; i++) {
@@ -1730,7 +1825,8 @@
         function getInspectorStatusClass(status) {
           switch (status) {
             case 'agreed': return 'mc-status-tag status-done';
-            case 'rejected': return 'mc-status-tag status-fail';
+            case 'rejected':
+            case 'disagreed': return 'mc-status-tag status-fail';
             case 'pending': return 'mc-status-tag status-pending';
             default: return 'mc-status-tag status-pending';
           }
@@ -1739,7 +1835,8 @@
         function getInspectorStatusText(status) {
           switch (status) {
             case 'agreed': return '已同意';
-            case 'rejected': return '已驳回';
+            case 'rejected':
+            case 'disagreed': return '不同意';
             case 'pending': return '待确认';
             default: return '—';
           }
@@ -1982,52 +2079,44 @@
           html += '<div class="mc-countersign-title">检查结果确认</div>';
           html += '<div class="mc-countersign-alert">' +
             '1. 本任务只需一名检查人完成检查记录单填写。<br>' +
-            '2. 两名检查人全部同意后，当前站点才算完成。<br>' +
-            '3. 任意一人驳回，则检查记录单退回修改。<br>' +
-            '4. 填写人本人也需要参与确认。' +
+            '2. 填写人提交后自动视为已同意。<br>' +
+            '3. 另一名检查人确认同意后，当前站点才算完成。' +
             '</div>';
 
           // 确认表格
-          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:560px;"><thead><tr>' +
+          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:440px;"><thead><tr>' +
             '<th style="width:100px;">检查人</th>' +
-            '<th style="width:120px;">角色</th>' +
             '<th style="width:90px;text-align:center;">状态</th>' +
             '<th style="width:120px;">确认时间</th>' +
             '<th style="width:auto;">意见</th>' +
-            '<th style="width:100px;text-align:center;">操作</th>' +
             '</tr></thead><tbody>';
 
           for (var i = 0; i < signState.inspectors.length; i++) {
             var ins = signState.inspectors[i];
             var isMe = ins.name === mockCheckData.currentUser;
             var nameDisplay = ins.name + (isMe ? ' <span class="mc-user-badge is-me">您</span>' : '');
-            var roleDisplay = (ins.name === signState.filler) ? '填写人 / 确认人' : '确认人';
-            var statusClass = getInspectorStatusClass(ins.status);
-            var statusText = getInspectorStatusText(ins.status);
+
+            // 填写人：自动已同意，不显示操作
+            var isFillerPerson = (ins.name === signState.filler);
+            var statusText, statusClass;
+            if (isFillerPerson && ins.status === 'pending') {
+              // 填写人提交后自动同意，不用等手动点击
+              statusText = '已自动同意';
+              statusClass = 'mc-status-tag status-done';
+              ins.status = 'agreed'; // 同步状态
+              ins.time = ins.time || new Date().toISOString().slice(0, 16).replace('T', ' ');
+            } else {
+              statusClass = getInspectorStatusClass(ins.status);
+              statusText = getInspectorStatusText(ins.status);
+            }
             var timeDisplay = ins.time || '<span style="color:#bfbfbf;">—</span>';
             var opinionDisplay = ins.opinion || '<span style="color:#bfbfbf;">—</span>';
 
-            var actionHtml = '';
-            if (isMe && !isReadonly && ins.status === 'pending') {
-              // 填写人本人默认已同意（规则9），但需展示
-              // 如果在确认中状态且当前人待确认，展示按钮
-              actionHtml = '<button class="mc-cs-btn-agree" data-cs-action="agree" data-inspector="' + ins.name + '">同意</button>' +
-                '<button class="mc-cs-btn-reject" data-cs-action="reject" data-inspector="' + ins.name + '">驳回</button>';
-            } else if (ins.status === 'agreed') {
-              actionHtml = '<span style="color:#52c41a;font-weight:500;">已同意</span>';
-            } else if (ins.status === 'rejected') {
-              actionHtml = '<span style="color:#ff4d4f;font-weight:500;">已驳回</span>';
-            } else {
-              actionHtml = '<span style="color:#bfbfbf;">—</span>';
-            }
-
             html += '<tr>' +
               '<td>' + nameDisplay + '</td>' +
-              '<td>' + roleDisplay + '</td>' +
-              '<td style="text-align:center;"><span class="mc-status-tag ' + statusClass + '">' + statusText + '</span></td>' +
+              '<td style="text-align:center;"><span class="' + statusClass + '">' + statusText + '</span></td>' +
               '<td>' + timeDisplay + '</td>' +
               '<td>' + opinionDisplay + '</td>' +
-              '<td style="text-align:center;">' + actionHtml + '</td>' +
               '</tr>';
           }
 
@@ -2049,8 +2138,8 @@
             var myStatusObj = getMyInspectorStatus(code);
             if (myStatusObj && myStatusObj.status === 'pending') {
               html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">';
-              html += '<button class="mc-cs-btn-reject" id="mc-btn-cs-reject" style="padding:6px 20px;">驳回</button>';
-              html += '<button class="mc-cs-btn-agree" id="mc-btn-cs-agree" style="padding:6px 20px;">同意</button>';
+              html += '<button class="mc-cs-btn-reject" id="mc-btn-cs-reject" data-cs-action="reject" style="padding:6px 20px;">不同意</button>';
+              html += '<button class="mc-cs-btn-agree" id="mc-btn-cs-agree" data-cs-action="agree" style="padding:6px 20px;">同意</button>';
               html += '</div>';
             }
           }
@@ -2383,71 +2472,123 @@
 
         // ---- 渲染整改通知单（表单/展示双态）----
         function renderNoticePanel(site) {
-          var state = taskCheckState[site.code] && taskCheckState[site.code].notice;
-          var detail = siteDetailMap[site.code] || {};
+          var code = site.code;
+          var state = taskCheckState[code] && taskCheckState[code].notice;
+          var detail = siteDetailMap[code] || {};
           var officeArea = detail.officeArea || site.dept || '裕华片区所';
           var censusUser = detail.censusUser || '王建国';
-          var defaultNoticeNo = 'ZG-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + (site.code ? site.code.slice(-3) : '001');
-          if (!state || !state.submitted) {
+          var defaultNoticeNo = 'ZG-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + (code ? code.slice(-3) : '001');
+          var signState = getRectifySignState(code);
+          var status = getRectifyStatus(code);
+          var isFiller = isCurrentUserRectifyFiller(code);
+          var hasSubmitted = state && state.submitted;
+          var isCompleted = state && state.completed;
+
+          // ---- 表单态（待填写 / 填写中）----
+          if (!hasSubmitted) {
+            var formReadonly = isFiller ? '' : ' readonly style="background:#f5f5f5;cursor:not-allowed;"';
             return '\
-              <div class="mc-notice-form" style="background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:24px;">\
-                <div style="font-size:18px;font-weight:600;color:#262626;margin-bottom:24px;text-align:center;border-bottom:2px solid #4c78f5;padding-bottom:12px;">整改通知书</div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item">\
-                    <div class="mc-notice-form-label">编号</div>\
-                    <input class="mc-notice-form-input" id="nf-notice-no" value="' + defaultNoticeNo + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+              <div class="mc-record-card">\
+                <div class="mc-checklist-title-row">\
+                  <span class="mc-checklist-title">整改通知书</span>\
+                  ' + getRectifyStatusTag(status) + '\
+                  <div class="mc-checklist-actions">' +
+                    (status === 'pending_fill'
+                      ? '<button class="mc-action-btn primary" id="nr-btn-start-fill">开始填写</button>'
+                      : isFiller
+                        ? '<button class="mc-action-btn" id="nr-btn-draft">暂存</button><button class="mc-action-btn primary" id="nr-btn-submit">提交</button>'
+                        : '')
+                  + '</div>\
+                </div>' +
+                (status === 'filling' && !isFiller
+                  ? '<div class="mc-checklist-alert-info">当前整改通知书正在由 <strong>' + signState.filler + '</strong> 填写，提交后您可进行确认。</div>'
+                  : '<div class="mc-checklist-alert-info">请填写整改通知书内容并提交，提交后进入双人确认环节。</div>')
+              + '\
+                <div class="mc-notice-form" style="background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:24px;margin-top:12px;">\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">编号</div>\
+                      <input class="mc-notice-form-input" id="nf-notice-no" value="' + defaultNoticeNo + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">部门</div>\
+                      <input class="mc-notice-form-input" id="nf-dept" value="' + officeArea + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
                   </div>\
-                  <div class="mc-notice-form-item">\
-                    <div class="mc-notice-form-label">部门</div>\
-                    <input class="mc-notice-form-input" id="nf-dept" value="' + officeArea + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>整改事项</div>\
+                      <textarea class="mc-notice-form-textarea" id="nf-content" placeholder="例如：现场建筑物 1#楼为 3 层建筑物与核查表 2 层不一致" style="min-height:80px;"' + formReadonly + '></textarea>\
+                    </div>\
                   </div>\
-                </div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item full-row">\
-                    <div class="mc-notice-form-label"><span class="mc-required">*</span>整改事项</div>\
-                    <textarea class="mc-notice-form-textarea" id="nf-content" placeholder="例如：现场建筑物 1#楼为 3 层建筑物与核查表 2 层不一致" style="min-height:80px;"></textarea>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">整改期限（工作日）</div>\
+                      <input class="mc-notice-form-input" id="nf-deadline-days" type="number" min="1" placeholder="请输入工作日数"' + formReadonly + '>\
+                    </div>\
                   </div>\
-                </div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item">\
-                    <div class="mc-notice-form-label">整改期限（工作日）</div>\
-                    <input class="mc-notice-form-input" id="nf-deadline-days" type="number" min="1" placeholder="请输入工作日数">\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>整改意见</div>\
+                      <textarea class="mc-notice-form-textarea" id="nf-opinion" placeholder="例如：重新核实层数面积，重新编制面积核查表。" style="min-height:80px;"' + formReadonly + '></textarea>\
+                    </div>\
                   </div>\
-                </div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item full-row">\
-                    <div class="mc-notice-form-label"><span class="mc-required">*</span>整改意见</div>\
-                    <textarea class="mc-notice-form-textarea" id="nf-opinion" placeholder="例如：重新核实层数面积，重新编制面积核查表。" style="min-height:80px;"></textarea>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>被检查单位人员</div>\
+                      <input class="mc-notice-form-input" id="nf-signature" value="' + censusUser + '" placeholder="面积普查的任务完成人员"' + formReadonly + '>\
+                    </div>\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">检查人员</div>\
+                      <input class="mc-notice-form-input" id="nf-inspector" value="赵立成" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
                   </div>\
-                </div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item">\
-                    <div class="mc-notice-form-label"><span class="mc-required">*</span>被检查单位人员</div>\
-                    <input class="mc-notice-form-input" id="nf-signature" value="' + censusUser + '" placeholder="面积普查的任务完成人员">\
-                  </div>\
-                  <div class="mc-notice-form-item">\
-                    <div class="mc-notice-form-label">检查人员</div>\
-                    <input class="mc-notice-form-input" id="nf-inspector" value="赵立成" readonly style="background:#f5f5f5;cursor:not-allowed;">\
-                  </div>\
-                </div>\
-                <div class="mc-notice-form-row">\
-                  <div class="mc-notice-form-item full-row">\
-                    <div class="mc-notice-form-label"><span class="mc-required">*</span>检查人员联系方式</div>\
-                    <input class="mc-notice-form-input" id="nf-phone" placeholder="请输入检查人员联系方式">\
-                  </div>\
-                </div>\
-                <div class="mc-notice-actions">\
-                  <button class="mc-btn mc-btn-default" id="nf-draft" style="margin-right:8px;">暂存</button>\
-                  <button class="mc-btn mc-btn-primary" id="nf-submit">提交整改通知</button>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>检查人员联系方式</div>\
+                      <input class="mc-notice-form-input" id="nf-phone" placeholder="请输入检查人员联系方式"' + formReadonly + '>\
+                    </div>\
+                  </div>' +
+                  (isFiller ? '\
+                  <div class="mc-notice-actions">\
+                    <button class="mc-btn mc-btn-default" id="nr-btn-draft" style="margin-right:8px;">暂存</button>\
+                    <button class="mc-btn mc-btn-primary" id="nr-btn-submit">提交整改通知</button>\
+                  </div>' : '') + '\
                 </div>\
               </div>';
           }
 
-          // 已提交：展示态
-          var detail = siteDetailMap[site.code] || {};
-          return '\
-            <div class="mc-notice-display-card" id="mc-notice-display-card">\
-              <div class="mc-notice-display-title">整改通知书</div>\
+          // ---- 已提交：展示态（对齐检查记录单模式）----
+          var html = '';
+
+          // 1. 标题行 + 状态Tag + 操作按钮
+          var statusTag = isCompleted
+            ? '<span class="mc-status-tag status-done">已完成</span>'
+            : '<span class="mc-status-tag status-doing">确认中</span>';
+
+          html += '<div class="mc-record-card">';
+          html += '<div class="mc-checklist-title-row">';
+          html += '<span class="mc-checklist-title">整改通知书</span>';
+          html += statusTag;
+          html += '<div class="mc-checklist-actions">';
+          if (!isCompleted) {
+            html += '<button class="mc-action-btn" id="nr-btn-edit">编辑</button>';
+          } else {
+            html += '<button class="mc-action-btn" id="nr-btn-view">查看</button>';
+          }
+          html += '<button class="mc-action-btn" id="nr-btn-export">导出通知单</button>';
+          html += '</div></div>';
+
+          // 2. 状态提示
+          if (isCompleted) {
+            html += '<div class="mc-checklist-alert-info">✅ 该整改通知书已完成确认。</div>';
+          } else {
+            html += '<div class="mc-checklist-alert-info">⏳ 整改通知书已提交，等待双人确认。</div>';
+          }
+
+          // 3. 整改通知书内容展示
+          html += '\
+            <div class="mc-notice-display-card" style="margin-top:12px;">\
               <div class="mc-notice-display-grid">\
                 <div class="mc-notice-display-item"><span>编号</span>' + (state.noticeNo || '—') + '</div>\
                 <div class="mc-notice-display-item"><span>部门</span>' + (state.dept || detail.officeArea || site.dept) + '</div>\
@@ -2458,24 +2599,140 @@
               </div>\
               <div class="mc-notice-display-section">\
                 <div class="mc-notice-display-section-title">整改意见</div>\
-                <div class="mc-notice-display-section-body">' + (state.opinion ? state.opinion.replace(/\\n/g, '<br>') : '—') + '</div>\
+                <div class="mc-notice-display-section-body">' + (state.opinion ? state.opinion.replace(/\n/g, '<br>') : '—') + '</div>\
               </div>\
               <div class="mc-notice-display-footer-grid">\
-                <div class="mc-notice-display-item"><span>整改期限（工作日）</span>' + (state.deadlineDays || '5') + '天</div>\
+                <div class="mc-notice-display-item"><span>整改期限（工作日）</span>' + (state.deadlineDays || '—') + '天</div>\
                 <div class="mc-notice-display-item"><span>被检查单位人员</span>' + (state.inspectedPerson || '—') + '</div>\
                 <div class="mc-notice-display-item"><span>检查人员</span>' + (state.inspector || '赵立成') + '</div>\
                 <div class="mc-notice-display-item"><span>检查人员联系方式</span>' + (state.phone || '—') + '</div>\
-                <div class="mc-notice-display-item"><span>状态</span><span class="mc-status-tag done">' + (state.status || '已发送') + '</span></div>\
-              </div>\
-              <div class="mc-notice-display-actions">\
-                <button class="mc-btn mc-btn-default" id="nf-export" style="margin-right:8px;">导出通知单</button>\
-                <button class="mc-btn mc-btn-primary" id="nf-edit">编辑</button>\
-              </div>\
-              <div class="mc-notice-signatures" style="margin-top:12px;padding:10px;background:#fafafa;border-radius:6px;font-size:12px;">\
-                <div style="font-weight:600;margin-bottom:6px;color:#333;">双人确认（整改通知书）</div>\
-                ' + (function(){ try { var ps = window.PrototypeStore; var notices = ps && ps.getRectificationNotices ? ps.getRectificationNotices({siteCode:site.code}) : []; var n = notices && notices.length ? notices[0] : null; var sigs = (n && n.signatures) || []; if (sigs.length === 0) return '<div style="color:#999;">待确认</div>'; var nid = n ? n.id : ''; var ret = sigs.map(function(s){ var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;'; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;"><span>' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:11px;">' + (s.signTime||'') + '</span></div>'; }).join(''); ret += '<div style="margin-top:6px;display:flex;gap:6px;"><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',true)">张建国 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'张建国\',false)">张建国 不同意</button><button class="mc-btn mc-btn-primary" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',true)">李建华 同意</button><button class="mc-btn mc-btn-default" style="font-size:11px;padding:3px 8px;" onclick="signNoticeSign(\'' + nid + '\',\'李建华\',false)">李建华 不同意</button></div>'; return ret; } catch(e){return '';}})() + '\
               </div>\
             </div>';
+
+          html += '</div>'; // mc-record-card
+
+          // 4. 确认区（对齐检查记录单模式）
+          html += renderRectifyCountersignArea(code, status, signState, isFiller, state);
+
+          // 5. 操作记录
+          html += renderRectifyOperationLog(code);
+
+          return html;
+        }
+
+        // ---- 渲染整改通知书确认区 ----
+        function renderRectifyCountersignArea(code, status, signState, isFiller, noticeState) {
+          if (status === 'pending_fill' || status === 'filling') {
+            if (status === 'filling' && !isFiller) {
+              // 非填写人可见确认区预览
+            } else {
+              return '';
+            }
+          }
+
+          var isReadonly = (status === 'completed');
+          var isCountersigning = (status === 'countersigning' || status === 'submitted');
+          var showButtons = !isReadonly && isCountersigning;
+
+          // 检查当前用户是否还有待确认
+          var myStatus = null;
+          if (showButtons) {
+            myStatus = getMyRectifyStatus(code);
+          }
+
+          var html = '';
+          html += '<div class="mc-notice-countersign-card">';
+          html += '<div class="mc-notice-countersign-title">整改通知书确认</div>';
+          html += '<div class="mc-notice-countersign-alert">' +
+            '1. 填写人提交后自动视为已同意。<br>' +
+            '2. 另一名检查人确认同意后，整改通知书确认完成。<br>' +
+            '3. 确认意见为选填。' +
+            '</div>';
+
+          // 确认表格
+          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:440px;"><thead><tr>' +
+            '<th style="width:100px;">检查人</th>' +
+            '<th style="width:90px;text-align:center;">状态</th>' +
+            '<th style="width:120px;">确认时间</th>' +
+            '<th style="width:auto;">意见</th>' +
+            '</tr></thead><tbody>';
+
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            var ins = signState.inspectors[i];
+            var isMe = ins.name === mockRectifyData.currentUser;
+            var nameDisplay = ins.name + (isMe ? ' <span class="mc-user-badge is-me">您</span>' : '');
+
+            // 填写人：自动已同意
+            var isFillerPerson = (ins.name === signState.filler);
+            var statusClass, statusText;
+            if (isFillerPerson && ins.status === 'pending') {
+              statusText = '已自动同意';
+              statusClass = 'mc-status-tag status-done';
+              ins.status = 'agreed';
+              ins.time = ins.time || new Date().toISOString().slice(0, 16).replace('T', ' ');
+            } else {
+              statusClass = 'mc-status-tag ' + (ins.status === 'agreed' ? 'status-done' : ins.status === 'disagreed' ? 'status-fail' : 'status-pending');
+              statusText = ins.status === 'agreed' ? '已同意' : ins.status === 'disagreed' ? '不同意' : '待确认';
+            }
+            var timeDisplay = ins.time || '<span style="color:#bfbfbf;">—</span>';
+            var opinionDisplay = ins.opinion || '<span style="color:#bfbfbf;">—</span>';
+
+            html += '<tr>' +
+              '<td>' + nameDisplay + '</td>' +
+              '<td style="text-align:center;"><span class="' + statusClass + '">' + statusText + '</span></td>' +
+              '<td>' + timeDisplay + '</td>' +
+              '<td>' + opinionDisplay + '</td>' +
+              '</tr>';
+          }
+
+          html += '</tbody></table></div>';
+
+          // 确认意见输入区（仅非填写人）
+          if (showButtons && myStatus && myStatus.status === 'pending' && myStatus.name !== signState.filler) {
+            html += '<div class="mc-countersign-opinion">';
+            html += '<label>确认意见：</label>';
+            html += '<textarea id="nr-cs-opinion" placeholder="请输入确认意见（选填）。"></textarea>';
+            html += '</div>';
+          }
+
+          // 底部确认按钮（仅非填写人）
+          if (showButtons && myStatus && myStatus.status === 'pending' && myStatus.name !== signState.filler) {
+            html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">';
+            html += '<button class="mc-cs-btn-reject" id="nr-btn-cs-disagree" style="padding:6px 20px;">不同意</button>';
+            html += '<button class="mc-cs-btn-agree" id="nr-btn-cs-agree" style="padding:6px 20px;">同意</button>';
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染整改通知书操作记录 ----
+        function renderRectifyOperationLog(code) {
+          var signState = getRectifySignState(code);
+          var ops = signState.operations;
+
+          var html = '<div class="mc-operation-card">';
+          html += '<div class="mc-operation-title">操作记录</div>';
+
+          if (ops.length === 0) {
+            html += '<div class="mc-operation-empty">暂无操作记录</div>';
+          } else {
+            html += '<div class="mc-operation-timeline">';
+            for (var i = ops.length - 1; i >= 0; i--) {
+              var op = ops[i];
+              var isLatest = (i === ops.length - 1);
+              html += '<div class="mc-operation-item' + (isLatest ? ' op-active' : '') + '">';
+              html += '<span class="mc-operation-type">' + op.type + '</span>';
+              html += '<span class="mc-operation-time">' + op.time + '</span>';
+              html += '<div class="mc-operation-desc">' + op.operator + '：' + op.desc + '</div>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
         }
 
         // ---- 双专家确认辅助函数 ----
@@ -2954,6 +3211,12 @@
             var myStatus = getMyInspectorStatus(siteCode);
             if (!myStatus) return;
 
+            // 填写人不需要确认，跳过
+            if (myStatus.name === signState.filler) {
+              showToast('warning', '⚠', '您作为填写人已自动同意');
+              return;
+            }
+
             if (action === 'agree') {
               myStatus.status = 'agreed';
               myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
@@ -2961,38 +3224,22 @@
               myStatus.opinion = opinion ? opinion.value.trim() : '';
               addOperation(siteCode, mockCheckData.currentUser, '同意', mockCheckData.currentUser + ' 同意了确认' + (myStatus.opinion ? '，意见：' + myStatus.opinion : ''));
 
-              // 检查是否全部同意
-              var allAgreed = true;
-              for (var i = 0; i < signState.inspectors.length; i++) {
-                if (signState.inspectors[i].status !== 'agreed') allAgreed = false;
-              }
-              if (allAgreed) {
-                if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
-                taskCheckState[siteCode].checklist.completed = true;
-                addOperation(siteCode, '系统', '任务完成', '两名检查人全部同意，当前站点已完成');
-                showToast('success', '✓', '全部同意，当前站点已完成');
-              } else {
-                showToast('success', '✓', '已同意，等待其他检查人确认');
-              }
+              // 填写人已自动同意，另一人同意后即完成
+              if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
+              taskCheckState[siteCode].checklist.completed = true;
+              addOperation(siteCode, '系统', '任务完成', '全部同意，当前站点已完成');
+              showToast('success', '✓', '确认完成，当前站点已完成');
               // 刷新
               var activeTabEl = document.querySelector('.mc-station-tab.active');
               if (activeTabEl) activeTabEl.click();
             } else if (action === 'reject') {
               var opinion = document.getElementById('mc-cs-opinion');
               var reason = opinion ? opinion.value.trim() : '';
-              if (!reason) {
-                showToast('warning', '请填写原因');
-                return;
-              }
-              myStatus.status = 'rejected';
+              myStatus.status = 'disagreed';
               myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
               myStatus.opinion = reason;
-              if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
-              taskCheckState[siteCode].checklist.rejected = true;
-              taskCheckState[siteCode].checklist.submitted = true;
-              taskCheckState[siteCode].checklist.countersigning = false;
-              addOperation(siteCode, mockCheckData.currentUser, '不同意', mockCheckData.currentUser + ' 驳回了确认，原因：' + reason);
-              showToast('warning', '已驳回，检查记录单退回修改');
+              addOperation(siteCode, mockCheckData.currentUser, '不同意', mockCheckData.currentUser + ' 不同意确认' + (reason ? '，意见：' + reason : ''));
+              showToast('success', '✓', mockCheckData.currentUser + ' 已操作');
               // 刷新
               var activeTabEl = document.querySelector('.mc-station-tab.active');
               if (activeTabEl) activeTabEl.click();
@@ -3369,6 +3616,18 @@
               };
               taskCheckState[siteCode].checklist = checklistRecord;
 
+              // 填写人自动标记为已同意
+              var signState = getInspectors(siteCode);
+              signState.filler = mockCheckData.currentUser;
+              for (var csi = 0; csi < signState.inspectors.length; csi++) {
+                if (signState.inspectors[csi].name === mockCheckData.currentUser) {
+                  signState.inspectors[csi].status = 'agreed';
+                  signState.inspectors[csi].time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+                  break;
+                }
+              }
+              addOperation(siteCode, mockCheckData.currentUser, '提交', mockCheckData.currentUser + ' 提交了检查记录单（自动已同意）');
+
               // === PrototypeStore: 持久化检查记录 ===
               try {
                 window.PrototypeStore.saveCheckRecord(siteCode, checklistRecord);
@@ -3486,8 +3745,30 @@
 
         // ---- 整改通知单事件绑定 ----
         function bindNoticeEvents() {
+          // ---- 整改通知书表单/操作事件 ----
+          var siteCode = getActiveSiteCode();
+          var site = getSiteByCode(siteCode);
+
+          // 开始填写（待填写态）
+          var startFillBtn = document.getElementById('nr-btn-start-fill');
+          if (startFillBtn) {
+            startFillBtn.addEventListener('click', function () {
+              if (!siteCode || !site) return;
+              var signState = getRectifySignState(siteCode);
+              if (signState.filler && signState.filler !== mockRectifyData.currentUser) {
+                showToast('warning', '⚠', '该整改通知书正在由 ' + signState.filler + ' 填写');
+                return;
+              }
+              signState.filler = mockRectifyData.currentUser;
+              addRectifyOperation(siteCode, mockRectifyData.currentUser, '开始填写', mockRectifyData.currentUser + ' 开始填写整改通知书');
+              var panel = document.getElementById('mc-tab-notice');
+              if (panel && site) { panel.innerHTML = renderNoticePanel(site); }
+              bindNoticeEvents();
+            });
+          }
+
           // 暂存按钮（表单态）
-          var draftBtn = document.getElementById('nf-draft');
+          var draftBtn = document.getElementById('nr-btn-draft');
           if (draftBtn) {
             draftBtn.addEventListener('click', function () {
               showToast('success', '✓', '整改通知单已暂存');
@@ -3495,7 +3776,7 @@
           }
 
           // 提交按钮（表单态）
-          var submitBtn = document.getElementById('nf-submit');
+          var submitBtn = document.getElementById('nr-btn-submit');
           if (submitBtn) {
             submitBtn.addEventListener('click', function () {
               // 校验必填字段
@@ -3527,17 +3808,6 @@
                 showToast('warning', '⚠', '请填写检查人员联系方式');
                 if (phone) phone.focus();
                 return;
-              }
-
-              // 获取当前站点
-              var activeTab = document.querySelector('.mc-station-tab.active');
-              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
-              var site = null;
-              for (var k = 0; k < myCheckSites.length; k++) {
-                if (myCheckSites[k].code === siteCode) {
-                  site = myCheckSites[k];
-                  break;
-                }
               }
 
               // 校验整改期限
@@ -3572,10 +3842,24 @@
               };
               taskCheckState[siteCode].notice = noticeRecord;
 
+              // 操作记录：提交
+              addRectifyOperation(siteCode, mockRectifyData.currentUser, '提交', mockRectifyData.currentUser + ' 提交了整改通知书');
+
+              // 填写人自动标记为已同意
+              var signState = getRectifySignState(siteCode);
+              signState.filler = mockRectifyData.currentUser;
+              for (var ri = 0; ri < signState.inspectors.length; ri++) {
+                if (signState.inspectors[ri].name === mockRectifyData.currentUser) {
+                  signState.inspectors[ri].status = 'agreed';
+                  var now = new Date();
+                  signState.inspectors[ri].time = now.toISOString().slice(0, 16).replace('T', ' ');
+                  break;
+                }
+              }
+
               // === PrototypeStore: 将整改通知书内容写入 Store ===
               try {
                 var ps = window.PrototypeStore;
-                // 查找当前站点对应的Store整改通知书
                 var allNotices = ps.getRectificationNotices({ siteCode: siteCode });
                 var targetNotice = allNotices && allNotices.length ? allNotices[0] : null;
                 if (targetNotice && ps.updateRectificationNotice) {
@@ -3591,34 +3875,28 @@
                 }
               } catch(e) { console.warn('notice save error', e); }
 
-              // 刷新整改通知单面板为展示态
+              // 刷新面板
               var noticePanel = document.getElementById('mc-tab-notice');
               if (noticePanel && site) {
                 noticePanel.innerHTML = renderNoticePanel(site);
               }
-
               showToast('success', '✓', '整改通知单已提交');
               bindNoticeEvents();
             });
           }
 
           // 编辑按钮（展示态）
-          var editBtn = document.getElementById('nf-edit');
+          var editBtn = document.getElementById('nr-btn-edit');
           if (editBtn) {
             editBtn.addEventListener('click', function () {
-              var activeTab = document.querySelector('.mc-station-tab.active');
-              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
               if (taskCheckState[siteCode] && taskCheckState[siteCode].notice) {
                 taskCheckState[siteCode].notice.submitted = false;
+                // 重置填写状态为编辑中
+                var signState = getRectifySignState(siteCode);
+                signState.filler = mockRectifyData.currentUser;
+                addRectifyOperation(siteCode, mockRectifyData.currentUser, '编辑', mockRectifyData.currentUser + ' 开始编辑整改通知书');
               }
               var noticePanel = document.getElementById('mc-tab-notice');
-              var site = null;
-              for (var k = 0; k < myCheckSites.length; k++) {
-                if (myCheckSites[k].code === siteCode) {
-                  site = myCheckSites[k];
-                  break;
-                }
-              }
               if (noticePanel && site) {
                 noticePanel.innerHTML = renderNoticePanel(site);
               }
@@ -3627,12 +3905,124 @@
           }
 
           // 导出按钮（展示态）
-          var exportBtn = document.getElementById('nf-export');
+          var exportBtn = document.getElementById('nr-btn-export');
           if (exportBtn) {
             exportBtn.addEventListener('click', function () {
               showToast('success', '✓', '整改通知单导出中…');
             });
           }
+
+          // ---- 整改通知书确认区事件 ----
+          // 确认区同意按钮
+          var csAgreeBtn = document.getElementById('nr-btn-cs-agree');
+          if (csAgreeBtn) {
+            csAgreeBtn.addEventListener('click', function () {
+              handleRectifyCountersign(siteCode, site, 'agree');
+            });
+          }
+
+          // 确认区不同意按钮
+          var csDisagreeBtn = document.getElementById('nr-btn-cs-disagree');
+          if (csDisagreeBtn) {
+            csDisagreeBtn.addEventListener('click', function () {
+              handleRectifyCountersign(siteCode, site, 'disagree');
+            });
+          }
+
+          // 行内同意/不同意按钮（data-nr-action）
+          var rowBtns = document.querySelectorAll('[data-nr-action]');
+          rowBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var action = this.getAttribute('data-nr-action');
+              handleRectifyCountersign(siteCode, site, action);
+            });
+          });
+        }
+
+        // ---- 整改通知书确认处理 ----
+        function handleRectifyCountersign(siteCode, site, action) {
+          if (!siteCode || !site) {
+            showToast('warning', '⚠', '站点信息异常');
+            return;
+          }
+
+          var signState = getRectifySignState(siteCode);
+          var myStatus = getMyRectifyStatus(siteCode);
+          if (!myStatus || myStatus.status !== 'pending') {
+            showToast('warning', '⚠', '您已确认过，无需重复操作');
+            return;
+          }
+
+          // 填写人不需要确认
+          if (myStatus.name === signState.filler) {
+            showToast('warning', '⚠', '您作为填写人已自动同意');
+            return;
+          }
+
+          // 获取确认意见
+          var opinionInput = document.getElementById('nr-cs-opinion');
+          var opinion = opinionInput ? opinionInput.value.trim() : '';
+
+          if (action === 'agree') {
+            myStatus.status = 'agreed';
+            myStatus.opinion = opinion;
+            var now = new Date();
+            myStatus.time = now.toISOString().slice(0, 16).replace('T', ' ');
+            addRectifyOperation(siteCode, mockRectifyData.currentUser, '同意', mockRectifyData.currentUser + ' 同意了整改通知书' + (opinion ? '，意见：' + opinion : ''));
+          } else if (action === 'disagree') {
+            myStatus.status = 'disagreed';
+            myStatus.opinion = opinion;
+            var now = new Date();
+            myStatus.time = now.toISOString().slice(0, 16).replace('T', ' ');
+            addRectifyOperation(siteCode, mockRectifyData.currentUser, '不同意', mockRectifyData.currentUser + ' 不同意整改通知书' + (opinion ? '，意见：' + opinion : ''));
+          }
+
+          // 检查是否全部已同意 → 已完成
+          var allAgreed = true;
+          for (var ri = 0; ri < signState.inspectors.length; ri++) {
+            if (signState.inspectors[ri].status !== 'agreed') {
+              allAgreed = false;
+              break;
+            }
+          }
+          if (allAgreed) {
+            if (taskCheckState[siteCode] && taskCheckState[siteCode].notice) {
+              taskCheckState[siteCode].notice.completed = true;
+            }
+            addRectifyOperation(siteCode, '系统', '完成', '双人确认完成，整改通知书已生效');
+            showToast('success', '✓', '双人确认完成，整改通知书已生效');
+          } else {
+            var disagreeCount = 0;
+            for (var ri = 0; ri < signState.inspectors.length; ri++) {
+              if (signState.inspectors[ri].status === 'disagreed') disagreeCount++;
+            }
+            if (disagreeCount > 0) {
+              showToast('success', '✓', mockRectifyData.currentUser + ' 已操作，等待另一人确认');
+            } else {
+              showToast('success', '✓', mockRectifyData.currentUser + ' 已同意');
+            }
+          }
+
+          // 刷新面板
+          var noticePanel = document.getElementById('mc-tab-notice');
+          if (noticePanel && site) {
+            noticePanel.innerHTML = renderNoticePanel(site);
+          }
+          bindNoticeEvents();
+        }
+
+        // ---- 获取当前活动站点辅助函数 ----
+        function getActiveSiteCode() {
+          var activeTab = document.querySelector('.mc-station-tab.active');
+          return activeTab ? activeTab.getAttribute('data-site-code') : null;
+        }
+
+        function getSiteByCode(code) {
+          if (!code) return null;
+          for (var k = 0; k < myCheckSites.length; k++) {
+            if (myCheckSites[k].code === code) return myCheckSites[k];
+          }
+          return null;
         }
 
         // ---- 双专家确认事件绑定（调用 Store 真实确认） ----

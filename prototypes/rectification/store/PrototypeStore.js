@@ -175,6 +175,9 @@
 
     // ——— 6. rectificationNotices ——— 从不合格checkRecord生成
     var rectificationNotices = {};
+    // ** 提前声明 rectificationTasks/rectIdSeq（用于下面notice循环中同步生成整改任务）**
+    var rectificationTasks = {};
+    var rectIdSeq = 0;
     var noticeIdSeq = 0;
 
     function genNoticeFromCR(siteCode, cr) {
@@ -246,12 +249,7 @@
       }
     });
 
-    // ——— 7. rectificationTasks ——— 已在上方notice循环中同步生成（仅审核通过的notice生成）
-    // 此处仅声明空对象，已有任务已写入 rectificationTasks
-    if (typeof rectificationTasks === 'undefined') var rectificationTasks = {};
-    var rectIdSeq = Object.keys(rectificationTasks).length;
-
-    // ——— 8. next IDs ———
+    // ——— 7. next IDs ———
     var maxTaskId = 0;
     if (md.tasks) md.tasks.forEach(function(t){if(t.id>maxTaskId)maxTaskId=t.id});
     var nextIds = {
