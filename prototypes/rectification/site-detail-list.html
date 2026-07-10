@@ -15,6 +15,105 @@
       margin: 0 auto;
     }
 
+    .sd-layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .sd-sidebar-card .card-body {
+      padding: 16px 0 12px;
+    }
+
+    .sd-sidebar-title {
+      padding: 0 20px 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #262626;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sd-tree {
+      padding: 12px 12px 4px;
+      max-height: 720px;
+      overflow: auto;
+    }
+
+    .sd-tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 8px;
+      border-radius: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .sd-tree-node:hover {
+      background: #f5f7fb;
+    }
+
+    .sd-tree-node.sd-tree-node--root {
+      margin-bottom: 4px;
+    }
+
+    .sd-tree-node.sd-tree-node--child {
+      padding-left: 30px;
+    }
+
+    .sd-tree-toggle {
+      width: 16px;
+      color: #8c8c8c;
+      font-size: 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .sd-tree-toggle.sd-tree-toggle--hidden {
+      visibility: hidden;
+      cursor: default;
+    }
+
+    .sd-tree-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #262626;
+      cursor: pointer;
+      user-select: none;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sd-tree-count {
+      color: #8c8c8c;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .sd-tree-children.sd-tree-children--collapsed {
+      display: none;
+    }
+
+    .sd-tree-summary {
+      margin: 0 20px 12px;
+      padding: 10px 12px;
+      background: #f7faff;
+      border: 1px solid #d6e4ff;
+      border-radius: 6px;
+      color: #4c78f5;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .sd-main {
+      min-width: 0;
+    }
+
     .sd-page-header {
       margin-bottom: 16px;
       display: flex;
@@ -235,18 +334,20 @@
       // Mock 数据
       // ============================================================
       var mockData = [
-        { id: 1, code: '60218B001', name: '裕华区中心站', checkStatus: '已检查', dept: '裕华管理部', area: '裕华片区所', type: '用户站', office: '裕东街道', address: '裕华区槐安路与翟营大街交叉口东行200米路北', census: '是', buildYear: '2009年', expert: '赵立成', checkTime: '2026-07-03', result: '合格', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 裕华片区常规面积核查任务' },
-        { id: 2, code: '60218B004', name: '裕华区万达站', checkStatus: '待整改', dept: '裕华管理部', area: '裕华片区所', type: '用户站', office: '裕华区', address: '裕华区槐中路与建华大街交口东南角', census: '是', buildYear: '2012年', expert: '赵立成', checkTime: '2026-07-03', result: '不合格', rectifyStatus: '待整改', rectifyTime: '—', taskName: '2026 第27周 裕华片区异常转派补查任务' },
-        { id: 3, code: '60218B007', name: '裕华区东南站', checkStatus: '已检查', dept: '裕华管理部', area: '裕华片区所', type: '用户站', office: '裕华区', address: '裕华区体育南大街与南二环交口', census: '是', buildYear: '2010年', expert: '赵立成', checkTime: '2026-06-28', result: '不合格', rectifyStatus: '待复查', rectifyTime: '2026-07-10', taskName: '2026 第27周 裕华片区常规面积核查任务' },
-        { id: 4, code: '60218B010', name: '桥西区新百站', checkStatus: '已检查', dept: '桥西管理部', area: '桥西片区所', type: '自管站', office: '中山西路', address: '桥西区中山西路与中华大街交口西南', census: '是', buildYear: '2005年', expert: '李志强', checkTime: '2026-06-30', result: '合格', rectifyStatus: '已归档', rectifyTime: '2026-07-05', taskName: '2026 第26周 桥西片区常规面积核查任务' },
-        { id: 5, code: '60218B012', name: '长安区中山东路站', checkStatus: '已检查', dept: '长安管理部', area: '长安片区所', type: '用户站', office: '中山东路', address: '长安区中山东路与青园街交叉口东行', census: '否', buildYear: '2008年', expert: '张伟', checkTime: '2026-06-25', result: '不合格', rectifyStatus: '已超期', rectifyTime: '—', taskName: '2026 第26周 长安片区管网排查任务' },
-        { id: 6, code: '60218B015', name: '裕华区槐北站', checkStatus: '待检查', dept: '裕华管理部', area: '裕华片区所', type: '自管站', office: '槐北路', address: '裕华区槐北路与富强大街交口', census: '是', buildYear: '2015年', expert: '赵立成', checkTime: '—', result: '—', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 裕华片区常规面积核查任务' },
-        { id: 7, code: '60218B018', name: '桥西区建设大街站', checkStatus: '检查中', dept: '桥西管理部', area: '桥西片区所', type: '用户站', office: '建设大街', address: '桥西区建设大街与裕华路交口西北', census: '是', buildYear: '2011年', expert: '李志强', checkTime: '—', result: '—', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 桥西片区常规面积核查任务' },
-        { id: 8, code: '60218B020', name: '长安区和平路站', checkStatus: '待整改', dept: '长安管理部', area: '长安片区所', type: '用户站', office: '和平东路', address: '长安区和平东路与建华大街交叉口东行', census: '是', buildYear: '2006年', expert: '张伟', checkTime: '2026-07-01', result: '不合格', rectifyStatus: '待审核', rectifyTime: '2026-07-04', taskName: '2026 第27周 长安片区常规面积核查任务' }
+        { id: 1, code: '60218B001', name: '裕华区中心站', checkStatus: '已检查', dept: '裕华管理部', area: '裕华一片区所', type: '用户站', office: '裕东街道', address: '裕华区槐安路与翟营大街交叉口东行200米路北', census: '是', buildYear: '2009年', expert: '赵立成', checkTime: '2026-07-03', result: '合格', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 裕华片区常规面积核查任务' },
+        { id: 2, code: '60218B004', name: '裕华区万达站', checkStatus: '待整改', dept: '裕华管理部', area: '裕华二片区所', type: '用户站', office: '裕华区', address: '裕华区槐中路与建华大街交口东南角', census: '是', buildYear: '2012年', expert: '赵立成', checkTime: '2026-07-03', result: '不合格', rectifyStatus: '待整改', rectifyTime: '—', taskName: '2026 第27周 裕华片区异常转派补查任务' },
+        { id: 3, code: '60218B007', name: '裕华区东南站', checkStatus: '已检查', dept: '裕华管理部', area: '裕华二片区所', type: '用户站', office: '裕华区', address: '裕华区体育南大街与南二环交口', census: '是', buildYear: '2010年', expert: '赵立成', checkTime: '2026-06-28', result: '不合格', rectifyStatus: '待复查', rectifyTime: '2026-07-10', taskName: '2026 第27周 裕华片区常规面积核查任务' },
+        { id: 4, code: '60218B010', name: '桥西区新百站', checkStatus: '已检查', dept: '桥西管理部', area: '桥西一片区所', type: '自管站', office: '中山西路', address: '桥西区中山西路与中华大街交口西南', census: '是', buildYear: '2005年', expert: '李志强', checkTime: '2026-06-30', result: '合格', rectifyStatus: '已归档', rectifyTime: '2026-07-05', taskName: '2026 第26周 桥西片区常规面积核查任务' },
+        { id: 5, code: '60218B012', name: '长安区中山东路站', checkStatus: '已检查', dept: '长安管理部', area: '长安一片区所', type: '用户站', office: '中山东路', address: '长安区中山东路与青园街交叉口东行', census: '否', buildYear: '2008年', expert: '张伟', checkTime: '2026-06-25', result: '不合格', rectifyStatus: '已超期', rectifyTime: '—', taskName: '2026 第26周 长安片区管网排查任务' },
+        { id: 6, code: '60218B015', name: '裕华区槐北站', checkStatus: '待检查', dept: '裕华管理部', area: '裕华一片区所', type: '自管站', office: '槐北路', address: '裕华区槐北路与富强大街交口', census: '是', buildYear: '2015年', expert: '赵立成', checkTime: '—', result: '—', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 裕华片区常规面积核查任务' },
+        { id: 7, code: '60218B018', name: '桥西区建设大街站', checkStatus: '检查中', dept: '桥西管理部', area: '桥西二片区所', type: '用户站', office: '建设大街', address: '桥西区建设大街与裕华路交口西北', census: '是', buildYear: '2011年', expert: '李志强', checkTime: '—', result: '—', rectifyStatus: '—', rectifyTime: '—', taskName: '2026 第27周 桥西片区常规面积核查任务' },
+        { id: 8, code: '60218B020', name: '长安区和平路站', checkStatus: '待整改', dept: '长安管理部', area: '长安二片区所', type: '用户站', office: '和平东路', address: '长安区和平东路与建华大街交叉口东行', census: '是', buildYear: '2006年', expert: '张伟', checkTime: '2026-07-01', result: '不合格', rectifyStatus: '待审核', rectifyTime: '2026-07-04', taskName: '2026 第27周 长安片区常规面积核查任务' }
       ];
 
       // 原始数据副本用于重置
       var allData = mockData.slice();
+      var selectedAreas = [];
+      var treeExpandedState = {};
 
       // ============================================================
       // 渲染函数
@@ -280,6 +381,9 @@
       }
 
       function renderRows(data) {
+        if (!data.length) {
+          return '<tr><td colspan="17" class="sd-col-center" style="padding:32px 12px;color:#8c8c8c;">暂无匹配站点</td></tr>';
+        }
         var html = '';
         for (var i = 0; i < data.length; i++) {
           var r = data[i];
@@ -308,75 +412,228 @@
         return html;
       }
 
+      function buildTreeData() {
+        var deptMap = {};
+        allData.forEach(function (item) {
+          if (!deptMap[item.dept]) {
+            deptMap[item.dept] = { name: item.dept, count: 0, areas: {} };
+          }
+          deptMap[item.dept].count += 1;
+          if (!deptMap[item.dept].areas[item.area]) {
+            deptMap[item.dept].areas[item.area] = { name: item.area, count: 0 };
+          }
+          deptMap[item.dept].areas[item.area].count += 1;
+        });
+
+        return Object.keys(deptMap).sort().map(function (deptName) {
+          var dept = deptMap[deptName];
+          return {
+            name: dept.name,
+            count: dept.count,
+            areas: Object.keys(dept.areas).sort().map(function (areaName) {
+              return dept.areas[areaName];
+            })
+          };
+        });
+      }
+
+      function isAreaSelected(areaName) {
+        return selectedAreas.indexOf(areaName) > -1;
+      }
+
+      function areAllAreasSelected(areaList) {
+        return areaList.length > 0 && areaList.every(function (area) {
+          return isAreaSelected(area.name);
+        });
+      }
+
+      function areSomeAreasSelected(areaList) {
+        return areaList.some(function (area) {
+          return isAreaSelected(area.name);
+        });
+      }
+
+      function renderTree() {
+        var treeEl = document.getElementById('sd-tree');
+        var summaryEl = document.getElementById('sd-tree-summary');
+        if (!treeEl || !summaryEl) return;
+
+        var treeData = buildTreeData();
+        var rootChecked = selectedAreas.length === 0;
+
+        summaryEl.textContent = rootChecked
+          ? '当前组织筛选：全部站点'
+          : '当前组织筛选：已选 ' + selectedAreas.length + ' 个片区所';
+
+        var html = [
+          '<div class="sd-tree-node sd-tree-node--root">',
+          '<span class="sd-tree-toggle sd-tree-toggle--hidden">•</span>',
+          '<input type="checkbox" id="sd-tree-root" ' + (rootChecked ? 'checked' : '') + ' />',
+          '<label class="sd-tree-label" for="sd-tree-root">全部站点<span class="sd-tree-count">(' + allData.length + ')</span></label>',
+          '</div>'
+        ];
+
+        treeData.forEach(function (dept) {
+          var expanded = treeExpandedState[dept.name] !== false;
+          var allChecked = areAllAreasSelected(dept.areas);
+          var someChecked = areSomeAreasSelected(dept.areas);
+          html.push(
+            '<div class="sd-tree-group">',
+              '<div class="sd-tree-node">',
+                '<span class="sd-tree-toggle" data-toggle-dept="' + dept.name + '">' + (expanded ? '▾' : '▸') + '</span>',
+                '<input type="checkbox" class="sd-tree-dept-checkbox" id="sd-tree-dept-' + dept.name + '" data-dept="' + dept.name + '" ' + (allChecked ? 'checked' : '') + ' />',
+                '<label class="sd-tree-label" for="sd-tree-dept-' + dept.name + '">' + dept.name + '<span class="sd-tree-count">(' + dept.count + ')</span></label>',
+              '</div>',
+              '<div class="sd-tree-children' + (expanded ? '' : ' sd-tree-children--collapsed') + '" data-children-dept="' + dept.name + '">'
+          );
+          dept.areas.forEach(function (area) {
+            html.push(
+              '<div class="sd-tree-node sd-tree-node--child">',
+                '<span class="sd-tree-toggle sd-tree-toggle--hidden">•</span>',
+                '<input type="checkbox" class="sd-tree-area-checkbox" id="sd-tree-area-' + area.name + '" data-dept="' + dept.name + '" data-area="' + area.name + '" ' + (isAreaSelected(area.name) ? 'checked' : '') + ' />',
+                '<label class="sd-tree-label" for="sd-tree-area-' + area.name + '">' + area.name + '<span class="sd-tree-count">(' + area.count + ')</span></label>',
+              '</div>'
+            );
+          });
+          html.push('</div></div>');
+        });
+
+        treeEl.innerHTML = html.join('');
+
+        treeData.forEach(function (dept) {
+          var deptCheckbox = document.querySelector('.sd-tree-dept-checkbox[data-dept="' + dept.name + '"]');
+          if (deptCheckbox) {
+            deptCheckbox.indeterminate = !areAllAreasSelected(dept.areas) && areSomeAreasSelected(dept.areas);
+          }
+        });
+      }
+
+      function setDeptSelected(deptName, checked) {
+        var treeData = buildTreeData();
+        var dept = treeData.find(function (item) { return item.name === deptName; });
+        if (!dept) return;
+        dept.areas.forEach(function (area) {
+          var index = selectedAreas.indexOf(area.name);
+          if (checked && index === -1) selectedAreas.push(area.name);
+          if (!checked && index > -1) selectedAreas.splice(index, 1);
+        });
+      }
+
+      function setAreaSelected(areaName, checked) {
+        var index = selectedAreas.indexOf(areaName);
+        if (checked && index === -1) selectedAreas.push(areaName);
+        if (!checked && index > -1) selectedAreas.splice(index, 1);
+      }
+
+      function getFilteredData() {
+        var nameVal = (document.getElementById('sd-f-name').value || '').trim();
+        var taskVal = (document.getElementById('sd-f-task').value || '').trim();
+        var checkStatusVal = document.getElementById('sd-f-check-status').value;
+        var censusVal = document.getElementById('sd-f-census').value;
+        var resultVal = document.getElementById('sd-f-result').value;
+        var rectifyVal = document.getElementById('sd-f-rectify').value;
+        var checkTimeVal = (document.getElementById('sd-f-check-time').value || '').trim();
+        var rectifyTimeVal = (document.getElementById('sd-f-rectify-time').value || '').trim();
+
+        return allData.filter(function (r) {
+          if (selectedAreas.length && selectedAreas.indexOf(r.area) === -1) return false;
+          if (nameVal && r.name.indexOf(nameVal) === -1) return false;
+          if (taskVal && r.taskName.indexOf(taskVal) === -1) return false;
+          if (checkStatusVal && r.checkStatus !== checkStatusVal) return false;
+          if (censusVal && r.census !== censusVal) return false;
+          if (resultVal && r.result !== resultVal) return false;
+          if (rectifyVal && r.rectifyStatus !== rectifyVal) return false;
+          if (checkTimeVal && r.checkTime.indexOf(checkTimeVal) === -1) return false;
+          if (rectifyTimeVal && r.rectifyTime.indexOf(rectifyTimeVal) === -1) return false;
+          return true;
+        });
+      }
+
+      function applyFilters() {
+        renderTable(getFilteredData());
+        renderTree();
+      }
+
       function renderPageContent() {
         var total = allData.length;
 
         return '\
           <div class="sd-page">\
-            <div class="sd-page-header">\
-              <div class="sd-page-title">面积检查站点明细</div>\
-              <button class="btn primary" id="sd-btn-export">导出</button>\
+            <div class="sd-layout">\
+              <aside class="card sd-sidebar-card">\
+                <div class="card-body">\
+                  <div class="sd-sidebar-title">组织筛选</div>\
+                  <div class="sd-tree-summary" id="sd-tree-summary">当前组织筛选：全部站点</div>\
+                  <div class="sd-tree" id="sd-tree"></div>\
+                </div>\
+              </aside>\
+              <div class="sd-main">\
+                <div class="sd-page-header">\
+                  <div class="sd-page-title">面积检查站点明细</div>\
+                  <button class="btn primary" id="sd-btn-export">导出</button>\
+                </div>\
+                <section class="card sd-filter-card">\
+                  <div class="card-body">\
+                    <div class="sd-filter-grid">\
+                      <div class="sd-filter-item"><label>站点名称：</label><input class="control" id="sd-f-name" placeholder="请输入" /></div>\
+                      <div class="sd-filter-item"><label>任务名称：</label><input class="control" id="sd-f-task" placeholder="请输入" /></div>\
+                      <div class="sd-filter-item"><label>检查状态：</label><select class="control" id="sd-f-check-status"><option value="">全部</option><option value="待检查">待检查</option><option value="检查中">检查中</option><option value="已检查">已检查</option><option value="待整改">待整改</option></select></div>\
+                      <div class="sd-filter-item"><label>本轮次是否普查：</label><select class="control" id="sd-f-census"><option value="">全部</option><option value="是">是</option><option value="否">否</option></select></div>\
+                      <div class="sd-filter-item"><label>检查结果：</label><select class="control" id="sd-f-result"><option value="">全部</option><option value="合格">合格</option><option value="不合格">不合格</option></select></div>\
+                      <div class="sd-filter-item"><label>整改状态：</label><select class="control" id="sd-f-rectify"><option value="">全部</option><option value="待整改">待整改</option><option value="待审核">待审核</option><option value="待复查">待复查</option><option value="已归档">已归档</option><option value="已超期">已超期</option></select></div>\
+                      <div class="sd-filter-item"><label>检查完成时间：</label><input class="control" id="sd-f-check-time" placeholder="请输入" /></div>\
+                      <div class="sd-filter-item"><label>整改完成时间：</label><input class="control" id="sd-f-rectify-time" placeholder="请输入" /></div>\
+                      <div class="sd-filter-actions">\
+                        <button class="btn" id="sd-btn-reset">重置</button>\
+                        <button class="btn primary" id="sd-btn-query">查询</button>\
+                      </div>\
+                    </div>\
+                  </div>\
+                </section>\
+                <section class="card">\
+                  <div class="card-body">\
+                    <div class="sd-list-header">\
+                      <span class="sd-list-title">站点列表</span>\
+                      <span class="sd-count-badge">共 ' + total + ' 条记录</span>\
+                    </div>\
+                    <div class="table-scroll">\
+                      <table class="sd-table">\
+                        <thead>\
+                          <tr>\
+                            <th class="sd-col-center col-seq">序号</th>\
+                            <th class="col-code">换热站编码</th>\
+                            <th class="col-name">换热站名称</th>\
+                            <th class="sd-col-center col-check-status">检查状态</th>\
+                            <th class="col-dept">管理部</th>\
+                            <th class="col-area">片区所</th>\
+                            <th class="sd-col-center col-type">站点类型</th>\
+                            <th class="col-office">办事处</th>\
+                            <th class="col-addr">用地地址</th>\
+                            <th class="sd-col-center col-census">本轮次是否普查</th>\
+                            <th class="sd-col-center col-year">建筑年代</th>\
+                            <th class="col-expert">检查专家</th>\
+                            <th class="col-check-time">检查完成时间</th>\
+                            <th class="sd-col-center col-result">检查结果</th>\
+                            <th class="sd-col-center col-rectify-status">整改状态</th>\
+                            <th class="col-rectify-time">整改完成时间</th>\
+                            <th class="sd-col-center col-ops">操作</th>\
+                          </tr>\
+                        </thead>\
+                        <tbody id="sd-table-body">' + renderRows(allData) + '</tbody>\
+                      </table>\
+                    </div>\
+                    <div class="pagination">\
+                      <span class="sd-pagination-info">第 1 - ' + total + ' 条 / 共 ' + total + ' 条</span>\
+                      <div class="page-box">\
+                        <div class="page-btn disabled">&lt;</div>\
+                        <div class="page-number active">1</div>\
+                        <div class="page-btn disabled">&gt;</div>\
+                      </div>\
+                    </div>\
+                  </div>\
+                </section>\
+              </div>\
             </div>\
-            <section class="card sd-filter-card">\
-              <div class="card-body">\
-                <div class="sd-filter-grid">\
-                  <div class="sd-filter-item"><label>站点名称：</label><input class="control" id="sd-f-name" placeholder="请输入" /></div>\
-                  <div class="sd-filter-item"><label>任务名称：</label><input class="control" id="sd-f-task" placeholder="请输入" /></div>\
-                  <div class="sd-filter-item"><label>检查状态：</label><select class="control" id="sd-f-check-status"><option value="">全部</option><option value="待检查">待检查</option><option value="检查中">检查中</option><option value="已检查">已检查</option><option value="待整改">待整改</option></select></div>\
-                  <div class="sd-filter-item"><label>本轮次是否普查：</label><select class="control" id="sd-f-census"><option value="">全部</option><option value="是">是</option><option value="否">否</option></select></div>\
-                  <div class="sd-filter-item"><label>检查结果：</label><select class="control" id="sd-f-result"><option value="">全部</option><option value="合格">合格</option><option value="不合格">不合格</option></select></div>\
-                  <div class="sd-filter-item"><label>整改状态：</label><select class="control" id="sd-f-rectify"><option value="">全部</option><option value="待整改">待整改</option><option value="待审核">待审核</option><option value="待复查">待复查</option><option value="已归档">已归档</option><option value="已超期">已超期</option></select></div>\
-                  <div class="sd-filter-item"><label>检查完成时间：</label><input class="control" id="sd-f-check-time" placeholder="请输入" /></div>\
-                  <div class="sd-filter-item"><label>整改完成时间：</label><input class="control" id="sd-f-rectify-time" placeholder="请输入" /></div>\
-                  <div class="sd-filter-actions">\
-                    <button class="btn" id="sd-btn-reset">重置</button>\
-                    <button class="btn primary" id="sd-btn-query">查询</button>\
-                  </div>\
-                </div>\
-              </div>\
-            </section>\
-            <section class="card">\
-              <div class="card-body">\
-                <div class="sd-list-header">\
-                  <span class="sd-list-title">站点列表</span>\
-                  <span class="sd-count-badge">共 ' + total + ' 条记录</span>\
-                </div>\
-                <div class="table-scroll">\
-                  <table class="sd-table">\
-                    <thead>\
-                      <tr>\
-                        <th class="sd-col-center col-seq">序号</th>\
-                        <th class="col-code">换热站编码</th>\
-                        <th class="col-name">换热站名称</th>\
-                        <th class="sd-col-center col-check-status">检查状态</th>\
-                        <th class="col-dept">管理部</th>\
-                        <th class="col-area">片区所</th>\
-                        <th class="sd-col-center col-type">站点类型</th>\
-                        <th class="col-office">办事处</th>\
-                        <th class="col-addr">用地地址</th>\
-                        <th class="sd-col-center col-census">本轮次是否普查</th>\
-                        <th class="sd-col-center col-year">建筑年代</th>\
-                        <th class="col-expert">检查专家</th>\
-                        <th class="col-check-time">检查完成时间</th>\
-                        <th class="sd-col-center col-result">检查结果</th>\
-                        <th class="sd-col-center col-rectify-status">整改状态</th>\
-                        <th class="col-rectify-time">整改完成时间</th>\
-                        <th class="sd-col-center col-ops">操作</th>\
-                      </tr>\
-                    </thead>\
-                    <tbody id="sd-table-body">' + renderRows(allData) + '</tbody>\
-                  </table>\
-                </div>\
-                <div class="pagination">\
-                  <span class="sd-pagination-info">第 1 - ' + total + ' 条 / 共 ' + total + ' 条</span>\
-                  <div class="page-box">\
-                    <div class="page-btn disabled">&lt;</div>\
-                    <div class="page-number active">1</div>\
-                    <div class="page-btn disabled">&gt;</div>\
-                  </div>\
-                </div>\
-              </div>\
-            </section>\
           </div>';
       }
 
@@ -395,31 +652,7 @@
         var queryBtn = document.getElementById('sd-btn-query');
         var resetBtn = document.getElementById('sd-btn-reset');
 
-        function doFilter() {
-          var nameVal = (document.getElementById('sd-f-name').value || '').trim();
-          var taskVal = (document.getElementById('sd-f-task').value || '').trim();
-          var checkStatusVal = document.getElementById('sd-f-check-status').value;
-          var censusVal = document.getElementById('sd-f-census').value;
-          var resultVal = document.getElementById('sd-f-result').value;
-          var rectifyVal = document.getElementById('sd-f-rectify').value;
-          var checkTimeVal = (document.getElementById('sd-f-check-time').value || '').trim();
-          var rectifyTimeVal = (document.getElementById('sd-f-rectify-time').value || '').trim();
-
-          var filtered = allData.filter(function (r) {
-            if (nameVal && r.name.indexOf(nameVal) === -1) return false;
-            if (taskVal && r.taskName.indexOf(taskVal) === -1) return false;
-            if (checkStatusVal && r.checkStatus !== checkStatusVal) return false;
-            if (censusVal && r.census !== censusVal) return false;
-            if (resultVal && r.result !== resultVal) return false;
-            if (rectifyVal && r.rectifyStatus !== rectifyVal) return false;
-            if (checkTimeVal && r.checkTime.indexOf(checkTimeVal) === -1) return false;
-            if (rectifyTimeVal && r.rectifyTime.indexOf(rectifyTimeVal) === -1) return false;
-            return true;
-          });
-          renderTable(filtered);
-        }
-
-        if (queryBtn) queryBtn.addEventListener('click', doFilter);
+        if (queryBtn) queryBtn.addEventListener('click', applyFilters);
         if (resetBtn) {
           resetBtn.addEventListener('click', function () {
             ['sd-f-name','sd-f-task','sd-f-check-time','sd-f-rectify-time'].forEach(function (id) {
@@ -430,7 +663,38 @@
               var el = document.getElementById(id);
               if (el) el.value = '';
             });
-            renderTable(allData);
+            selectedAreas = [];
+            applyFilters();
+          });
+        }
+
+        var treeEl = document.getElementById('sd-tree');
+        if (treeEl) {
+          treeEl.addEventListener('click', function (e) {
+            var toggle = e.target.closest('[data-toggle-dept]');
+            if (toggle) {
+              var deptName = toggle.getAttribute('data-toggle-dept');
+              treeExpandedState[deptName] = treeExpandedState[deptName] === false;
+              renderTree();
+            }
+          });
+
+          treeEl.addEventListener('change', function (e) {
+            var target = e.target;
+            if (target.id === 'sd-tree-root') {
+              selectedAreas = [];
+              applyFilters();
+              return;
+            }
+            if (target.classList.contains('sd-tree-dept-checkbox')) {
+              setDeptSelected(target.getAttribute('data-dept'), target.checked);
+              applyFilters();
+              return;
+            }
+            if (target.classList.contains('sd-tree-area-checkbox')) {
+              setAreaSelected(target.getAttribute('data-area'), target.checked);
+              applyFilters();
+            }
           });
         }
 
@@ -458,6 +722,8 @@
             AppComponents.showToast('当前为原型预览，分页未实现', 'info');
           });
         });
+
+        renderTree();
       }
 
       // ============================================================
@@ -618,7 +884,7 @@
         var badge = document.querySelector('.sd-count-badge');
         if (badge) badge.textContent = '共 ' + total + ' 条记录';
         var info = document.querySelector('.sd-pagination-info');
-        if (info) info.textContent = '第 1 - ' + total + ' 条 / 共 ' + total + ' 条';
+        if (info) info.textContent = total ? ('第 1 - ' + total + ' 条 / 共 ' + total + ' 条') : '第 0 - 0 条 / 共 0 条';
       }
 
       // ============================================================

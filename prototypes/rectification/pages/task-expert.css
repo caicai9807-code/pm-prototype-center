@@ -336,6 +336,10 @@
         line-height: 1.6;
       }
 
+      body[data-page="task-expert"] .expert-grid-meta--secondary {
+        margin-top: 2px;
+      }
+
       body[data-page="task-expert"] .expert-grid-status {
         flex-shrink: 0;
         margin-left: 8px;

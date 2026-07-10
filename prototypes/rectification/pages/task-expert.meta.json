@@ -51,7 +51,7 @@
       "name": "expertPool",
       "type": "array",
       "target": "ui-render",
-      "description": "候选专家池列表，每个专家包含id/name/dept/type/age/lastCheck/status字段，支持按全部/待分配/已分配筛选"
+      "description": "候选专家池列表，每个专家包含id/name/dept/type/age/lastCheck/hasAuditTask/status字段，卡片展示距上次检查XX天前和当前是否有稽查任务，支持按全部/待分配/已分配筛选"
     },
     {
       "name": "assignments",

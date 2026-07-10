@@ -47,25 +47,25 @@
     });
 
     var expertPool = [
-      { id: 1, name: '赵立成', dept: '裕华管理部', type: '一类', age: 43, lastCheck: '2026-06-10', status: '待分配' },
-      { id: 2, name: '孙敏', dept: '裕华管理部', type: '二类', age: 39, lastCheck: '2026-05-29', status: '待分配' },
-      { id: 3, name: '刘海峰', dept: '长安管理部', type: '一类', age: 45, lastCheck: '2026-06-08', status: '待分配' },
-      { id: 4, name: '周倩', dept: '长安管理部', type: '二类', age: 37, lastCheck: '2026-05-18', status: '待分配' }
+      { id: 1, name: '赵立成', dept: '裕华管理部', type: '一类', age: 43, lastCheck: '2026-06-10', hasAuditTask: false, status: '待分配' },
+      { id: 2, name: '孙敏', dept: '裕华管理部', type: '二类', age: 39, lastCheck: '2026-05-29', hasAuditTask: true, status: '待分配' },
+      { id: 3, name: '刘海峰', dept: '长安管理部', type: '一类', age: 45, lastCheck: '2026-06-08', hasAuditTask: true, status: '待分配' },
+      { id: 4, name: '周倩', dept: '长安管理部', type: '二类', age: 37, lastCheck: '2026-05-18', hasAuditTask: false, status: '待分配' }
     ];
 
     var expertModalPool = [
-      { id: 'user001', username: 'user001', realName: '赵立成', phone: '19933000001', org: '华电供热', dept: '裕华管理部', age: 43, lastCheck: '2026-06-10' },
-      { id: 'user002', username: 'user002', realName: '孙敏', phone: '19933000002', org: '华电供热', dept: '裕华管理部', age: 39, lastCheck: '2026-05-29' },
-      { id: 'user003', username: 'user003', realName: '刘海峰', phone: '19933000003', org: '华电供热', dept: '长安管理部', age: 45, lastCheck: '2026-06-08' },
-      { id: 'user004', username: 'user004', realName: '周倩', phone: '19933000004', org: '华电供热', dept: '长安管理部', age: 37, lastCheck: '2026-05-18' },
-      { id: 'user005', username: 'user005', realName: '王建国', phone: '19933000005', org: '华电供热', dept: '桥西管理部', age: 44, lastCheck: '2026-06-01' },
-      { id: 'user006', username: 'user006', realName: '马会丽', phone: '19933000006', org: '华电供热', dept: '桥西管理部', age: 38, lastCheck: '2026-05-21' },
-      { id: 'user007', username: 'user007', realName: '陈晓光', phone: '19933000007', org: '华电供热', dept: '裕华管理部', age: 41, lastCheck: '2026-06-12' },
-      { id: 'user008', username: 'user008', realName: '李楠', phone: '19933000008', org: '华电供热', dept: '长安管理部', age: 36, lastCheck: '2026-06-11' },
-      { id: 'user009', username: 'user009', realName: '张伟民', phone: '19933000009', org: '华电供热', dept: '裕华管理部', age: 42, lastCheck: '2026-05-20' },
-      { id: 'user010', username: 'user010', realName: '李志强', phone: '19933000010', org: '华电供热', dept: '裕华管理部', age: 38, lastCheck: '2026-06-05' },
-      { id: 'user011', username: 'user011', realName: '王秀英', phone: '19933000011', org: '华电供热', dept: '裕华管理部', age: 45, lastCheck: '2026-04-28' },
-      { id: 'user012', username: 'user012', realName: '赵海峰', phone: '19933000012', org: '华电供热', dept: '长安管理部', age: 40, lastCheck: '2026-06-03' }
+      { id: 'user001', username: 'user001', realName: '赵立成', phone: '19933000001', org: '华电供热', dept: '裕华管理部', age: 43, lastCheck: '2026-06-10', hasAuditTask: false },
+      { id: 'user002', username: 'user002', realName: '孙敏', phone: '19933000002', org: '华电供热', dept: '裕华管理部', age: 39, lastCheck: '2026-05-29', hasAuditTask: true },
+      { id: 'user003', username: 'user003', realName: '刘海峰', phone: '19933000003', org: '华电供热', dept: '长安管理部', age: 45, lastCheck: '2026-06-08', hasAuditTask: true },
+      { id: 'user004', username: 'user004', realName: '周倩', phone: '19933000004', org: '华电供热', dept: '长安管理部', age: 37, lastCheck: '2026-05-18', hasAuditTask: false },
+      { id: 'user005', username: 'user005', realName: '王建国', phone: '19933000005', org: '华电供热', dept: '桥西管理部', age: 44, lastCheck: '2026-06-01', hasAuditTask: true },
+      { id: 'user006', username: 'user006', realName: '马会丽', phone: '19933000006', org: '华电供热', dept: '桥西管理部', age: 38, lastCheck: '2026-05-21', hasAuditTask: false },
+      { id: 'user007', username: 'user007', realName: '陈晓光', phone: '19933000007', org: '华电供热', dept: '裕华管理部', age: 41, lastCheck: '2026-06-12', hasAuditTask: false },
+      { id: 'user008', username: 'user008', realName: '李楠', phone: '19933000008', org: '华电供热', dept: '长安管理部', age: 36, lastCheck: '2026-06-11', hasAuditTask: true },
+      { id: 'user009', username: 'user009', realName: '张伟民', phone: '19933000009', org: '华电供热', dept: '裕华管理部', age: 42, lastCheck: '2026-05-20', hasAuditTask: false },
+      { id: 'user010', username: 'user010', realName: '李志强', phone: '19933000010', org: '华电供热', dept: '裕华管理部', age: 38, lastCheck: '2026-06-05', hasAuditTask: true },
+      { id: 'user011', username: 'user011', realName: '王秀英', phone: '19933000011', org: '华电供热', dept: '裕华管理部', age: 45, lastCheck: '2026-04-28', hasAuditTask: true },
+      { id: 'user012', username: 'user012', realName: '赵海峰', phone: '19933000012', org: '华电供热', dept: '长安管理部', age: 40, lastCheck: '2026-06-03', hasAuditTask: false }
     ];
 
     var currentFilter = 'all';
@@ -77,6 +77,25 @@
     /* 槽位激活态：记录当前激活的槽位（group, index），-1 表示无激活 */
     var activeSlotGroup = -1;
     var activeSlotIndex = -1;
+    var prototypeToday = '2026-07-10';
+
+    function getDaysSince(lastCheck) {
+      if (!lastCheck) return null;
+      var base = new Date(prototypeToday + 'T00:00:00');
+      var checkDate = new Date(lastCheck + 'T00:00:00');
+      if (isNaN(base.getTime()) || isNaN(checkDate.getTime())) return null;
+      var diff = Math.floor((base.getTime() - checkDate.getTime()) / (24 * 60 * 60 * 1000));
+      return diff >= 0 ? diff : 0;
+    }
+
+    function formatLastCheckAgo(lastCheck) {
+      var days = getDaysSince(lastCheck);
+      return days === null ? '—' : days + ' 天前';
+    }
+
+    function formatAuditTask(hasAuditTask) {
+      return hasAuditTask ? '有' : '无';
+    }
 
     /* ---- 激活/取消激活槽位 ---- */
     function activateSlot(gi, si) {
@@ -245,6 +264,10 @@
               '<span>' + e.dept + '</span>' +
               '<span>' + e.age + '岁</span>' +
               '<span>上次检查：' + e.lastCheck + '</span>' +
+            '</div>' +
+            '<div class="expert-grid-meta expert-grid-meta--secondary">' +
+              '<span>距上次检查：' + formatLastCheckAgo(e.lastCheck) + '</span>' +
+              '<span>当前稽查任务：' + formatAuditTask(e.hasAuditTask) + '</span>' +
             '</div>' +
           '</div>' +
           '<div class="expert-grid-status"><span class="status-tag ' + statusCls + '">' + e.status + '</span></div>' +
@@ -644,6 +667,7 @@
               type: '一类',
               age: expert.age,
               lastCheck: expert.lastCheck,
+              hasAuditTask: !!expert.hasAuditTask,
               status: '待分配'
             });
           }
@@ -733,6 +757,7 @@
             type: '一类',
             age: e.age,
             lastCheck: e.lastCheck,
+            hasAuditTask: !!e.hasAuditTask,
             status: '待分配'
           });
         });
