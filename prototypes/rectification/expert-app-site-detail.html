@@ -589,6 +589,7 @@
     const params = new URLSearchParams(window.location.search);
     const siteCode = params.get('code') || '60218B006';
     const taskId = params.get('task') || '';
+    const isReadonly = params.get('readonly') === '1';
 
     // Mock 数据（与 PC 端 siteDetailPool 对应）
     const siteData = {
@@ -812,11 +813,11 @@
     var isUnqualified = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
 
     var btnHtml = '';
-    if (site.status === 'unchecked') {
+    if (!isReadonly && site.status === 'unchecked') {
       btnHtml = '<button class="action-btn-full btn-primary" onclick="location.href=\'./expert-app-check-record.html?code=' + siteCode + '&task=' + taskId + '\'">填写检查记录单</button>';
-    } else if (site.status === 'checked' || site.status === 'rectified') {
+    } else if (!isReadonly && (site.status === 'checked' || site.status === 'rectified')) {
       btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
-    } else if (site.status === 'rectify') {
+    } else if (!isReadonly && site.status === 'rectify') {
       btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
     }
 
@@ -935,8 +936,8 @@
           '</div>' +
           revBadgeHtml +
           '<div class="bld-footer">' +
-            '<button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + d.id + ')">复核</button>' +
-            '<span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + d.id + '&code=' + siteCode + '\'">查看详情 ›</span>' +
+            (isReadonly ? '' : '<button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + d.id + ')">复核</button>') +
+            '<span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + d.id + '&code=' + siteCode + (isReadonly ? '&readonly=1' : '') + '\'">查看详情 ›</span>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -1252,7 +1253,7 @@
                     '<div class="bld-area-card ' + dc + '"><span class="acl">面积变化</span><span class="acv">' + ds + bi.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span><span class="acr">' + bi.rate + '</span></div>' +
                   '</div>' +
                   rb +
-                  '<div class="bld-footer"><button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + bi.id + ')">复核</button><span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + bi.id + '&code=' + sc + '\'">查看详情 ›</span></div>' +
+                  '<div class="bld-footer">' + (isReadonly ? '' : '<button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + bi.id + ')">复核</button>') + '<span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + bi.id + '&code=' + sc + (isReadonly ? '&readonly=1' : '') + '\'">查看详情 ›</span></div>' +
                 '</div>';
               }).join('');
             }

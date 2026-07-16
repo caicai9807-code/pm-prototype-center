@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const sourceRoot = '/Users/sears/Desktop/VibeWork/deliverables/rectification-prototype/rectification';
+const sourceRoot = path.resolve(__dirname, '../prototypes/rectification');
 const outputPath = '/Users/sears/Desktop/VibeWork/pm-prototype-center/deliverables/expert-app-stable-single-file.html';
 const defaultEntry = 'expert-app.html';
 

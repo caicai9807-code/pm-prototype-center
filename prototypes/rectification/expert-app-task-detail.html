@@ -171,6 +171,22 @@
     .site-unchecked { background: #fff7e6; color: #d48806; }
     .site-rectify { background: #ffeeee; color: #ff3141; }
 
+    /* ===== 已结束任务只读信息 ===== */
+    .readonly-tip { margin-top: 8px; padding: 8px 10px; border-radius: 6px; background: #f5f5f5; color: #666; font-size: 12px; line-height: 1.6; }
+    .attachment-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f5f5f5; }
+    .attachment-item:last-child { border-bottom: none; }
+    .attachment-main { flex: 1; min-width: 0; }
+    .attachment-name { font-size: 13px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attachment-meta { margin-top: 2px; font-size: 11px; color: #999; }
+    .attachment-link { color: #1677ff; font-size: 12px; white-space: nowrap; }
+    .history-item { padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+    .history-item:last-child { border-bottom: none; }
+    .history-item summary { cursor: pointer; list-style: none; }
+    .history-item summary::-webkit-details-marker { display: none; }
+    .history-title { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+    .history-time { flex-shrink: 0; color: #999; font-size: 11px; }
+    .history-detail { padding-top: 5px; color: #666; font-size: 12px; line-height: 1.6; }
+
     /* ===== 操作按钮区 ===== */
     .action-bar {
       position: fixed;
@@ -221,6 +237,8 @@
     const params = new URLSearchParams(window.location.search);
     const taskId = params.get('id');
     const taskType = params.get('type') || 'area-check';
+    const emptyText = '暂无/—';
+    const displayValue = value => value === undefined || value === null || value === '' ? emptyText : value;
 
     const areaCheckData = {
       'T20250701001': {
@@ -249,6 +267,50 @@
           { code: '60218C005', name: '高新区中站', type: '中心站', status: 'unchecked', statusText: '待检查' },
         ]
       },
+      'T20250601001': {
+        title: '2025年春季面积普查-裕华区', status: 'done', statusText: '已结束',
+        taskNo: 'RW-20250601-001', type: '面积普查', area: '裕华区', sites: 5,
+        startDate: '2025-06-01', endDate: '2025-06-15', expert: '张建国', dept: '裕华区管理部',
+        completedAt: '2025-06-15 17:30', completedBy: '系统自动结束',
+        conclusion: '5个站点已全部完成检查', endReason: '任务范围内站点均已完成',
+        sitesList: [
+          { code: '60218B001', name: '裕华区中心站', type: '中心站', status: 'checked', statusText: '已检查' },
+          { code: '60218B004', name: '裕华区万达站', type: '自管站', status: 'checked', statusText: '已检查' },
+          { code: '60218B003', name: '桥西区南站', type: '用户站', status: 'checked', statusText: '已检查' },
+          { code: '60218B009', name: '桥西区东站', type: '用户站', status: 'checked', statusText: '已检查' },
+          { code: '60218B012', name: '桥西区西站', type: '中心站', status: 'checked', statusText: '已检查' }
+        ],
+        attachments: [
+          { name: '任务检查结果汇总.txt', size: '2.1 KB', url: 'data:text/plain;charset=utf-8,%E4%BB%BB%E5%8A%A1%E6%A3%80%E6%9F%A5%E7%BB%93%E6%9E%9C%E6%B1%87%E6%80%BB' },
+          { name: '现场检查归档说明.txt', size: '1.4 KB', url: 'data:text/plain;charset=utf-8,%E7%8E%B0%E5%9C%BA%E6%A3%80%E6%9F%A5%E5%BD%92%E6%A1%A3%E8%AF%B4%E6%98%8E' }
+        ],
+        history: [
+          { title: '任务自动结束', time: '2025-06-15 17:30', detail: '全部5个站点完成检查，系统将任务状态更新为已结束。' },
+          { title: '最后一个站点完成检查', time: '2025-06-15 17:28', detail: '桥西区西站检查完成，任务进度更新为5/5。' },
+          { title: '任务开始', time: '2025-06-01 09:00', detail: '任务到达开始时间，状态由待开始更新为进行中。' }
+        ]
+      },
+      'T20250601002': {
+        title: '2025年春季面积普查-长安区', status: 'done', statusText: '已结束',
+        taskNo: 'RW-20250601-002', type: '面积普查', area: '长安区', sites: 4,
+        startDate: '2025-06-01', endDate: '2025-06-15', expert: '张建国', dept: '长安区管理部',
+        completedAt: '2025-06-14 16:20', completedBy: '系统自动结束',
+        conclusion: '4个站点已全部完成检查', endReason: '任务范围内站点均已完成',
+        sitesList: [
+          { code: '60218B001', name: '长安区中心站', type: '中心站', status: 'checked', statusText: '已检查' },
+          { code: '60218B006', name: '桥西区北站', type: '用户站', status: 'rectify', statusText: '待整改' },
+          { code: '60218B003', name: '长安区南站', type: '子站', status: 'checked', statusText: '已检查' },
+          { code: '60218B004', name: '长安区北站', type: '子站', status: 'checked', statusText: '已检查' }
+        ],
+        attachments: [],
+        history: [{ title: '任务自动结束', time: '2025-06-14 16:20', detail: '全部4个站点完成检查，系统将任务状态更新为已结束。' }]
+      },
+      'T20250601003': {
+        title: '2025年春季面积普查-桥西区', status: 'done', statusText: '已结束',
+        taskNo: 'RW-20250601-003', type: '面积普查', area: '桥西区', sites: 5,
+        startDate: '2025-06-01', endDate: '2025-06-15', expert: '张建国', dept: '桥西区管理部',
+        completedAt: '', completedBy: '', conclusion: '', endReason: '', sitesList: [], attachments: [], history: []
+      },
     };
 
     const rectData = {
@@ -269,7 +331,10 @@
     };
 
     const data = taskType === 'area-check' ? areaCheckData : rectData;
-    const task = data[taskId] || areaCheckData['T20250701001'];
+    const task = data[taskId] || {
+      title: '任务详情', status: 'done', statusText: emptyText, taskNo: '', type: '', area: '',
+      sites: '', startDate: '', endDate: '', expert: '', dept: '', sitesList: [], attachments: [], history: []
+    };
     document.getElementById('pageTitle').textContent = task.title;
 
     const tagMap = {
@@ -283,9 +348,10 @@
         <h2>${task.title}</h2>
         <div class="meta">
           ${taskType === 'area-check'
-            ? `<span>任务编号：${task.taskNo}</span><span>检查类型：${task.type}</span><span>区域：${task.area}</span><span>站点：${task.sites}个</span>`
-            : `<span>通知单：${task.noticeNo}</span><span>站点：${task.site}</span><span>编码：${task.code}</span>`}
+            ? `<span>任务编号：${displayValue(task.taskNo)}</span><span>检查类型：${displayValue(task.type)}</span><span>区域：${displayValue(task.area)}</span><span>站点：${task.sites === '' ? emptyText : task.sites + '个'}</span>`
+            : `<span>通知单：${displayValue(task.noticeNo)}</span><span>站点：${displayValue(task.site)}</span><span>编码：${displayValue(task.code)}</span>`}
         </div>
+        ${task.status === 'done' ? '<div class="readonly-tip">该任务已结束，当前页面仅支持查看。</div>' : ''}
       </div>
     `;
 
@@ -293,22 +359,30 @@
       html += `
         <div class="info-section">
           <div class="info-section-title">任务信息</div>
-          <div class="info-row"><div class="info-label">任务编号</div><div class="info-value">${task.taskNo}</div></div>
-          <div class="info-row"><div class="info-label">检查类型</div><div class="info-value">${task.type}</div></div>
-          <div class="info-row"><div class="info-label">检查区域</div><div class="info-value">${task.area}</div></div>
-          <div class="info-row"><div class="info-label">站点数量</div><div class="info-value">${task.sites}个</div></div>
-          <div class="info-row"><div class="info-label">开始日期</div><div class="info-value">${task.startDate}</div></div>
-          <div class="info-row"><div class="info-label">截止日期</div><div class="info-value">${task.endDate}</div></div>
-          <div class="info-row"><div class="info-label">指派专家</div><div class="info-value">${task.expert}</div></div>
-          <div class="info-row"><div class="info-label">所属管理部</div><div class="info-value">${task.dept}</div></div>
+          <div class="info-row"><div class="info-label">任务编号</div><div class="info-value">${displayValue(task.taskNo)}</div></div>
+          <div class="info-row"><div class="info-label">检查类型</div><div class="info-value">${displayValue(task.type)}</div></div>
+          <div class="info-row"><div class="info-label">检查区域</div><div class="info-value">${displayValue(task.area)}</div></div>
+          <div class="info-row"><div class="info-label">站点数量</div><div class="info-value">${task.sites === '' ? emptyText : task.sites + '个'}</div></div>
+          <div class="info-row"><div class="info-label">开始日期</div><div class="info-value">${displayValue(task.startDate)}</div></div>
+          <div class="info-row"><div class="info-label">截止日期</div><div class="info-value">${displayValue(task.endDate)}</div></div>
+          <div class="info-row"><div class="info-label">指派专家</div><div class="info-value">${displayValue(task.expert)}</div></div>
+          <div class="info-row"><div class="info-label">所属管理部</div><div class="info-value">${displayValue(task.dept)}</div></div>
         </div>
+        ${task.status === 'done' ? `<div class="info-section">
+          <div class="info-section-title">结束信息</div>
+          <div class="info-row"><div class="info-label">结束时间</div><div class="info-value">${displayValue(task.completedAt)}</div></div>
+          <div class="info-row"><div class="info-label">处理人</div><div class="info-value">${displayValue(task.completedBy)}</div></div>
+          <div class="info-row"><div class="info-label">最终结论</div><div class="info-value">${displayValue(task.conclusion)}</div></div>
+          <div class="info-row"><div class="info-label">结束原因</div><div class="info-value">${displayValue(task.endReason)}</div></div>
+        </div>` : ''}
         <div class="info-section">
           <div class="info-section-title">站点列表</div>
       `;
       if (task.sitesList && task.sitesList.length > 0) {
         html += task.sitesList.map(s => {
           const sc = s.status === 'checked' ? 'site-checked' : s.status === 'rectify' ? 'site-rectify' : 'site-unchecked';
-          return `<a href="./expert-app-site-detail.html?code=${s.code}&task=${taskId}" class="site-card">
+          const readonlyParam = task.status === 'done' ? '&readonly=1' : '';
+          return `<a href="./expert-app-site-detail.html?code=${s.code}&task=${taskId}${readonlyParam}" class="site-card">
             <div class="site-card-top">
               <span class="site-card-name">${s.name}</span>
               <span class="site-tag ${sc}">${s.statusText}</span>
@@ -323,6 +397,14 @@
         html += '<p style="padding:20px;text-align:center;color:#bbb;">暂无站点数据</p>';
       }
       html += '</div>';
+      if (task.status === 'done') {
+        html += `<div class="info-section"><div class="info-section-title">附件</div>${task.attachments && task.attachments.length
+          ? task.attachments.map(a => `<div class="attachment-item"><div class="attachment-main"><div class="attachment-name">${displayValue(a.name)}</div><div class="attachment-meta">${displayValue(a.size)}</div></div><a class="attachment-link" href="${a.url}" target="_blank" rel="noopener">预览</a><a class="attachment-link" href="${a.url}" download="${a.name}">下载</a></div>`).join('')
+          : '<div style="padding:18px 0;text-align:center;color:#bbb;">暂无附件</div>'}</div>`;
+        html += `<div class="info-section"><div class="info-section-title">操作历史</div>${task.history && task.history.length
+          ? task.history.map(h => `<details class="history-item"><summary><div class="history-title"><span>${displayValue(h.title)}</span><span class="history-time">${displayValue(h.time)}</span></div></summary><div class="history-detail">${displayValue(h.detail)}</div></details>`).join('')
+          : '<div style="padding:18px 0;text-align:center;color:#bbb;">暂无操作记录</div>'}</div>`;
+      }
     } else {
       html += `
         <div class="info-section">
@@ -340,7 +422,11 @@
     document.getElementById('content').innerHTML = html;
 
     const actionBar = document.getElementById('actionBar');
-    if (task.status === 'confirm') {
+    if (task.status === 'done') {
+      actionBar.hidden = true;
+      actionBar.style.display = 'none';
+      document.querySelector('.safe-area').hidden = true;
+    } else if (task.status === 'confirm') {
       actionBar.innerHTML = `<button class="btn btn-warn" onclick="alert('已拒绝')">拒绝</button><button class="btn btn-primary" onclick="alert('已确认')">确认</button>`;
     } else if (task.status === 'rectify') {
       actionBar.innerHTML = `<button class="btn btn-primary" onclick="alert('进入整改填报')">开始整改</button>`;
@@ -349,7 +435,9 @@
     } else if (task.status === 'progress') {
       actionBar.innerHTML = `<button class="btn btn-primary" onclick="location.href='./expert-app-site-list.html?id=${taskId}'">继续检查</button>`;
     } else {
-      actionBar.innerHTML = `<button class="btn btn-default" onclick="history.back()">返回</button>`;
+      actionBar.hidden = true;
+      actionBar.style.display = 'none';
+      document.querySelector('.safe-area').hidden = true;
     }
   </script>
 </body>
