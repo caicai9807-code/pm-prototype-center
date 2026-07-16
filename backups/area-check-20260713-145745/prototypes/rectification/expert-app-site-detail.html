@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>站点详情</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+    :root { --adm-primary: #1677ff; --adm-success: #00b578; --adm-danger: #ff3141; }
+
+    /* 导航栏 */
+    .adm-nav-bar {
+      position: sticky;
+      top: 0; z-index: 100;
+      height: 40px; background: #fff;
+      display: flex; align-items: center; padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-nav-bar .back {
+      font-size: 20px; color: #333;
+      padding: 2px 6px 2px 0; cursor: pointer; font-weight: 300;
+    }
+    .adm-nav-bar .title {
+      flex: 1; text-align: center; font-size: 15px; font-weight: 500; margin-right: 32px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* 内容区 */
+    .adm-content { padding: 8px 12px 16px; }
+
+    /* 卡片 */
+    .adm-card {
+      background: #fff; border-radius: 10px; padding: 12px;
+      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .adm-card-title {
+      font-size: 14px; font-weight: 600; color: #1a1a1a;
+      margin-bottom: 8px; padding-bottom: 6px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    /* 状态卡片 */
+    .status-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px;
+    }
+    .status-card-name {
+      font-size: 18px; font-weight: 600; color: #1a1a1a;
+    }
+    .status-tag {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 500;
+    }
+    .tag-gray { background: #f5f5f5; color: #999; }
+    .tag-green { background: #ebfaf3; color: #00b578; }
+    .tag-blue { background: #e7f1ff; color: #1677ff; }
+    .tag-orange { background: #fff7e6; color: #d48806; }
+    .tag-red { background: #ffeeee; color: #ff3141; }
+
+    .status-info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f2f5; font-size: 13px;
+    }
+    .status-info-row:last-child { border-bottom: none; }
+    .status-info-label { color: #999; }
+    .status-info-value { color: #333; font-weight: 500; }
+
+    .action-btn-full {
+      width: 100%; height: 36px; border-radius: 18px;
+      font-size: 14px; font-weight: 600; border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s; margin-top: 6px;
+    }
+    .action-btn-full:active { opacity: 0.8; }
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-green { background: #00b578; color: #fff; }
+    .btn-gray { background: #f5f5f5; color: #666; border: 1px solid #e8e8e8; }
+
+    /* Tab 栏 - Pill 风格 */
+    .adm-tabs {
+      display: flex; gap: 4px; padding: 6px 12px;
+      background: #f5f5f5; overflow-x: auto;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .adm-tabs::-webkit-scrollbar { display: none; }
+    .adm-tab {
+      flex-shrink: 0; padding: 5px 10px;
+      font-size: 12px; font-weight: 500; color: #666;
+      cursor: pointer; white-space: nowrap;
+      border-radius: 6px; transition: all 0.15s;
+    }
+    .adm-tab.active {
+      background: #1677ff; color: #fff; font-weight: 600;
+    }
+    .adm-tab.active::after { display: none; }
+
+    /* Tab 面板 - 切换显示 */
+    .tab-panel {
+      display: none;
+      animation: tabFadeIn 0.2s ease;
+    }
+    .tab-panel.active { display: block; }
+    @keyframes tabFadeIn {
+      0% { opacity: 0; transform: translateY(4px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 信息行 */
+    .info-row {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 6px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 12px; color: #999; flex-shrink: 0; }
+    .info-value { font-size: 13px; font-weight: 500; color: #333; text-align: right; word-break: break-all; }
+    .info-value.empty { color: #ccc; }
+
+    /* 安全区域 */
+    /* ===== 建筑物卡片 - 方案②单列布局 ===== */
+    .bld-card {
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: block; transition: box-shadow 0.2s, transform 0.15s;
+      border: 0.5px solid #f0f0f0;
+    }
+    .bld-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .bld-card:active { transform: scale(0.98); }
+    .bld-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .bld-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+    .bld-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; font-weight: 500; }
+    /* 2x2 网格字段 */
+    .bld-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; padding: 8px 0; }
+    .bld-gitem { display: flex; justify-content: space-between; align-items: center; height: 24px; }
+    .bld-glabel { font-size: 12px; color: #999; }
+    .bld-gvalue { font-size: 12px; color: #333; text-align: right; }
+    /* 面积双卡片横排 */
+    .bld-area-row { display: flex; gap: 8px; }
+    .bld-area-card {
+      flex: 1; padding: 8px 10px; border-radius: 6px;
+      background: #f8f9fc; border: 0.5px solid #e8e8e8; text-align: center;
+    }
+    .bld-area-card .acl { font-size: 11px; color: #999; display: block; }
+    .bld-area-card .acv { font-size: 15px; font-weight: 600; color: #1a1a1a; display: block; margin-top: 2px; }
+    .bld-area-card .acv .acu { font-size: 11px; font-weight: 400; color: #999; margin-left: 2px; }
+    .bld-area-card.green { background: #f0fdf4; border-color: #bbf7d0; }
+    .bld-area-card.green .acv { color: #00b578; }
+    .bld-area-card.green .acv .acu { color: #00b578; }
+    .bld-area-card.red { background: #fef2f2; border-color: #fecaca; }
+    .bld-area-card.red .acv { color: #e24b4a; }
+    .bld-area-card.red .acv .acu { color: #e24b4a; }
+    .bld-area-card .acr { font-size: 10px; color: #00b578; display: block; }
+    .bld-area-card.red .acr { color: #e24b4a; }
+
+    /* 已复核徽标 */
+    .bld-review-badge {
+      margin-top: 8px; padding: 4px 8px;
+      background: #f0fdf4; border: 1px solid #bbf7d0;
+      border-radius: 4px; font-size: 11px; color: #16a34a;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .bld-review-badge .badge-icon {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #16a34a; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* 底部操作栏 */
+    .bld-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top: 0.5px solid #f0f0f0; }
+    .bld-btn-review {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 28px; padding: 0 14px; border-radius: 14px;
+      border: 0.5px solid #1677ff; background: #fff;
+      color: #1677ff; font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .bld-btn-review:hover { background: #e6f1fb; }
+    .bld-btn-review:active { background: #b5d4f4; }
+    .bld-link { font-size: 12px; color: #1677ff; cursor: pointer; padding: 4px 0; }
+
+
+    .safe-area { height: 44px; }
+
+    /* 审核弹窗 */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 999; display: flex; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .modal-card { background: #fff; border-radius: 12px; width: 100%; max-width: 340px; overflow: hidden; }
+    .modal-header { padding: 16px 20px 12px; font-size: 16px; font-weight: 600; text-align: center; color: #1a1a1a; }
+    .modal-body { padding: 0 20px 16px; }
+    .modal-textarea {
+      width: 100%; min-height: 80px; border: 1px solid #e8e8e8; border-radius: 8px;
+      padding: 10px; font-size: 14px; color: #333; resize: none; outline: none;
+      font-family: inherit; background: #fafafa;
+    }
+    .modal-textarea:focus { border-color: #ff3141; background: #fff; }
+    .modal-footer { display: flex; padding: 0 20px 20px; gap: 12px; }
+    .modal-btn {
+      flex: 1; height: 40px; border-radius: 20px; border: none; font-size: 14px;
+      font-weight: 500; cursor: pointer; transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-btn:active { opacity: 0.8; }
+    .modal-btn-cancel { background: #f5f5f5; color: #666; }
+    .modal-btn-confirm { background: #1677ff; color: #fff; font-weight: 600; }
+    .audit-radio-row { display: flex; gap: 20px; }
+    .audit-radio-row label { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .audit-radio-row input { accent-color: #1677ff; }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 2000;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease; white-space: nowrap;
+      background: #333; color: #fff; max-width: 80vw; white-space: normal; text-align: center;
+    }
+    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast.toast-warning { background: #fff7e6; color: #d46b08; border: 0.5px solid #ffd591; }
+    .toast.toast-success { background: #f6ffed; color: #52c41a; border: 0.5px solid #b7eb8f; }
+
+    /* 隐藏内容 */
+    /* 底部审核Sheet弹窗 */
+    .sheet-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 999; display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .sheet-overlay.show { opacity: 1; pointer-events: auto; }
+    .sheet-card {
+      background: #fff; border-radius: 16px 16px 0 0; width: 100%; max-width: 430px;
+      padding: 0 0 16px; transform: translateY(100%); transition: transform 0.25s ease;
+    }
+    .sheet-overlay.show .sheet-card { transform: translateY(0); }
+    .sheet-header {
+      padding: 20px 20px 12px; font-size: 16px; font-weight: 700;
+      color: #1a1a1a; position: relative;
+    }
+    .sheet-header::before {
+      content: ''; position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+      width: 36px; height: 4px; border-radius: 2px; background: #e8e8e8;
+    }
+    .sheet-body { padding: 0 20px 16px; }
+    .sheet-label {
+      font-size: 14px; font-weight: 600; color: #333;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 4px;
+    }
+    .sheet-label .required { color: #ff3141; }
+    .sheet-radio-row { display: flex; gap: 24px; margin-bottom: 16px; }
+    .sheet-radio-row label { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; cursor: pointer; color: #333; }
+    .sheet-radio-row input { accent-color: #1677ff; width: 16px; height: 16px; }
+    .sheet-textarea {
+      width: 100%; min-height: 100px; border: 1px solid #e5e7eb; border-radius: 8px;
+      padding: 10px; font-size: 14px; color: #333; resize: none; outline: none;
+      font-family: inherit; background: #fff;
+    }
+    .sheet-textarea:focus { border-color: #1677ff; }
+    .sheet-count { text-align: right; font-size: 12px; color: #bbb; margin-top: 4px; }
+    .sheet-footer { display: flex; padding: 0 20px; gap: 12px; }
+    .sheet-btn {
+      flex: 1; height: 42px; border-radius: 21px; border: none;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .sheet-btn:active { opacity: 0.8; }
+    .sheet-btn-cancel { background: #fff; color: #333; border: 1px solid #e8e8e8; }
+    .sheet-btn-confirm { background: #1677ff; color: #fff; }
+
+    /* 面积汇总卡片 */
+    .area-card {
+      background: #f8f9fc; border-radius: 8px; padding: 12px; margin-bottom: 8px;
+    }
+    .area-card.highlight {
+      background: #f6ffed; border: 1px solid #d9f7be;
+    }
+    .area-number {
+      font-size: 24px; font-weight: 700; color: #1677ff;
+      margin-bottom: 2px;
+    }
+    .area-number.green { color: #00b578; }
+    .area-unit { font-size: 13px; font-weight: 400; color: #666; }
+    .area-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+    .area-diff {
+      font-size: 12px; color: #ff3141; font-weight: 500; margin-top: 4px;
+    }
+    .area-section-title {
+      font-size: 12px; font-weight: 600; color: #333;
+      margin-top: 6px; margin-bottom: 4px;
+    }
+    .area-section-items {
+      font-size: 12px; color: #666; line-height: 1.6;
+    }
+
+    /* 表格 */
+    .mobile-table-wrap { overflow-x: auto; margin: 0 -12px; padding: 0 12px; }
+    .mobile-table-wrap::-webkit-scrollbar { height: 4px; }
+    .mobile-table-wrap::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+    .mobile-table {
+      font-size: 12px; border-collapse: collapse; min-width: 100%;
+    }
+    .mobile-table th, .mobile-table td {
+      padding: 8px 10px; border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap; text-align: left;
+    }
+    .mobile-table th {
+      background: #fafafa; color: #999; font-weight: 500; font-size: 11px;
+      position: sticky; top: 0;
+    }
+    .mobile-table td { color: #333; }
+    .mobile-table .col-right { text-align: right; }
+    .mobile-table .col-center { text-align: center; }
+    .text-green { color: #00b578; }
+    .text-red { color: #ff3141; }
+
+    /* 图片预览卡片 */
+    .preview-card {
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .preview-title {
+      font-size: 14px; font-weight: 600; color: #1a1a1a;
+      margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+    }
+    .preview-title .icon { font-size: 16px; }
+    .preview-desc {
+      font-size: 12px; color: #999; line-height: 1.6; margin-bottom: 12px;
+    }
+    .img-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .img-placeholder {
+      background: #fafafa; border-radius: 8px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      color: #ccc; font-size: 13px; border: 1px dashed #e5e5e5;
+    }
+
+    /* 现场检查照片上传 */
+    /* 已上传照片展示 */
+    .uploaded-photo-section {
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .photo-upload-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+    .uploaded-photo-grid-two { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .uploaded-photo-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; background: #f8f9fc; border-radius: 6px;
+      border: 1px solid #edf0f2;
+    }
+    .uploaded-photo-thumb {
+      width: 36px; height: 36px; border-radius: 4px;
+      background: #e8f0fe; color: #1677ff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .uploaded-photo-info { flex: 1; min-width: 0; }
+    .uploaded-photo-name {
+      font-size: 12px; font-weight: 500; color: #333;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .uploaded-photo-meta { font-size: 11px; color: #999; margin-top: 2px; }
+    .uploaded-photo-count {
+      font-size: 11px; color: #999; text-align: right; margin-top: 6px;
+    }
+
+    /* 检查记录单 */
+    .check-record-item {
+      background: #fff; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 6px; border: 1px solid #f0f0f0;
+    }
+    .check-record-title {
+      font-size: 13px; font-weight: 600; color: #333;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .check-record-result {
+      font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 500;
+    }
+    .result-yes { background: #ebfaf3; color: #00b578; }
+    .result-no { background: #ffeeee; color: #ff3141; }
+    .result-na { background: #f5f5f5; color: #999; }
+    .check-record-desc { font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5; }
+
+    /* 整改通知单 */
+    .notice-card {
+      background: #fff8e8; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px;
+    }
+    .notice-title { font-size: 14px; font-weight: 600; color: #d48806; margin-bottom: 8px; }
+    .notice-item { font-size: 12px; color: #666; line-height: 1.6; margin-bottom: 4px; }
+    .notice-item strong { color: #333; }
+
+    /* 整改告知书 */
+    .letter-card {
+      background: #f0f9ff; border: 1px solid #bae0ff; border-radius: 8px; padding: 12px;
+    }
+    .letter-title { font-size: 14px; font-weight: 600; color: #1677ff; margin-bottom: 8px; }
+    .letter-desc-box {
+      background: #fff; border-radius: 6px; padding: 10px; margin-bottom: 10px;
+      font-size: 13px; color: #333; line-height: 1.6; border: 0.5px solid #e8e8e8;
+    }
+    .letter-meta { font-size: 12px; color: #8c8c8c; margin-bottom: 10px; }
+    .letter-meta strong { color: #333; font-weight: 500; }
+    .letter-attachment {
+      display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+      background: #fff; border-radius: 6px; border: 0.5px solid #e8e8e8;
+      margin-bottom: 6px;
+    }
+    .letter-attachment:last-child { margin-bottom: 0; }
+    .letter-att-icon { font-size: 18px; flex-shrink: 0; }
+    .letter-att-info { flex: 1; min-width: 0; }
+    .letter-att-name { font-size: 12px; font-weight: 500; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .letter-att-meta { font-size: 11px; color: #999; margin-top: 2px; }
+    .letter-att-status {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #ebfaf3; color: #00b578; font-weight: 500; flex-shrink: 0;
+    }
+    .letter-empty {
+      text-align: center; padding: 40px 20px;
+    }
+    .letter-empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .letter-empty-text { font-size: 14px; color: #999; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="adm-nav-bar">
+    <a href="javascript:history.back()" class="back">‹</a>
+    <span class="title" id="pageTitle">站点详情</span>
+  </div>
+
+  <div class="adm-content">
+    <!-- 状态卡片 -->
+    <div class="adm-card" id="statusCard" style="padding:10px;"></div>
+
+    <!-- Tab 栏 -->
+    <div class="adm-tabs" id="tabBar">
+      <div class="adm-tab active" data-tab="basic">基础信息</div>
+      <div class="adm-tab" data-tab="area">面积汇总</div>
+      <div class="adm-tab" data-tab="buildings">建筑物</div>
+      <div class="adm-tab" data-tab="plan">平面图</div>
+      <div class="adm-tab" data-tab="door">门头图</div>
+      <div class="adm-tab" data-tab="record">检查记录单</div>
+      <div class="adm-tab" data-tab="letter">整改告知书</div>
+    </div>
+
+    <!-- 基础信息 -->
+    <div class="tab-panel active" id="panel-basic">
+      <div class="adm-card">
+        <div class="adm-card-title">站点信息</div>
+        <div id="siteInfo"></div>
+      </div>
+      <div class="adm-card">
+        <div class="adm-card-title">普查信息</div>
+        <div id="censusInfo"></div>
+      </div>
+    </div>
+
+    <!-- 面积汇总 -->
+    <div class="tab-panel" id="panel-area">
+      <div id="areaSummary"></div>
+    </div>
+
+    <!-- 建筑物 -->
+    <div class="tab-panel" id="panel-buildings">
+      <div id="buildingCards"></div>
+    </div>
+
+    <!-- 平面图 -->
+    <div class="tab-panel" id="panel-plan">
+      <div class="preview-card">
+        <div class="preview-title"><span class="icon">📐</span><span id="planTitle">站点平面图预览</span></div>
+        <div class="preview-desc">用热范围平面图当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>
+        <div class="img-grid">
+          <div class="img-placeholder">平面图-1F</div>
+          <div class="img-placeholder">平面图-2F</div>
+          <div class="img-placeholder">平面图-3F</div>
+        </div>
+      </div>
+      <div class="uploaded-photo-section">
+        <div class="photo-upload-title">已上传照片</div>
+        <div class="uploaded-photo-grid-two">
+          <div class="uploaded-photo-item">
+            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-info">
+              <div class="uploaded-photo-name">现场检查照片_1.jpg</div>
+              <div class="uploaded-photo-meta">2026-07-02 09:32 · 裕华区中心站</div>
+            </div>
+          </div>
+          <div class="uploaded-photo-item">
+            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-info">
+              <div class="uploaded-photo-name">现场检查照片_2.jpg</div>
+              <div class="uploaded-photo-meta">2026-07-02 09:35 · 裕华区中心站</div>
+            </div>
+          </div>
+        </div>
+        <div class="uploaded-photo-count">共 2 张照片</div>
+      </div>
+    </div>
+
+    <!-- 门头图 -->
+    <div class="tab-panel" id="panel-door">
+      <div class="preview-card">
+        <div class="preview-title"><span class="icon">📷</span><span id="doorTitle">站点门头图预览</span></div>
+        <div class="preview-desc">商业门头图片当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>
+        <div class="img-grid">
+          <div class="img-placeholder">门头-东侧</div>
+          <div class="img-placeholder">门头-南侧</div>
+          <div class="img-placeholder">门头-西侧</div>
+        </div>
+      </div>
+      <div class="uploaded-photo-section">
+        <div class="photo-upload-title">已上传照片</div>
+        <div class="uploaded-photo-grid-two">
+          <div class="uploaded-photo-item">
+            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-info">
+              <div class="uploaded-photo-name">现场检查照片_1.jpg</div>
+              <div class="uploaded-photo-meta">2026-07-02 09:32 · 裕华区中心站</div>
+            </div>
+          </div>
+          <div class="uploaded-photo-item">
+            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-info">
+              <div class="uploaded-photo-name">现场检查照片_2.jpg</div>
+              <div class="uploaded-photo-meta">2026-07-02 09:35 · 裕华区中心站</div>
+            </div>
+          </div>
+        </div>
+        <div class="uploaded-photo-count">共 2 张照片</div>
+      </div>
+    </div>
+
+    <!-- 检查记录单 -->
+    <div class="tab-panel" id="panel-record">
+      <div id="checkRecord"></div>
+    </div>
+
+    <!-- 整改通知单（仅检查不合格时显示） -->
+    <div class="tab-panel" id="panel-rectify">
+      <div id="rectifyContent"></div>
+    </div>
+
+    <!-- 整改告知书（展示PC端上传的整改反馈） -->
+    <div class="tab-panel" id="panel-letter">
+      <div id="letterContent"></div>
+    </div>
+  </div>
+
+  <div class="safe-area"></div>
+
+  <!-- 复查审核弹窗（底部Sheet） -->
+  <div class="sheet-overlay" id="auditOverlay">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-header">复查结果</div>
+      <div class="sheet-body">
+        <div class="sheet-label">复查结果 <span class="required">*</span></div>
+        <div class="sheet-radio-row">
+          <label><input type="radio" name="auditResult" value="pass" checked> 通过</label>
+          <label><input type="radio" name="auditResult" value="reject"> 驳回</label>
+        </div>
+        <div id="rejectSection" style="display:none;">
+          <div class="sheet-label">驳回原因 <span class="required">*</span></div>
+          <textarea class="sheet-textarea" id="auditRejectReason" placeholder="请输入驳回原因" maxlength="300"></textarea>
+          <div class="sheet-count"><span id="auditCount">0</span>/300</div>
+        </div>
+      </div>
+      <div class="sheet-footer">
+        <button class="sheet-btn sheet-btn-cancel" onclick="closeRectifyAudit()">取消</button>
+        <button class="sheet-btn sheet-btn-confirm" onclick="submitRectifyAudit()">提交</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const siteCode = params.get('code') || '60218B006';
+    const taskId = params.get('task') || '';
+
+    // Mock 数据（与 PC 端 siteDetailPool 对应）
+    const siteData = {
+      '60218B006': {
+        name: '桥西区北站', code: '60218B006', type: '用户站',
+        dept: '桥西管理部', area: '桥西片区所', district: '桥西区',
+        street: '维明街道', address: '桥西区中山路与维明大街交叉口北行50米',
+        contact: '—', phone: '—',
+        censusUser: '王普查', censusDate: '2025-06-28',
+        status: 'unchecked', statusText: '未检查', checkTime: '—',
+        confirmProgress: '0/2',
+        originalArea: {
+          total: 5420.00,
+          residential: { subtotal: 3800.00, multiLayer: 2100.00, highRise: 1200.00, apartment: 500.00 },
+          nonResidential: { subtotal: 1620.00, nonResident: 1200.00, nonCoop: 300.00, carPark: 120.00 }
+        },
+        currentArea: {
+          total: 5580.00,
+          residential: { subtotal: 3900.00, multiLayer: 2100.00, highRise: 1300.00, apartment: 500.00 },
+          nonResidential: { subtotal: 1680.00, nonResident: 1260.00, nonCoop: 300.00, carPark: 120.00 }
+        },
+        areaDiff: 160.00,
+        surveyDetails: [
+          { id: 1, building: '1号楼', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1200.00, currentArea: 1300.00, diff: 100.00, rate: '+8.33%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2009年', basis: '实测核实', attachment: '1份', remark: '—' },
+          { id: 2, building: '2号楼', floors: 8, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 800.00, currentArea: 800.00, diff: 0.00, rate: '0.00%', controlMode: '分户控制', heatingType: '暖气片', buildYear: '2010年', basis: '确权书', attachment: '1份', remark: '—' },
+        ],
+        checkRecord: {
+          conclusion: '', submitted: false,
+          items: [
+            { id: 1, title: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？', result: '', subItems: [] },
+            { id: 2, title: '用热范围平面图是否具备绘制人、审批流程是否完整？', result: '', subItems: [] },
+            { id: 3, title: '面积核查依据（确权书及相关证明材料）是否有效且齐全？', result: '', subItems: [] },
+            { id: 4, title: '是否存在面积变化情况？', result: '', subItems: [] },
+            { id: 5, title: '面积核查汇总表与用热现场是否一致？', result: '', subItems: [] },
+            { id: 6, title: '商业门头平面图与现场顺序是否一致？', result: '', subItems: [] },
+            { id: 7, title: '实测计算是否满足制度要求？', result: '', subItems: [] },
+          ]
+        }
+      },
+      '60218B001': {
+        name: '裕华区中心站', code: '60218B001', type: '中心站',
+        dept: '裕华管理部', area: '裕华片区所', district: '裕华区',
+        street: '裕东街道', address: '裕华区槐安路与翟营大街交叉口东行200米路北',
+        contact: '王志强', phone: '138-0001-1001',
+        censusUser: '赵普查', censusDate: '2025-06-25',
+        status: 'checked', statusText: '已检查', checkTime: '2025-07-03',
+        confirmProgress: '2/2',
+        originalArea: {
+          total: 3460.00,
+          residential: { subtotal: 2600.00, multiLayer: 1500.00, highRise: 800.00, apartment: 300.00 },
+          nonResidential: { subtotal: 860.00, nonResident: 600.00, nonCoop: 200.00, carPark: 60.00 }
+        },
+        currentArea: {
+          total: 3540.00,
+          residential: { subtotal: 2700.00, multiLayer: 1500.00, highRise: 900.00, apartment: 300.00 },
+          nonResidential: { subtotal: 840.00, nonResident: 580.00, nonCoop: 200.00, carPark: 60.00 }
+        },
+        areaDiff: 80.00,
+        surveyDetails: [
+          { id: 1, building: '1号楼(住宅)', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 3460.00, currentArea: 3540.00, diff: 80.00, rate: '+2.31%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2009年', basis: '实测核实', attachment: '1份', remark: '—' },
+        ],
+        checkRecord: {
+          conclusion: '不合格', submitted: true,
+          inspector: '赵立成', checkDate: '2025-07-03',
+          problemDesc: '经现场核查，共发现3项不合格：面积核查汇总表数据不完整、用热范围平面图无绘制人签字、面积核查依据确权书缺失。',
+          items: [
+            { id: 1, title: '面积核查汇总表是否完整？', result: '否', subItems: ['数据填写不正确', '项目填写不齐全'], desc: '地下室新增用热面积约160㎡未同步到普查台账' },
+            { id: 2, title: '用热范围平面图是否完整？', result: '否', subItems: ['无绘制人签字'], desc: '' },
+            { id: 3, title: '面积核查依据是否有效？', result: '否', subItems: ['确权书缺失'], desc: '确权书及相关证明材料缺失' },
+            { id: 4, title: '是否存在面积变化？', result: '是', subItems: [], desc: '存在面积变化' },
+            { id: 5, title: '面积核查汇总表与现场是否一致？', result: '否', subItems: ['建筑名称不一致'], desc: '' },
+            { id: 6, title: '商业门头平面图是否一致？', result: '是', subItems: [], desc: '' },
+            { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [], desc: '' },
+          ]
+        },
+        rectifyLetter: {
+          fixDesc: '已按要求完成整改：补传了面积核查汇总表完整数据、平面图已补充绘制人签字、确权书及相关证明材料已补齐归档。',
+          rectifier: '赵国强', lastSaveTime: '2026-07-06 16:30',
+          attachments: [
+            { name: '面积核查汇总表（整改后）.xlsx', size: '2.3 MB' },
+            { name: '用热范围平面图（签字版）.pdf', size: '1.8 MB' },
+            { name: '确权书补充材料.zip', size: '4.5 MB' }
+          ]
+        }
+      }
+    };
+
+    // 补充其他站点数据
+    var extraSites = {
+      '60218B004': {
+        name: '裕华区万达站', code: '60218B004', type: '自管站',
+        dept: '裕华管理部', area: '裕华片区所', district: '裕华区',
+        street: '裕华路街道', address: '裕华区槐中路与建华东大街交叉口东南角',
+        contact: '赵国强', phone: '138-0004-4004',
+        censusUser: '李普查', censusDate: '2025-06-25',
+        status: 'rectify', statusText: '待整改', checkTime: '2026-07-02',
+        confirmProgress: '2/2',
+        originalArea: {
+          total: 4200.00,
+          residential: { subtotal: 2800.00, multiLayer: 1600.00, highRise: 1000.00, apartment: 200.00 },
+          nonResidential: { subtotal: 1400.00, nonResident: 1000.00, nonCoop: 300.00, carPark: 100.00 }
+        },
+        currentArea: {
+          total: 4350.00,
+          residential: { subtotal: 2900.00, multiLayer: 1600.00, highRise: 1100.00, apartment: 200.00 },
+          nonResidential: { subtotal: 1450.00, nonResident: 1050.00, nonCoop: 300.00, carPark: 100.00 }
+        },
+        areaDiff: 150.00,
+        surveyDetails: [
+          { id: 1, building: 'A座', floors: 18, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 2400.00, currentArea: 2500.00, diff: 100.00, rate: '+4.17%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2015年', basis: '实测核实', attachment: '1份', remark: '—' },
+          { id: 2, building: 'B座商业', floors: 5, heatNature: '非住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1800.00, currentArea: 1850.00, diff: 50.00, rate: '+2.78%', controlMode: '集中控制', heatingType: '暖气片', buildYear: '2015年', basis: '确权书', attachment: '1份', remark: '—' },
+        ],
+        checkRecord: {
+          conclusion: '不合格', submitted: true,
+          inspector: '张建国', checkDate: '2026-07-02',
+          problemDesc: '经现场核查，共发现2项不合格：面积核查汇总表数据不完整、用热范围平面图无绘制人签字。',
+          items: [
+            { id: 1, title: '面积核查汇总表是否完整？', result: '否', subItems: ['数据填写不正确'], desc: '商业裙楼新增用热面积约150㎡未同步到普查台账' },
+            { id: 2, title: '用热范围平面图是否完整？', result: '否', subItems: ['无绘制人签字'], desc: '' },
+            { id: 3, title: '面积核查依据是否有效？', result: '是', subItems: [], desc: '' },
+            { id: 4, title: '是否存在面积变化？', result: '是', subItems: [], desc: '存在面积变化' },
+            { id: 5, title: '面积核查汇总表与现场是否一致？', result: '是', subItems: [], desc: '' },
+            { id: 6, title: '商业门头平面图是否一致？', result: '是', subItems: [], desc: '' },
+            { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [], desc: '' },
+          ]
+        },
+        rectifyLetter: {
+          fixDesc: '已补传商业裙楼面积数据至普查台账，平面图已补充绘制人签字。',
+          rectifier: '赵国强', lastSaveTime: '2026-07-05 10:15',
+          attachments: [
+            { name: '整改情况说明.docx', size: '1.2 MB' }
+          ]
+        }
+      },
+      '60218B003': {
+        name: '桥西区南站', code: '60218B003', type: '用户站',
+        dept: '桥西管理部', area: '桥西片区所', district: '桥西区',
+        street: '东里街道', address: '桥西区中华南大街与槐安路交叉口南行150米路东',
+        contact: '李工', phone: '138-0003-1001',
+        censusUser: '李普查', censusDate: '2025-06-26',
+        status: 'rectified', statusText: '已整改', checkTime: '2025-07-02',
+        confirmProgress: '2/2'
+      },
+      '60218B009': {
+        name: '桥西区东站', code: '60218B009', type: '用户站',
+        dept: '桥西管理部', area: '桥西片区所', district: '桥西区',
+        street: '汇通街道', address: '桥西区南长街与槐安路交叉口东行100米',
+        contact: '—', phone: '—',
+        censusUser: '王普查', censusDate: '2025-06-28',
+        status: 'unchecked', statusText: '待检查', checkTime: '—',
+        confirmProgress: '0/2'
+      },
+      '60218B012': {
+        name: '桥西区西站', code: '60218B012', type: '中心站',
+        dept: '桥西管理部', area: '桥西片区所', district: '桥西区',
+        street: '中山街道', address: '桥西区友谊南大街与建国路交叉口西行80米',
+        contact: '张工', phone: '138-0003-1002',
+        censusUser: '李普查', censusDate: '2025-06-27',
+        status: 'checked', statusText: '已检查', checkTime: '2025-07-03',
+        confirmProgress: '2/2',
+        checkRecord: {
+          conclusion: '合格', submitted: true,
+          inspector: '赵立成', checkDate: '2025-07-03',
+          problemDesc: '',
+          items: [
+            { id: 1, title: '面积核查汇总表是否完整？', result: '是', subItems: [], desc: '' },
+            { id: 2, title: '用热范围平面图是否完整？', result: '是', subItems: [], desc: '' },
+            { id: 3, title: '面积核查依据是否有效？', result: '是', subItems: [], desc: '' },
+            { id: 4, title: '是否存在面积变化？', result: '是', subItems: [], desc: '有少量面积变化但已核实' },
+            { id: 5, title: '面积核查汇总表与现场是否一致？', result: '是', subItems: [], desc: '' },
+            { id: 6, title: '商业门头平面图是否一致？', result: '是', subItems: [], desc: '' },
+            { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [], desc: '' },
+          ]
+        }
+      },
+      '60218B015': {
+        name: '桥西区中站', code: '60218B015', type: '子站',
+        dept: '桥西管理部', area: '桥西片区所', district: '桥西区',
+        street: '南长街道', address: '桥西区工农路与维明大街交口西北角',
+        contact: '刘工', phone: '138-0003-1003',
+        censusUser: '王普查', censusDate: '2025-06-29',
+        status: 'rectify', statusText: '待整改', checkTime: '—',
+        confirmProgress: '1/2'
+      }
+    };
+    for (var k in extraSites) { siteData[k] = extraSites[k]; }
+
+    // 获取站点数据，为没有详细数据的站点生成默认普查信息
+    var defaultDetail = {
+      originalArea: { total: 5420.00, residential: { subtotal: 3800.00, multiLayer: 2100.00, highRise: 1200.00, apartment: 500.00 }, nonResidential: { subtotal: 1620.00, nonResident: 1200.00, nonCoop: 300.00, carPark: 120.00 } },
+      currentArea: { total: 5580.00, residential: { subtotal: 3900.00, multiLayer: 2100.00, highRise: 1300.00, apartment: 500.00 }, nonResidential: { subtotal: 1680.00, nonResident: 1260.00, nonCoop: 300.00, carPark: 120.00 } },
+      areaDiff: 160.00,
+      surveyDetails: [
+        { id: 1, building: '1号楼', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1200.00, currentArea: 1300.00, diff: 100.00, rate: '+8.33%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2009年', basis: '实测核实', attachment: '1份', remark: '—' },
+        { id: 2, building: '2号楼', floors: 8, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 800.00, currentArea: 800.00, diff: 0.00, rate: '0.00%', controlMode: '分户控制', heatingType: '暖气片', buildYear: '2010年', basis: '确权书', attachment: '1份', remark: '—' },
+      ],
+      checkRecord: { conclusion: '', submitted: false, items: [] }
+    };
+    // 为缺少详细数据的站点补充默认面积和普查数据
+    for (var k in siteData) {
+      var s = siteData[k];
+      if (!s.originalArea) {
+        s.originalArea = defaultDetail.originalArea;
+        s.currentArea = defaultDetail.currentArea;
+        s.areaDiff = defaultDetail.areaDiff;
+        s.surveyDetails = defaultDetail.surveyDetails;
+        s.checkRecord = s.checkRecord || { conclusion: '', submitted: false, items: [] };
+      }
+    }
+
+    var site = siteData[siteCode] || siteData['60218B006'];
+    window._currentSiteData = site;
+    document.getElementById('pageTitle').textContent = site.name;
+
+    // 根据状态显示不同标签颜色和按钮
+    var statusTagClass = 'tag-gray';
+    if (site.status === 'checked' || site.status === 'rectified') statusTagClass = 'tag-green';
+    else if (site.status === 'rectify') statusTagClass = 'tag-orange';
+    else if (site.status === 'unchecked') statusTagClass = 'tag-gray';
+
+    var isUnqualified = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
+
+    var btnHtml = '';
+    if (site.status === 'unchecked') {
+      btnHtml = '<button class="action-btn-full btn-primary" onclick="location.href=\'./expert-app-check-record.html?code=' + siteCode + '&task=' + taskId + '\'">填写检查记录单</button>';
+    } else if (site.status === 'checked' || site.status === 'rectified') {
+      btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
+    } else if (site.status === 'rectify') {
+      btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
+    }
+
+    document.getElementById('statusCard').innerHTML = `
+      <div class="status-card-top">
+        <span class="status-card-name">${site.name}</span>
+        ${isUnqualified ? '<span class="status-tag tag-red">不合格</span>' : '<span class="status-tag ' + statusTagClass + '">' + site.statusText + '</span>'}
+      </div>
+      <div class="status-info-row">
+        <span class="status-info-label">检查完成时间</span>
+        <span class="status-info-value">${site.checkTime}</span>
+      </div>
+      <div class="status-info-row">
+        <span class="status-info-label">确认进度</span>
+        <span class="status-info-value">${site.confirmProgress}</span>
+      </div>
+      <div class="status-info-row">
+        <span class="status-info-label">站点状态</span>
+        <span class="status-tag ${statusTagClass}">${site.statusText}</span>
+      </div>
+      ${btnHtml}
+    `;
+
+    // 渲染站点信息
+    document.getElementById('siteInfo').innerHTML = `
+      <div class="info-row"><span class="info-label">站点名称</span><span class="info-value">${site.name}</span></div>
+      <div class="info-row"><span class="info-label">用户编码</span><span class="info-value">${site.code}</span></div>
+      <div class="info-row"><span class="info-label">站点类型</span><span class="info-value">${site.type}</span></div>
+      <div class="info-row"><span class="info-label">所属管理部</span><span class="info-value">${site.dept}</span></div>
+      <div class="info-row"><span class="info-label">片区所</span><span class="info-value">${site.area}</span></div>
+      <div class="info-row"><span class="info-label">行政区</span><span class="info-value">${site.district}</span></div>
+      <div class="info-row"><span class="info-label">办事处</span><span class="info-value">${site.street}</span></div>
+      <div class="info-row"><span class="info-label">用热地址</span><span class="info-value">${site.address}</span></div>
+      <div class="info-row"><span class="info-label">联系人</span><span class="info-value ${site.contact === '—' ? 'empty' : ''}">${site.contact}</span></div>
+      <div class="info-row"><span class="info-label">联系电话</span><span class="info-value ${site.phone === '—' ? 'empty' : ''}">${site.phone}</span></div>
+    `;
+
+    // 渲染普查信息
+    document.getElementById('censusInfo').innerHTML = `
+      <div class="info-row"><span class="info-label">普查人</span><span class="info-value">${site.censusUser}</span></div>
+      <div class="info-row"><span class="info-label">普查日期</span><span class="info-value">${site.censusDate}</span></div>
+    `;
+
+    // 渲染面积汇总
+    const orig = site.originalArea;
+    const curr = site.currentArea;
+    const diffSign = site.areaDiff >= 0 ? '+' : '';
+    document.getElementById('areaSummary').innerHTML = `
+      <div class="adm-card area-card">
+        <div class="area-number">${orig.total.toLocaleString('en-US', {minimumFractionDigits: 2})}<span class="area-unit"> ㎡</span></div>
+        <div class="area-label">原面积</div>
+        <div class="area-section-title">住宅分类 <span style="font-weight:400;color:#999;">小计 ${orig.residential.subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</span></div>
+        <div class="area-section-items">多层 ${orig.residential.multiLayer.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 高层 ${orig.residential.highRise.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 公寓 ${orig.residential.apartment.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</div>
+        <div class="area-section-title">非住宅分类 <span style="font-weight:400;color:#999;">小计 ${orig.nonResidential.subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</span></div>
+        <div class="area-section-items">非居 ${orig.nonResidential.nonResident.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 非协 ${orig.nonResidential.nonCoop.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</div>
+      </div>
+      <div class="adm-card area-card highlight">
+        <div class="area-number green">${curr.total.toLocaleString('en-US', {minimumFractionDigits: 2})}<span class="area-unit"> ㎡</span></div>
+        <div class="area-label">现面积</div>
+        <div class="area-diff">差异：${diffSign}${site.areaDiff.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</div>
+        <div class="area-section-title">住宅分类 <span style="font-weight:400;color:#999;">小计 ${curr.residential.subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</span></div>
+        <div class="area-section-items">多层 ${curr.residential.multiLayer.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 高层 ${curr.residential.highRise.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 公寓 ${curr.residential.apartment.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</div>
+        <div class="area-section-title">非住宅分类 <span style="font-weight:400;color:#999;">小计 ${curr.nonResidential.subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</span></div>
+        <div class="area-section-items">非居 ${curr.nonResidential.nonResident.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡ | 非协 ${curr.nonResidential.nonCoop.toLocaleString('en-US', {minimumFractionDigits: 2})} ㎡</div>
+      </div>
+    `;
+
+    // ===== 实测复核状态（只读，反显已上传信息） =====
+    var reviewDisplay = {};
+    if (site.surveyDetails) {
+      site.surveyDetails.forEach(function(d) {
+        if (d.basis && d.basis.indexOf('实测') >= 0) {
+          reviewDisplay[d.id] = {
+            photoName: '现场测量照片_' + d.building + '.jpg',
+            area: d.currentArea,
+            date: '2026-07-02'
+          };
+        }
+      });
+    }
+
+    // 渲染建筑物卡片 - 方案②单列布局 + 复核按钮
+    // 建立建筑数据引用供弹窗使用
+    if (!window._reviewBuildings) window._reviewBuildings = {};
+    if (site.surveyDetails && site.surveyDetails.length > 0) {
+      var cardsHtml = site.surveyDetails.map(function(d) {
+        window._reviewBuildings[d.id] = d;
+        var diffSign = d.diff >= 0 ? '+' : '';
+        var diffClass = d.diff >= 0 ? 'green' : 'red';
+        var revDisplay = reviewDisplay[d.id];
+        var isMeasured = d.basis && d.basis.indexOf('实测') >= 0;
+        var revBadgeHtml = isMeasured && revDisplay
+          ? '<div class="bld-review-badge"><span class="badge-icon">✓</span> 已复核（' + revDisplay.area.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡' + (revDisplay.photos && revDisplay.photos.length > 0 ? ' · ' + revDisplay.photos.length + '张照片' : '') + '）</div>'
+          : '';
+        return '<div class="bld-card">' +
+          '<div class="bld-top">' +
+            '<span class="bld-name">' + d.building + '</span>' +
+            '<span class="status-tag tag-green">' + d.status + '</span>' +
+          '</div>' +
+          '<div class="bld-grid">' +
+            '<div class="bld-gitem"><span class="bld-glabel">层数</span><span class="bld-gvalue">' + d.floors + '层</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">用热性质</span><span class="bld-gvalue">' + d.heatNature + '</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">收费类别</span><span class="bld-gvalue">' + d.chargeType + '</span></div>' +
+            '<div class="bld-gitem"><span class="bld-glabel">普查依据</span><span class="bld-gvalue">' + d.basis + '</span></div>' +
+          '</div>' +
+          '<div class="bld-area-row">' +
+            '<div class="bld-area-card">' +
+              '<span class="acl">建筑面积</span>' +
+              '<span class="acv">' + d.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span>' +
+            '</div>' +
+            '<div class="bld-area-card ' + diffClass + '">' +
+              '<span class="acl">面积变化</span>' +
+              '<span class="acv">' + diffSign + d.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span>' +
+              '<span class="acr">' + d.rate + '</span>' +
+            '</div>' +
+          '</div>' +
+          revBadgeHtml +
+          '<div class="bld-footer">' +
+            '<button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + d.id + ')">复核</button>' +
+            '<span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + d.id + '&code=' + siteCode + '\'">查看详情 ›</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      document.getElementById('buildingCards').innerHTML = cardsHtml;
+    } else {
+      document.getElementById('buildingCards').innerHTML = '<div style="text-align:center;padding:40px 20px;color:#bbb;font-size:14px;">暂无建筑物数据</div>';
+    }
+
+    // 渲染检查记录单
+    const record = site.checkRecord;
+    if (!record.submitted) {
+      document.getElementById('checkRecord').innerHTML = `
+        <div class="adm-card" style="text-align:center;padding:40px 20px;">
+          <div style="font-size:48px;margin-bottom:12px;">📝</div>
+          <p style="font-size:14px;color:#999;">暂无检查记录单</p>
+          <p style="font-size:12px;color:#bbb;margin-top:4px;">请先填写检查记录单</p>
+        </div>
+      `;
+    } else {
+      const conclusionTag = record.conclusion === '合格'
+        ? '<span class="status-tag tag-green">合格</span>'
+        : '<span class="status-tag tag-red">不合格</span>';
+      const itemsHtml = record.items.map(item => {
+        const resultClass = item.result === '是' ? 'result-yes' : item.result === '否' ? 'result-no' : 'result-na';
+        const resultText = item.result === '是' ? '是' : item.result === '否' ? '否' : '不适用';
+        const subItemsHtml = item.subItems.length > 0
+          ? `<div class="check-record-desc">不合格原因：${item.subItems.join('、')}</div>`
+          : '';
+        const descHtml = item.desc ? `<div class="check-record-desc">${item.desc}</div>` : '';
+        return `<div class="check-record-item">
+          <div class="check-record-title">${item.id}. ${item.title} <span class="check-record-result ${resultClass}">${resultText}</span></div>
+          ${subItemsHtml}
+          ${descHtml}
+        </div>`;
+      }).join('');
+
+      document.getElementById('checkRecord').innerHTML = `
+        <div class="adm-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:14px;font-weight:600;">检查结论</span>
+            ${conclusionTag}
+          </div>
+          <div class="info-row"><span class="info-label">检查人</span><span class="info-value">${record.inspector}</span></div>
+          <div class="info-row"><span class="info-label">检查日期</span><span class="info-value">${record.checkDate}</span></div>
+          ${record.problemDesc ? `<div style="margin-top:8px;padding:8px;background:#f8f9fc;border-radius:6px;font-size:12px;color:#666;line-height:1.6;">${record.problemDesc}</div>` : ''}
+        </div>
+        <div class="adm-card" style="margin-top:8px;">
+          <div class="adm-card-title">检查项目</div>
+          ${itemsHtml}
+        </div>
+      `;
+    }
+
+    // 动态添加整改通知单Tab（仅检查不合格时显示）
+    var showRectify = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
+    var tabBar = document.getElementById('tabBar');
+    if (showRectify) {
+      var tab = document.createElement('div');
+      tab.className = 'adm-tab';
+      tab.dataset.tab = 'rectify';
+      tab.textContent = '整改通知单';
+      tabBar.appendChild(tab);
+      // 渲染整改通知单内容
+      document.getElementById('rectifyContent').innerHTML = `
+        <div class="adm-card" style="background:#fff8e8;border:1px solid #ffe58f;">
+          <div style="font-size:14px;font-weight:600;color:#d48806;margin-bottom:10px;">整改通知单</div>
+          <div class="info-row"><span class="info-label">编号</span><span class="info-value">ZG-2026-${site.code}</span></div>
+          <div class="info-row"><span class="info-label">站点名称</span><span class="info-value">${site.name}</span></div>
+          <div class="info-row"><span class="info-label">存在问题</span><span class="info-value">${site.checkRecord.problemDesc || '—'}</span></div>
+          <div style="margin-top:10px;padding:8px;background:#fff;border-radius:6px;font-size:12px;color:#666;line-height:1.6;">
+            <strong style="color:#d48806;">整改要求：</strong>请于收到通知后7个工作日内完成整改，并提交整改报告及相关证明材料。
+          </div>
+        </div>
+      `;
+    }
+
+    // 渲染整改告知书（展示PC端上传的整改反馈）
+    var letter = site.rectifyLetter;
+    if (letter && letter.fixDesc) {
+      var attHtml = (letter.attachments || []).map(function(a) {
+        return '<div class="letter-attachment">' +
+          '<div class="letter-att-icon">📄</div>' +
+          '<div class="letter-att-info">' +
+            '<div class="letter-att-name">' + a.name + '</div>' +
+            '<div class="letter-att-meta">' + (a.size || '—') + '</div>' +
+          '</div>' +
+          '<span class="letter-att-status">已上传</span>' +
+        '</div>';
+      }).join('');
+      document.getElementById('letterContent').innerHTML = '' +
+        '<div class="adm-card letter-card">' +
+          '<div class="letter-title">📋 整改告知书</div>' +
+          '<div class="letter-desc-box">' + letter.fixDesc + '</div>' +
+          '<div class="letter-meta">整改人：<strong>' + (letter.rectifier || '—') + '</strong> &nbsp;&nbsp; 最近保存：<strong>' + (letter.lastSaveTime || '—') + '</strong></div>' +
+          (attHtml ? '<div style="margin-top:10px;"><div style="font-size:13px;font-weight:500;color:#333;margin-bottom:6px;">整改附件</div>' + attHtml + '</div>' : '') +
+        '</div>';
+    } else {
+      document.getElementById('letterContent').innerHTML = '' +
+        '<div class="adm-card">' +
+          '<div class="letter-empty">' +
+            '<div class="letter-empty-icon">📋</div>' +
+            '<div class="letter-empty-text">暂无整改告知书</div>' +
+            '<div style="font-size:12px;color:#bbb;margin-top:6px;">整改负责人上传告知书后将在此展示</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    // Tab 切换
+    document.getElementById('tabBar').addEventListener('click', function(e) {
+      const tab = e.target.closest('.adm-tab');
+      if (!tab) return;
+      document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+
+    // 审核弹窗
+    function showRectifyAudit() {
+      document.getElementById('auditOverlay').classList.add('show');
+    }
+    function closeRectifyAudit() {
+      document.getElementById('auditOverlay').classList.remove('show');
+      document.getElementById('auditRejectReason').value = '';
+      document.getElementById('rejectSection').style.display = 'none';
+      document.getElementById('auditCount').textContent = '0';
+      // 重置radio为"通过"
+      var passRadio = document.querySelector('input[name="auditResult"][value="pass"]');
+      if (passRadio) passRadio.checked = true;
+    }
+    // 点击背景关闭sheet
+    document.getElementById('auditOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeRectifyAudit();
+    });
+    function submitRectifyAudit() {
+      var result = document.querySelector('input[name="auditResult"]:checked');
+      if (!result) { showToast('请选择审核结果'); return; }
+      if (result.value === 'reject') {
+        var reason = document.getElementById('auditRejectReason').value.trim();
+        if (!reason) { showToast('请填写驳回原因'); return; }
+      }
+      showToast('审核提交成功');
+      closeRectifyAudit();
+    }
+    // 审核结果radio联动驳回原因
+    document.addEventListener('change', function(e) {
+      if (e.target.name === 'auditResult') {
+        document.getElementById('rejectSection').style.display = e.target.value === 'reject' ? 'block' : 'none';
+      }
+    });
+    // 驳回原因字数统计
+    document.addEventListener('input', function(e) {
+      if (e.target.id === 'auditRejectReason') {
+        document.getElementById('auditCount').textContent = e.target.value.length;
+      }
+    });
+
+    // ====== 复核弹窗（完整版） ======
+    var reviewModal = null;
+    var reviewBuildingId = null;
+    var reviewPhotos = [];
+
+    function openReviewModal(buildingId) {
+      var bd = window._reviewBuildings && window._reviewBuildings[buildingId];
+      if (!bd) { showToast('建筑数据未找到'); return; }
+      reviewBuildingId = buildingId;
+      reviewPhotos = [];
+      if (!reviewModal) {
+        reviewModal = document.createElement('div');
+        reviewModal.id = 'reviewModal';
+        reviewModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.2s ease;';
+        reviewModal.addEventListener('click', function(e) { if (e.target === this) closeReviewModal(); });
+        document.body.appendChild(reviewModal);
+      }
+      // 构建弹窗内容
+      reviewModal.innerHTML =
+        '<div style="background:#fff;border-radius:12px;width:100%;max-width:340px;max-height:90vh;overflow-y:auto;">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:0.5px solid #f0f0f0;">' +
+            '<span style="font-size:17px;font-weight:600;color:#1a1a1a;">建筑物复核</span>' +
+            '<span onclick="closeReviewModal()" style="width:28px;height:28px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:16px;color:#999;cursor:pointer;">✕</span>' +
+          '</div>' +
+          '<div style="padding:16px 20px;">' +
+            // 建筑信息提示
+            '<div style="background:#f8f9fc;border-radius:8px;padding:10px 12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">' +
+              '<span style="font-size:13px;font-weight:500;color:#1a1a1a;">' + bd.building + '</span>' +
+              '<span style="font-size:12px;color:#999;">普查面积 <b style="color:#333;">' + bd.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡</b></span>' +
+            '</div>' +
+            // 复核照片
+            '<div style="margin-bottom:16px;">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                '<span style="font-size:13px;font-weight:500;color:#1a1a1a;">复核照片</span>' +
+                '<span style="font-size:11px;color:#999;" id="reviewPhotoCount">0 张</span>' +
+              '</div>' +
+              '<div style="display:flex;gap:8px;flex-wrap:wrap;" id="reviewPhotoList"></div>' +
+              '<div onclick="document.getElementById(\'reviewFileInput\').click()" style="margin-top:8px;width:100%;height:44px;border:1px dashed #d9d9d9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#1677ff;cursor:pointer;">+ 上传复核照片</div>' +
+              '<input type="file" id="reviewFileInput" accept="image/*" multiple style="display:none" onchange="handleReviewPhotoSelect(this)">' +
+            '</div>' +
+            // 复查面积
+            '<div style="margin-bottom:16px;">' +
+              '<label style="font-size:13px;font-weight:500;color:#1a1a1a;display:block;margin-bottom:6px;">复查面积 <span style="color:#e24b4a;">*</span></label>' +
+              '<div style="display:flex;align-items:center;border:0.5px solid #d9d9d9;border-radius:8px;padding:0 12px;height:40px;background:#fafafa;">' +
+                '<input type="number" id="reviewAreaInput" step="0.01" min="0" placeholder="请输入复查面积" style="flex:1;border:none;outline:none;font-size:14px;color:#333;background:transparent;" value="' + bd.currentArea.toFixed(2) + '">' +
+                '<span style="font-size:12px;color:#999;flex-shrink:0;">㎡</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;padding:12px 20px 20px;gap:12px;">' +
+            '<button onclick="closeReviewModal()" style="flex:1;height:40px;border-radius:20px;border:0.5px solid #d9d9d9;background:#fff;font-size:14px;color:#333;cursor:pointer;">取消</button>' +
+            '<button onclick="submitReview()" style="flex:1;height:40px;border-radius:20px;border:none;background:#1677ff;font-size:14px;color:#fff;cursor:pointer;font-weight:500;">提交复核</button>' +
+          '</div>' +
+        '</div>';
+      setTimeout(function() { reviewModal.style.opacity = '1'; reviewModal.style.pointerEvents = 'auto'; }, 10);
+    }
+
+    function closeReviewModal() {
+      if (reviewModal) {
+        reviewModal.style.opacity = '0';
+        reviewModal.style.pointerEvents = 'none';
+      }
+    }
+
+    function handleReviewPhotoSelect(input) {
+      var files = input.files;
+      if (!files || files.length === 0) return;
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        var reader = new FileReader();
+        reader.onload = (function(fileName) {
+          return function(e) {
+            reviewPhotos.push({ name: fileName, dataUrl: e.target.result });
+            renderReviewPhotos();
+          };
+        })(f.name);
+        reader.readAsDataURL(f);
+      }
+      input.value = '';
+    }
+
+    function renderReviewPhotos() {
+      var list = document.getElementById('reviewPhotoList');
+      var count = document.getElementById('reviewPhotoCount');
+      if (!list) return;
+      if (reviewPhotos.length === 0) {
+        list.innerHTML = '';
+        if (count) count.textContent = '0 张';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < reviewPhotos.length; i++) {
+        html +=
+          '<div style="position:relative;width:72px;height:72px;border-radius:6px;overflow:hidden;border:0.5px solid #e8e8e8;">' +
+            '<img src="' + reviewPhotos[i].dataUrl + '" style="width:100%;height:100%;object-fit:cover;">' +
+            '<span onclick="removeReviewPhoto(' + i + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;">✕</span>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+      if (count) count.textContent = reviewPhotos.length + ' 张';
+    }
+
+    function removeReviewPhoto(index) {
+      reviewPhotos.splice(index, 1);
+      renderReviewPhotos();
+    }
+
+    function submitReview() {
+      var areaInput = document.getElementById('reviewAreaInput');
+      var area = parseFloat(areaInput.value);
+      if (reviewPhotos.length === 0) {
+        var toast = document.getElementById('toast');
+        if (toast) { toast.textContent = '请至少上传 1 张复核照片'; toast.className = 'toast toast-warning show'; setTimeout(function(){toast.className='toast'},2000); }
+        return;
+      }
+      if (isNaN(area) || area <= 0) {
+        var toast = document.getElementById('toast');
+        if (toast) { toast.textContent = '请输入有效的复查面积'; toast.className = 'toast toast-warning show'; setTimeout(function(){toast.className='toast'},2000); }
+        return;
+      }
+      // 保存复核数据
+      reviewDisplay[reviewBuildingId] = {
+        photos: reviewPhotos.map(function(p) { return p.name; }),
+        area: area,
+        date: new Date().toISOString().slice(0,10)
+      };
+      closeReviewModal();
+      // 刷新建筑物卡片
+      if (typeof renderSiteBuildings === 'function') {
+        renderSiteBuildings();
+      } else {
+        // 手动触发刷新：找到当前站点的surveyDetails重新渲染
+        var sc = getSiteCode ? getSiteCode() : '';
+        if (sc && window._reviewBuildings) {
+          // 重新执行卡片渲染逻辑
+          var bldContainer = document.getElementById('buildingCards');
+          if (bldContainer && window._currentSiteData) {
+            var s = window._currentSiteData;
+            if (s.surveyDetails && s.surveyDetails.length > 0) {
+              bldContainer.innerHTML = s.surveyDetails.map(function(bi) {
+                var ds = bi.diff >= 0 ? '+' : '';
+                var dc = bi.diff >= 0 ? 'green' : 'red';
+                var rd = reviewDisplay[bi.id];
+                var im = bi.basis && bi.basis.indexOf('实测') >= 0;
+                var rb = im && rd ? '<div class="bld-review-badge"><span class="badge-icon">✓</span> 已复核（' + rd.area.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ㎡' + (rd.photos && rd.photos.length > 0 ? ' · ' + rd.photos.length + '张照片' : '') + '）</div>' : '';
+                return '<div class="bld-card">' +
+                  '<div class="bld-top"><span class="bld-name">' + bi.building + '</span><span class="status-tag tag-green">' + bi.status + '</span></div>' +
+                  '<div class="bld-grid">' +
+                    '<div class="bld-gitem"><span class="bld-glabel">层数</span><span class="bld-gvalue">' + bi.floors + '层</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">用热性质</span><span class="bld-gvalue">' + bi.heatNature + '</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">收费类别</span><span class="bld-gvalue">' + bi.chargeType + '</span></div>' +
+                    '<div class="bld-gitem"><span class="bld-glabel">普查依据</span><span class="bld-gvalue">' + bi.basis + '</span></div>' +
+                  '</div>' +
+                  '<div class="bld-area-row">' +
+                    '<div class="bld-area-card"><span class="acl">建筑面积</span><span class="acv">' + bi.currentArea.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span></div>' +
+                    '<div class="bld-area-card ' + dc + '"><span class="acl">面积变化</span><span class="acv">' + ds + bi.diff.toLocaleString('en-US', {minimumFractionDigits: 2}) + '<span class="acu">㎡</span></span><span class="acr">' + bi.rate + '</span></div>' +
+                  '</div>' +
+                  rb +
+                  '<div class="bld-footer"><button class="bld-btn-review" onclick="event.stopPropagation();openReviewModal(' + bi.id + ')">复核</button><span class="bld-link" onclick="event.stopPropagation();location.href=\'./expert-app-building-detail.html?id=' + bi.id + '&code=' + sc + '\'">查看详情 ›</span></div>' +
+                '</div>';
+              }).join('');
+            }
+          }
+        }
+      }
+      showToast('✓ 复核数据已提交');
+    }
+
+    // ====== Toast 提示 ======
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'toast show';
+      setTimeout(function() { el.className = 'toast'; }, 2200);
+    }
+  </script>
+</body>
+</html>

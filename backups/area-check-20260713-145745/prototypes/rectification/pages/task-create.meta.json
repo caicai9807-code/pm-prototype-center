@@ -1,0 +1,136 @@
+{
+  "name": "新建面积检查任务",
+  "pageKey": "task-create",
+  "business": "创建或编辑检查任务的第一步，支持填写基础信息（任务名称、开始/结束时间）、通过站点选择器选择检查站点，编辑模式下回填已有数据，进行中任务仅可修改专家分配",
+  "domain": "rectification",
+  "inputs": [
+    {
+      "name": "mode",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "页面模式，mode=edit为编辑模式，否则为新建模式"
+    },
+    {
+      "name": "id",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "编辑模式下的任务ID，用于回填基础信息和站点数据"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "taskForm",
+      "type": "object",
+      "target": "ui-render",
+      "description": "基础信息表单，包含任务名称、开始时间、结束时间字段"
+    },
+    {
+      "name": "selectedSites",
+      "type": "array",
+      "target": "ui-render",
+      "description": "已选站点列表，渲染到站点表格中，包含code/name/dept/area/type/address字段"
+    },
+    {
+      "name": "sessionData",
+      "type": "object",
+      "target": "session-storage",
+      "description": "点击下一步时将selectedSites/editMode/editTaskId存入sessionStorage，供task-expert页面读取"
+    }
+  ],
+  "stateMachine": {
+    "initial": "editing",
+    "states": {
+      "editing": {
+        "description": "编辑基础信息和站点选择状态，填写任务名称、时间，管理已选站点",
+        "transitions": [
+          {
+            "trigger": "click-open-site-selector",
+            "target": "site-selecting",
+            "action": "打开站点选择器弹窗"
+          },
+          {
+            "trigger": "click-save-draft",
+            "target": "editing",
+            "action": "暂存当前表单数据，显示成功提示"
+          },
+          {
+            "trigger": "click-next-step",
+            "target": "validating",
+            "action": "验证基础信息和站点选择是否完整"
+          },
+          {
+            "trigger": "click-cancel",
+            "target": "navigating-to-list",
+            "action": "取消并返回任务列表"
+          },
+          {
+            "trigger": "click-remove-site",
+            "target": "editing",
+            "action": "从已选站点中移除指定站点"
+          }
+        ]
+      },
+      "site-selecting": {
+        "description": "站点选择器弹窗打开状态，支持按管理部/片区所/站点类型/站点名称/普查/检查筛选，勾选站点",
+        "transitions": [
+          {
+            "trigger": "click-confirm-sites",
+            "target": "editing",
+            "action": "确认选择站点，关闭弹窗，更新已选站点表格"
+          },
+          {
+            "trigger": "click-cancel-modal",
+            "target": "editing",
+            "action": "取消选择，关闭弹窗，保留原有已选站点"
+          }
+        ]
+      },
+      "validating": {
+        "description": "验证基础信息完整性（任务名称、开始时间、结束时间）和站点选择（至少1个）",
+        "transitions": [
+          {
+            "trigger": "validation-pass",
+            "target": "navigating-to-expert",
+            "action": "验证通过，将数据存入sessionStorage，跳转到专家分配页"
+          },
+          {
+            "trigger": "validation-fail",
+            "target": "editing",
+            "action": "验证失败，显示警告提示（缺少必填项或未选站点）"
+          }
+        ]
+      },
+      "navigating-to-list": {
+        "description": "跳转回任务列表页",
+        "transitions": []
+      },
+      "navigating-to-expert": {
+        "description": "跳转到专家分配页（task-expert），编辑模式带id和mode参数",
+        "transitions": []
+      }
+    }
+  },
+  "dependencies": {
+    "components": [
+      "AppComponents.showToast"
+    ],
+    "services": [
+      "TaskService.getTask",
+      "TaskService.getTaskSites"
+    ],
+    "mockData": [
+      "MockData.sitePool"
+    ]
+  },
+  "navigation": {
+    "entryPoints": [
+      "task-list"
+    ],
+    "exitPoints": [
+      "task-list",
+      "task-expert"
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{"kind":"deck","id":"pr/921led","name":"Deck"}
+{"kind":"layout","layoutId":"7e9a34f9-e5c7-4df3-863f-35de7be7431e","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"76472703-dedc-453f-a3f5-fa9ac21f8956","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/s9ufj1","slide":1,"title":"面积检查主流程：任务下发后逐站点完成检查判定","textShapes":26}
+{"kind":"textbox","id":"sh/cre1cv6l","slide":1,"name":"title-1","text":"面积检查主流程：任务下发后逐站点完成检查判定","textPreview":"面积检查主流程：任务下发后逐站点完成检查判定","textChars":22,"textLines":1,"bbox":[42,28,1110,50]}
+{"kind":"textbox","id":"sh/bqlk3q50","slide":1,"name":"subtitle-1","text":"主链路覆盖任务创建、专家确认、现场检查以及合格／整改分流","textPreview":"主链路覆盖任务创建、专家确认、现场检查以及合格／整改分流","textChars":28,"textLines":1,"bbox":[44,78,1090,28]}
+{"kind":"textbox","id":"sh/q5cjalof","slide":1,"name":"page-1","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1180,660,54,24]}
+{"kind":"shape","id":"sh/lwn290n2","slide":1,"name":"lane-任务管理人员","bbox":[42,122,1196,170]}
+{"kind":"shape","id":"sh/0ve1gv6h","slide":1,"name":"lane-bar-任务管理人员","bbox":[42,122,8,170]}
+{"kind":"textbox","id":"sh/zu5k7q5w","slide":1,"name":"lane-label-任务管理人员","text":"任务管理人员","textPreview":"任务管理人员","textChars":6,"textLines":1,"bbox":[62,132,132,28]}
+{"kind":"shape","id":"sh/ytwjelob","slide":1,"name":"lane-检查专家","bbox":[42,310,1196,310]}
+{"kind":"shape","id":"sh/1032xw7y","slide":1,"name":"lane-bar-检查专家","bbox":[42,310,8,310]}
+{"kind":"textbox","id":"sh/gzu14r6d","slide":1,"name":"lane-label-检查专家","text":"检查专家","textPreview":"检查专家","textChars":4,"textLines":1,"bbox":[62,320,132,28]}
+{"kind":"textbox","id":"sh/2pwbapsf","slide":1,"name":"task-create","text":"创建任务\n设置周期与范围","textPreview":"创建任务 | 设置周期与范围","textChars":12,"textLines":2,"bbox":[210,170,150,72]}
+{"kind":"textbox","id":"sh/3a5c3u90","slide":1,"name":"task-sites","text":"选择站点\n形成检查清单","textPreview":"选择站点 | 形成检查清单","textChars":11,"textLines":2,"bbox":[405,170,150,72]}
+{"kind":"textbox","id":"sh/4betczal","slide":1,"name":"task-assign","text":"分配专家\n填满全部槽位","textPreview":"分配专家 | 填满全部槽位","textChars":11,"textLines":2,"bbox":[600,170,150,72]}
+{"kind":"textbox","id":"sh/pc7u54r6","slide":1,"name":"task-all-assigned","text":"分配\n完成？","textPreview":"分配 | 完成？","textChars":6,"textLines":2,"bbox":[800,157,116,98]}
+{"kind":"textbox","id":"sh/qdgbe9sr","slide":1,"name":"task-submit","text":"提交并下发\n状态：待确认","textPreview":"提交并下发 | 状态：待确认","textChars":12,"textLines":2,"bbox":[970,170,160,72]}
+{"kind":"textbox","id":"sh/bepc7e9c","slide":1,"name":"expert-confirm","text":"专家确认任务","textPreview":"专家确认任务","textChars":6,"textLines":1,"bbox":[970,360,160,64]}
+{"kind":"textbox","id":"sh/cfytgjah","slide":1,"name":"expert-accept","text":"接受任务\n状态：待开始","textPreview":"接受任务 | 状态：待开始","textChars":11,"textLines":2,"bbox":[770,356,155,72]}
+{"kind":"textbox","id":"sh/dg7u9or2","slide":1,"name":"expert-start","text":"开始检查\n状态：进行中","textPreview":"开始检查 | 状态：进行中","textChars":11,"textLines":2,"bbox":[570,356,155,72]}
+{"kind":"textbox","id":"sh/yhgvi9sn","slide":1,"name":"expert-site","text":"进入站点\n核对面积与资料","textPreview":"进入站点 | 核对面积与资料","textChars":12,"textLines":2,"bbox":[370,356,155,72]}
+{"kind":"textbox","id":"sh/zipcbe98","slide":1,"name":"expert-record","text":"填写检查记录单\n提交并确认签字","textPreview":"填写检查记录单 | 提交并确认签字","textChars":15,"textLines":2,"bbox":[170,356,160,72]}
+{"kind":"textbox","id":"sh/vm9szepg","slide":1,"name":"expert-failed","text":"有不合格项？","textPreview":"有不合格项？","textChars":6,"textLines":1,"bbox":[205,475,118,96]}
+{"kind":"textbox","id":"sh/al0b6tov","slide":1,"name":"site-passed","text":"检查合格\n站点：已检查","textPreview":"检查合格 | 站点：已检查","textChars":11,"textLines":2,"bbox":[405,460,165,64]}
+{"kind":"textbox","id":"sh/x8ra1o7m","slide":1,"name":"site-rectify","text":"提交整改通知书\n站点：待整改","textPreview":"提交整改通知书 | 站点：待整改","textChars":14,"textLines":2,"bbox":[405,542,180,64]}
+{"kind":"textbox","id":"sh/w7it8j61","slide":1,"name":"site-loop","text":"站点全完成？","textPreview":"站点全完成？","textChars":6,"textLines":1,"bbox":[760,492,118,96]}
+{"kind":"textbox","id":"sh/nipsvep4","slide":1,"name":"task-end","text":"任务结束\n状态：已结束","textPreview":"任务结束 | 状态：已结束","textChars":11,"textLines":2,"bbox":[1000,504,155,72]}
+{"kind":"shape","id":"sh/mhgb29oz","slide":1,"bbox":[360,206,45,0]}
+{"kind":"shape","id":"sh/9kraxo7a","slide":1,"bbox":[555,206,45,0]}
+{"kind":"shape","id":"sh/8jit4j6p","slide":1,"bbox":[750,206,50,0]}
+{"kind":"shape","id":"sh/zepsrup8","slide":1,"bbox":[916,206,54,0]}
+{"kind":"shape","id":"sh/ydgby98n","slide":1,"bbox":[675,242,183,13]}
+{"kind":"shape","id":"sh/4jup8vml","slide":1,"bbox":[1050,242,0,118]}
+{"kind":"shape","id":"sh/pknq10n6","slide":1,"bbox":[925,392,45,0]}
+{"kind":"shape","id":"sh/2hc765of","slide":1,"bbox":[725,392,45,0]}
+{"kind":"shape","id":"sh/3il8zq50","slide":1,"bbox":[525,392,45,0]}
+{"kind":"shape","id":"sh/cne9cfmh","slide":1,"bbox":[330,392,40,0]}
+{"kind":"shape","id":"sh/donq5kn2","slide":1,"bbox":[250,428,14,47]}
+{"kind":"shape","id":"sh/qlw7a54r","slide":1,"bbox":[323,492,82,31]}
+{"kind":"shape","id":"sh/rm583a5w","slide":1,"bbox":[264,571,141,3]}
+{"kind":"shape","id":"sh/srap0b6d","slide":1,"bbox":[570,492,190,48]}
+{"kind":"shape","id":"sh/ts3qtgny","slide":1,"bbox":[585,574,234,14]}
+{"kind":"shape","id":"sh/lofi9gn2","slide":1,"bbox":[878,540,122,0]}
+{"kind":"shape","id":"sh/0nmh0b6h","slide":1,"bbox":[447.5,428,371.5,64]}
+{"kind":"textbox","id":"sh/zmd0765c","slide":1,"name":"assigned-yes","text":"是","textPreview":"是","textChars":1,"textLines":1,"bbox":[925,178,36,24]}
+{"kind":"textbox","id":"sh/yl4zylor","slide":1,"name":"assigned-no","text":"否","textPreview":"否","textChars":1,"textLines":1,"bbox":[742,260,36,24]}
+{"kind":"textbox","id":"sh/dkvi5gn6","slide":1,"name":"failed-no","text":"否","textPreview":"否","textChars":1,"textLines":1,"bbox":[342,472,36,24]}
+{"kind":"textbox","id":"sh/cjmhwb6l","slide":1,"name":"failed-yes","text":"是","textPreview":"是","textChars":1,"textLines":1,"bbox":[334,565,36,24]}
+{"kind":"textbox","id":"sh/bid03650","slide":1,"name":"done-yes","text":"是","textPreview":"是","textChars":1,"textLines":1,"bbox":[922,518,36,24]}
+{"kind":"textbox","id":"sh/qh4zu1of","slide":1,"name":"done-no","text":"否，继续下一站点","textPreview":"否，继续下一站点","textChars":8,"textLines":1,"bbox":[652,432,170,28]}
+{"kind":"notes","id":"nt/s9ufj1","slide":1,"text":""}
+{"kind":"slide","id":"sl/2c82id","slide":2,"title":"异常与整改闭环：驳回后统一退回整改责任人","textShapes":23}
+{"kind":"textbox","id":"sh/epkzmh4f","slide":2,"name":"title-2","text":"异常与整改闭环：驳回后统一退回整改责任人","textPreview":"异常与整改闭环：驳回后统一退回整改责任人","textChars":20,"textLines":1,"bbox":[42,28,1110,50]}
+{"kind":"textbox","id":"sh/1svihc36","slide":2,"name":"subtitle-2","text":"专家拒绝触发主任转派；整改结果依次经过主任审核和专家复查","textPreview":"专家拒绝触发主任转派；整改结果依次经过主任审核和专家复查","textChars":28,"textLines":1,"bbox":[44,78,1090,28]}
+{"kind":"textbox","id":"sh/0r21o7ml","slide":2,"name":"page-2","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1180,660,54,24]}
+{"kind":"shape","id":"sh/nud0jmlw","slide":2,"name":"lane-任务转派","bbox":[42,122,1196,150]}
+{"kind":"shape","id":"sh/2t4jqh4b","slide":2,"name":"lane-bar-任务转派","bbox":[42,122,8,150]}
+{"kind":"textbox","id":"sh/pgvilw32","slide":2,"name":"lane-label-任务转派","text":"任务转派","textPreview":"任务转派","textChars":4,"textLines":1,"bbox":[62,132,132,28]}
+{"kind":"shape","id":"sh/ovm1srmh","slide":2,"name":"lane-整改责任人","bbox":[42,290,1196,100]}
+{"kind":"shape","id":"sh/bid0n6l8","slide":2,"name":"lane-bar-整改责任人","bbox":[42,290,8,100]}
+{"kind":"textbox","id":"sh/ah4ju14n","slide":2,"name":"lane-label-整改责任人","text":"整改责任人","textPreview":"整改责任人","textChars":5,"textLines":1,"bbox":[62,300,132,28]}
+{"kind":"shape","id":"sh/4v6x8v2d","slide":2,"name":"lane-部门主任","bbox":[42,408,1196,100]}
+{"kind":"shape","id":"sh/5wfeh0ji","slide":2,"name":"lane-bar-部门主任","bbox":[42,408,8,100]}
+{"kind":"textbox","id":"sh/it4v65k7","slide":2,"name":"lane-label-部门主任","text":"部门主任","textPreview":"部门主任","textChars":4,"textLines":1,"bbox":[62,418,132,28]}
+{"kind":"shape","id":"sh/3uxwfq1s","slide":2,"name":"lane-检查专家","bbox":[42,526,1196,112]}
+{"kind":"shape","id":"sh/sj6xcf29","slide":2,"name":"lane-bar-检查专家","bbox":[42,526,8,112]}
+{"kind":"textbox","id":"sh/dkfelkju","slide":2,"name":"lane-label-检查专家","text":"检查专家","textPreview":"检查专家","textChars":4,"textLines":1,"bbox":[62,536,132,28]}
+{"kind":"textbox","id":"sh/qxofa5k3","slide":2,"name":"transfer-reject","text":"原专家拒绝任务\n填写拒绝原因","textPreview":"原专家拒绝任务 | 填写拒绝原因","textChars":14,"textLines":2,"bbox":[220,165,190,66]}
+{"kind":"textbox","id":"sh/ryxwja1o","slide":2,"name":"transfer-reassign","text":"主任指派新专家\n不得指派原专家","textPreview":"主任指派新专家 | 不得指派原专家","textChars":15,"textLines":2,"bbox":[530,165,200,66]}
+{"kind":"textbox","id":"sh/0nqxgfi5","slide":2,"name":"transfer-accepted","text":"新专家默认已确认\n状态：待开始","textPreview":"新专家默认已确认 | 状态：待开始","textChars":15,"textLines":2,"bbox":[850,165,200,66]}
+{"kind":"textbox","id":"sh/1ozepkjq","slide":2,"name":"rectify-receive","text":"接收整改任务\n状态：待整改","textPreview":"接收整改任务 | 状态：待整改","textChars":13,"textLines":2,"bbox":[220,308,190,64]}
+{"kind":"textbox","id":"sh/94vetkbu","slide":2,"name":"rectify-fix","text":"完成问题整改\n补充证明材料","textPreview":"完成问题整改 | 补充证明材料","textChars":13,"textLines":2,"bbox":[530,308,200,64]}
+{"kind":"textbox","id":"sh/8jmd0fap","slide":2,"name":"rectify-submit","text":"提交整改反馈\n状态：待主任审核","textPreview":"提交整改反馈 | 状态：待主任审核","textChars":15,"textLines":2,"bbox":[850,308,200,64]}
+{"kind":"textbox","id":"sh/nidwrat4","slide":2,"name":"director-audit","text":"主任审核整改结果","textPreview":"主任审核整改结果","textChars":8,"textLines":1,"bbox":[520,426,220,64]}
+{"kind":"textbox","id":"sh/mh4vy5sj","slide":2,"name":"director-decision","text":"审核通过？","textPreview":"审核通过？","textChars":5,"textLines":1,"bbox":[850,414,110,88]}
+{"kind":"textbox","id":"sh/x8fex4b6","slide":2,"name":"expert-review","text":"专家复查整改结果\n状态：待专家复查","textPreview":"专家复查整改结果 | 状态：待专家复查","textChars":17,"textLines":2,"bbox":[520,548,220,64]}
+{"kind":"textbox","id":"sh/w7mx4zal","slide":2,"name":"expert-decision","text":"复查通过？","textPreview":"复查通过？","textChars":5,"textLines":1,"bbox":[850,536,110,88]}
+{"kind":"textbox","id":"sh/v6dwvut0","slide":2,"name":"rectify-archive","text":"整改归档\n状态：已归档","textPreview":"整改归档 | 状态：已归档","textChars":11,"textLines":2,"bbox":[1030,548,170,64]}
+{"kind":"shape","id":"sh/a54f2psf","slide":2,"bbox":[410,198,120,0]}
+{"kind":"shape","id":"sh/dcbel0b2","slide":2,"bbox":[730,198,120,0]}
+{"kind":"shape","id":"sh/cb2dsvuh","slide":2,"bbox":[410,340,120,0]}
+{"kind":"shape","id":"sh/i5g36x43","slide":2,"bbox":[730,340,120,0]}
+{"kind":"shape","id":"sh/36pkf25o","slide":2,"bbox":[630,372,320,54]}
+{"kind":"shape","id":"sh/47yl87mt","slide":2,"bbox":[740,458,110,0]}
+{"kind":"shape","id":"sh/5872hcne","slide":2,"bbox":[630,502,275,46]}
+{"kind":"shape","id":"sh/q9g3ah4z","slide":2,"bbox":[740,580,110,0]}
+{"kind":"shape","id":"sh/rapkjm5k","slide":2,"bbox":[960,580,70,0]}
+{"kind":"shape","id":"sh/sbilcrm5","slide":2,"bbox":[315,372,535,86]}
+{"kind":"shape","id":"sh/dcr2lwnq","slide":2,"bbox":[315,372,590,252]}
+{"kind":"textbox","id":"sh/6dwjydov","slide":2,"name":"audit-pass","text":"通过","textPreview":"通过","textChars":2,"textLines":1,"bbox":[790,501,58,24]}
+{"kind":"textbox","id":"sh/7e5k7i5g","slide":2,"name":"audit-reject","text":"驳回","textPreview":"驳回","textChars":2,"textLines":1,"bbox":[670,390,58,24]}
+{"kind":"textbox","id":"sh/nax0bex4","slide":2,"name":"review-pass","text":"通过","textPreview":"通过","textChars":2,"textLines":1,"bbox":[968,555,58,24]}
+{"kind":"textbox","id":"sh/m9oz29gj","slide":2,"name":"review-reject","text":"驳回","textPreview":"驳回","textChars":2,"textLines":1,"bbox":[700,640,58,24]}
+{"kind":"textbox","id":"sh/9wfidofa","slide":2,"name":"closure-note","text":"闭环规则：主任审核或专家复查驳回，均退回“待整改”；整改责任人补充材料后重新提交。","textPreview":"闭环规则：主任审核或专家复查驳回，均退回“待整改”；整改责任人补充材料后重新提交。","textChars":41,"textLines":1,"bbox":[190,652,900,42]}
+{"kind":"notes","id":"nt/2c82id","slide":2,"text":""}

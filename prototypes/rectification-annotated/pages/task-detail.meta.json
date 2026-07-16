@@ -1,0 +1,109 @@
+{
+  "name": "面积检查任务详情",
+  "pageKey": "task-detail",
+  "business": "展示单个检查任务的详细信息，包括任务状态、基础信息、任务进度步骤、检查统计数据，支持导出任务和保存修改",
+  "domain": "rectification",
+  "inputs": [
+    {
+      "name": "id",
+      "type": "string",
+      "source": "url-param",
+      "required": true,
+      "description": "任务ID，用于查询任务详情数据"
+    },
+    {
+      "name": "mode",
+      "type": "string",
+      "source": "url-param",
+      "required": false,
+      "description": "页面模式，mode=create时为新建模式，不加载已有任务数据"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "taskDetail",
+      "type": "object",
+      "target": "ui-render",
+      "description": "任务详情对象，包含name/planName/area/owner/status/start/end/year/expert/progress/qualified/unqualified/createdAt/completedAt/desc等字段"
+    },
+    {
+      "name": "stepProgress",
+      "type": "string",
+      "target": "ui-render",
+      "description": "任务进度步骤状态，高亮当前状态：草稿→待开始→进行中→已结束"
+    },
+    {
+      "name": "checkStats",
+      "type": "object",
+      "target": "ui-render",
+      "description": "检查统计数据，包含已完成数、合格数量、不合格数量"
+    }
+  ],
+  "stateMachine": {
+    "initial": "viewing",
+    "states": {
+      "viewing": {
+        "description": "查看任务详情，展示任务状态、基础信息、进度步骤和检查统计",
+        "transitions": [
+          {
+            "trigger": "click-back",
+            "target": "navigating-to-list",
+            "action": "返回任务列表页"
+          },
+          {
+            "trigger": "click-export",
+            "target": "exporting",
+            "action": "导出任务数据"
+          },
+          {
+            "trigger": "click-save",
+            "target": "saving",
+            "action": "保存修改或保存草稿"
+          }
+        ]
+      },
+      "exporting": {
+        "description": "导出任务中",
+        "transitions": [
+          {
+            "trigger": "export-complete",
+            "target": "viewing",
+            "action": "导出完成，回到查看状态"
+          }
+        ]
+      },
+      "saving": {
+        "description": "保存任务中",
+        "transitions": [
+          {
+            "trigger": "save-complete",
+            "target": "viewing",
+            "action": "保存完成，回到查看状态"
+          }
+        ]
+      },
+      "navigating-to-list": {
+        "description": "跳转回任务列表页",
+        "transitions": []
+      }
+    }
+  },
+  "dependencies": {
+    "components": [
+      "AppComponents.statusClass"
+    ],
+    "services": [
+      "TaskService.getTask"
+    ],
+    "mockData": []
+  },
+  "navigation": {
+    "entryPoints": [
+      "index",
+      "task-list"
+    ],
+    "exitPoints": [
+      "task-list"
+    ]
+  }
+}

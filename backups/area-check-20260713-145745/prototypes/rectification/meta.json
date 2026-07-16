@@ -1,0 +1,85 @@
+{
+  "name": "整改任务管理",
+  "domain": "rectification",
+  "description": "面积检查业务的整改任务管理模块，包含任务列表、任务详情、新建任务、专家分配等功能",
+  "version": "1.0.0",
+  "pages": [
+    {
+      "key": "index",
+      "name": "整改任务模块首页",
+      "file": "pages/index.js",
+      "meta": "pages/index.meta.json"
+    },
+    {
+      "key": "task-list",
+      "name": "面积检查任务管理",
+      "file": "pages/task-list.js",
+      "meta": "pages/task-list.meta.json"
+    },
+    {
+      "key": "task-detail",
+      "name": "面积检查任务详情",
+      "file": "pages/task-detail.js",
+      "meta": "pages/task-detail.meta.json"
+    },
+    {
+      "key": "task-create",
+      "name": "新建面积检查任务",
+      "file": "pages/task-create.js",
+      "meta": "pages/task-create.meta.json"
+    },
+    {
+      "key": "task-expert",
+      "name": "抽选专家与分组分配",
+      "file": "pages/task-expert.js",
+      "meta": "pages/task-expert.meta.json"
+    }
+  ],
+  "services": [
+    {
+      "name": "TaskService",
+      "file": "service/task-service.js",
+      "methods": ["getTask", "getTaskSites", "getTaskExpertAssignments", "filterTasks"]
+    }
+  ],
+  "mockData": [
+    {
+      "name": "MockData",
+      "file": "mock/data.js",
+      "collections": ["tasks", "sitePool", "taskSites", "taskExpertAssignments", "expertPool", "deptGroups", "expertModalPool"]
+    }
+  ],
+  "navigation": {
+    "entryPage": "index",
+    "primaryFlow": ["index", "task-list", "task-detail|task-create|task-expert"]
+  },
+  "dependencies": {
+    "shared": {
+      "components": ["Layout", "Table", "Form", "Modal", "Status"],
+      "utils": ["helpers"],
+      "router": true
+    },
+    "internal": {
+      "config": "config.js",
+      "components": "components.js"
+    }
+  },
+  "enhancements": [
+    {
+      "page": "task-list",
+      "file": "pages/task-list-enhance.js",
+      "description": "专家确认列增强（hover弹窗显示明细）"
+    },
+    {
+      "page": "task-expert",
+      "file": "pages/task-expert-enhance.js",
+      "description": "专家分配页覆盖逻辑（cloneNode替换按钮事件等）"
+    },
+    {
+      "page": "task-expert",
+      "file": "pages/task-expert.css",
+      "type": "style",
+      "description": "专家分配页专属样式补丁"
+    }
+  ]
+}

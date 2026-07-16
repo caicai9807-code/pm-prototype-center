@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>楼栋详情</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f6f8; color: #333; font-size: 14px;
+      min-height: 100vh; -webkit-tap-highlight-color: transparent;
+    }
+
+    .cf-nav-bar {
+      position: sticky; top: 0; z-index: 5;
+      background: #fff; display: flex; align-items: center;
+      height: 36px; padding: 0 12px; border-bottom: 1px solid #edf0f2;
+    }
+    .cf-back-btn {
+      width: 28px; height: 28px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: #4b7cf4;
+      font-size: 20px; border-radius: 14px; flex-shrink: 0;
+    }
+    .cf-nav-title {
+      flex: 1; text-align: center; font-size: 16px; font-weight: 600;
+      color: #111827; margin-right: 28px;
+    }
+    .cf-content { padding: 12px; }
+
+    .bd-card { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .bd-card-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f2f5; }
+
+    /* 顶部统计卡片 */
+    .bd-header-card { background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .bd-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .bd-header-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+    .bd-header-tag { font-size: 11px; padding: 2px 10px; border-radius: 10px; font-weight: 500; }
+    .bd-header-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .bd-header-stat { text-align: center; }
+    .bd-header-stat-num { font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.2; }
+    .bd-header-stat-label { font-size: 11px; color: #999; margin-top: 2px; }
+    .bd-header-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: #64748b; }
+    .bd-header-meta span { color: #333; font-weight: 500; }
+
+    .tag-blue { background: #e6f7ff; color: #1890ff; }
+    .tag-green { background: #ebfaf3; color: #00b578; }
+    .tag-gray { background: #f5f5f5; color: #999; }
+
+    .bd-tabs { display: flex; background: #fff; border-radius: 8px; padding: 4px; margin-bottom: 10px; gap: 2px; }
+    .bd-tab { flex: 1; text-align: center; font-size: 12px; padding: 7px 0; border-radius: 6px; cursor: pointer; color: #66758a; transition: all .15s; }
+    .bd-tab.active { background: #1677ff; color: #fff; font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 12px; color: #999; flex-shrink: 0; }
+    .info-value { font-size: 13px; font-weight: 500; color: #333; text-align: right; }
+    .info-value.link { color: #1677ff; }
+    .room-card {
+      background: #fff; border-radius: 10px; padding: 14px;
+      margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .room-card:last-child { margin-bottom: 0; }
+    .room-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 10px; border-bottom: 1px solid #f0f2f5;
+      margin-bottom: 10px;
+    }
+    .room-header-left { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+    .room-header-right { font-size: 13px; color: #999; }
+    .room-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; font-size: 13px;
+    }
+    .room-row-label { color: #999; }
+    .room-row-value { color: #333; font-weight: 500; }
+    .room-row-value.link { color: #1677ff; }
+    .room-list-hint {
+      text-align: center; font-size: 13px; color: #999;
+      margin-bottom: 12px;
+    }
+    .text-green { color: #00b578; }
+    .text-red { color: #ff3141; }
+
+    .photo-upload { border: 1px dashed #d9d9d9; border-radius: 8px; padding: 16px; text-align: center; margin-top: 8px; cursor: pointer; }
+    .photo-upload:active { background: #fafafa; }
+    .photo-upload .icon { font-size: 28px; margin-bottom: 4px; }
+    .photo-upload p { font-size: 12px; color: #999; }
+
+    .safe-area { height: 12px; }
+
+    .adm-toast {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 1000; padding: 10px 20px; border-radius: 8px;
+      background: rgba(0,0,0,0.75); color: #fff; font-size: 14px;
+      font-weight: 500; white-space: nowrap; pointer-events: none;
+      opacity: 1; transition: opacity 0.3s ease;
+    }
+    .adm-toast.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="cf-nav-bar">
+    <a href="javascript:history.back()" class="cf-back-btn">‹</a>
+    <div class="cf-nav-title" id="pageTitle">楼栋详情</div>
+  </div>
+  <div class="cf-content" id="content"></div>
+  <div class="safe-area"></div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var buildingId = params.get('id') || '1';
+    var siteCode = params.get('code') || '60218B006';
+
+    var buildings = {
+      '1': {
+        name: '1号楼(住宅)', floors: '1-6F', heatNature: '住宅', chargeType: '多层',
+        status: '已普查', tagClass: 'tag-blue', tagText: '实地核查',
+        originalArea: 3794.00, currentArea: 3794.00,
+        areaDiff: 0.00, diffRate: '0.00%',
+        controlMode: '分户控制', heatingType: '地暖', buildYear: '2009年',
+        basis: '实地核查', attachment: '核查依据.pdf', remark: '—',
+        rooms: [
+          { cardNo: '000900001', seq: 1, censusArea: '1-6F', basis: '实地核查', attachment: '核查依据.pdf', remark: '-' },
+          { cardNo: '000900002', seq: 2, censusArea: '1-6F', basis: '实地核查', attachment: '核查依据.pdf', remark: '-' },
+          { cardNo: '000900003', seq: 3, censusArea: '1-6F', basis: '实测核实', attachment: '实测报告.pdf', remark: '阳台封闭新增面积' },
+          { cardNo: '000900004', seq: 4, censusArea: '1-6F', basis: '确权书', attachment: '确权书.pdf', remark: '-' },
+        ]
+      },
+      '2': {
+        name: '2号楼(住宅)', floors: '1-8F', heatNature: '住宅', chargeType: '多层',
+        status: '已普查', tagClass: 'tag-blue', tagText: '实地核查',
+        originalArea: 2600.00, currentArea: 2600.00,
+        areaDiff: 0.00, diffRate: '0.00%',
+        controlMode: '分户控制', heatingType: '暖气片', buildYear: '2010年',
+        basis: '确权书', attachment: '确权书.pdf', remark: '—',
+        rooms: [
+          { cardNo: '000900005', seq: 1, censusArea: '1-8F', basis: '实地核查', attachment: '核查依据.pdf', remark: '-' },
+          { cardNo: '000900006', seq: 2, censusArea: '1-8F', basis: '确权书', attachment: '确权书.pdf', remark: '-' },
+        ]
+      },
+    };
+
+    var building = buildings[buildingId] || buildings['1'];
+    document.getElementById('pageTitle').textContent = '楼栋详情';
+
+    var currentTab = 'info';
+
+    function render() {
+      var html = '';
+
+      // 顶部统计卡片
+      html += '<div class="bd-header-card">';
+      html += '<div class="bd-header-top">';
+      html += '<span class="bd-header-name">' + building.name + '</span>';
+      html += '<span class="bd-header-tag ' + building.tagClass + '">' + building.tagText + '</span>';
+      html += '</div>';
+      html += '<div class="bd-header-stats">';
+      html += '<div class="bd-header-stat"><div class="bd-header-stat-num">' + building.originalArea.toLocaleString('en-US', {minimumFractionDigits:2}) + '</div><div class="bd-header-stat-label">原面积(㎡)</div></div>';
+      html += '<div class="bd-header-stat"><div class="bd-header-stat-num">' + building.currentArea.toLocaleString('en-US', {minimumFractionDigits:2}) + '</div><div class="bd-header-stat-label">现面积(㎡)</div></div>';
+      html += '<div class="bd-header-stat"><div class="bd-header-stat-num">' + building.areaDiff.toFixed(2) + '</div><div class="bd-header-stat-label">面积变化(㎡)</div></div>';
+      html += '<div class="bd-header-stat"><div class="bd-header-stat-num">' + building.diffRate + '</div><div class="bd-header-stat-label">变化率</div></div>';
+      html += '</div>';
+      html += '<div class="bd-header-meta">';
+      html += '用热性质：<span>' + building.heatNature + '</span>';
+      html += '收费类别：<span>' + building.chargeType + '</span>';
+      html += '变更明细：<span>' + building.rooms.length + '条</span>';
+      html += '</div>';
+      html += '</div>';
+
+      // Tab bar
+      html += '<div class="bd-tabs">';
+      html += '<div class="bd-tab' + (currentTab === 'info' ? ' active' : '') + '" onclick="switchTab(\'info\')">基础信息</div>';
+      html += '<div class="bd-tab' + (currentTab === 'change' ? ' active' : '') + '" onclick="switchTab(\'change\')">变更详情</div>';
+      html += '</div>';
+
+      // 基础信息
+      html += '<div class="tab-panel' + (currentTab === 'info' ? ' active' : '') + '" id="panel-info">';
+      html += '<div class="bd-card">';
+      html += '<div class="bd-card-title">楼栋基础信息</div>';
+      html += '<div class="info-row"><span class="info-label">楼号名称</span><span class="info-value">' + building.name + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">建筑年代</span><span class="info-value">' + building.buildYear.replace('年','') + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">收费类别</span><span class="info-value">' + building.chargeType + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">普查依据类型</span><span class="info-value">' + building.basis + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">原面积（㎡）</span><span class="info-value">' + building.originalArea.toLocaleString('en-US', {minimumFractionDigits:2}) + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">面积变化（㎡）</span><span class="info-value">' + building.areaDiff.toFixed(2) + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">依据附件</span><span class="info-value link" onclick="alert(\'下载附件：' + (building.attachment || '—') + '\')">' + (building.attachment || '—') + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">备注</span><span class="info-value">' + building.remark + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">层数</span><span class="info-value">' + building.floors + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">用热性质</span><span class="info-value">' + building.heatNature + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">控制方式</span><span class="info-value">' + building.controlMode + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">暖气类型</span><span class="info-value">' + building.heatingType + '</span></div>';
+      html += '<div class="info-row"><span class="info-label">现面积（㎡）</span><span class="info-value">' + building.currentArea.toLocaleString('en-US', {minimumFractionDigits:2}) + '</span></div>';
+      html += '</div>';
+      html += '</div>';
+
+      // 变更详情
+      html += '<div class="tab-panel' + (currentTab === 'change' ? ' active' : '') + '" id="panel-change">';
+      html += '<div class="room-list-hint">当前楼栋下的热费卡号明细</div>';
+      building.rooms.forEach(function(r) {
+        var attachHtml = r.attachment
+          ? '<span class="room-row-value link" onclick="alert(\'下载附件：' + r.attachment + '\')">' + r.attachment + '</span>'
+          : '<span class="room-row-value">-</span>';
+        html += '<div class="room-card">';
+        html += '<div class="room-header">';
+        html += '<span class="room-header-left">热费卡号 ' + r.cardNo + '</span>';
+        html += '<span class="room-header-right">序号 ' + r.seq + '</span>';
+        html += '</div>';
+        html += '<div class="room-row"><span class="room-row-label">普查面积</span><span class="room-row-value">' + r.censusArea + '</span></div>';
+        html += '<div class="room-row"><span class="room-row-label">普查依据</span><span class="room-row-value">' + r.basis + '</span></div>';
+        html += '<div class="room-row"><span class="room-row-label">附件</span>' + attachHtml + '</div>';
+        html += '<div class="room-row"><span class="room-row-label">备注</span><span class="room-row-value">' + r.remark + '</span></div>';
+        html += '</div>';
+      });
+      html += '</div>';
+
+      document.getElementById('content').innerHTML = html;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      render();
+    }
+
+    function showToast(msg) {
+      var existing = document.querySelector('.adm-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'adm-toast';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('hide'); }, 1800);
+      setTimeout(function() { toast.remove(); }, 2200);
+    }
+
+    render();
+  </script>
+</body>
+</html>

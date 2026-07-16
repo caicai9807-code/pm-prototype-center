@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>整改任务详情</title>
+  <link rel="stylesheet" href="../../shared/styles/shared.css" />
+  <link rel="stylesheet" href="./styles/pc-system-template.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    /* ── 整改任务详情页（rd- 前缀隔离）── */
+
+    .rd-page { max-width: 1400px; margin: 0 auto; }
+
+    /* 页面头部 */
+    .rd-page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; padding: 0 4px;
+    }
+    .rd-header-left { display: flex; align-items: center; gap: 12px; }
+    .rd-title { margin: 0; font-size: 20px; font-weight: 600; color: #1d2129; }
+    .rd-status-tag {
+      display: inline-block; padding: 2px 10px; border-radius: 4px;
+      font-size: 12px; font-weight: 500;
+      background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591;
+    }
+    .rd-status-tag.green { background: #f0fff4; color: #389e0d; border-color: #b7eb8f; }
+    .rd-status-tag.blue { background: #f0f5ff; color: #4c78f5; border-color: #adc6ff; }
+    .rd-status-tag.gray { background: #f5f5f5; color: #8c8c8c; border-color: #d9d9d9; }
+    .rd-status-tag.red { background: #fff2f0; color: #ff4d4f; border-color: #ffccc7; }
+    .rd-header-right { display: flex; gap: 8px; }
+
+    /* 信息卡片 */
+    .rd-info-card {
+      background: #fff; border-radius: 6px; padding: 20px 24px;
+      margin-bottom: 16px; border: 1px solid #f0f0f0;
+    }
+    .rd-info-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #f0f0f0; padding-bottom: 14px; margin-bottom: 18px;
+    }
+    .rd-info-title { font-size: 16px; font-weight: 500; color: #1f1f1f; }
+    .rd-info-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 24px;
+    }
+    .rd-info-item { display: flex; align-items: center; font-size: 14px; line-height: 22px; }
+    .rd-info-item.full-width { grid-column: span 4; white-space: normal; }
+    .rd-info-label { color: #8c8c8c; flex-shrink: 0; min-width: 80px; }
+    .rd-info-value { color: #262626; font-weight: 400; }
+
+    /* Tab 系统 */
+    .rd-tab-card {
+      background: #fff; border-radius: 6px; border: 1px solid #f0f0f0; margin-bottom: 16px;
+    }
+    .rd-tab-header {
+      display: flex; border-bottom: 1px solid #e8ecf1; padding: 0 20px;
+    }
+    .rd-tab-item {
+      padding: 12px 20px; font-size: 14px; color: #8c95a6; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s;
+      user-select: none;
+    }
+    .rd-tab-item:hover { color: #4c78f5; }
+    .rd-tab-item.active { color: #4c78f5; font-weight: 500; border-bottom-color: #4c78f5; }
+    .rd-tab-body { padding: 20px; }
+    .rd-tab-panel { display: none; }
+    .rd-tab-panel.active { display: block; }
+
+    /* 子Tab */
+    .rd-subtab-header {
+      display: flex; gap: 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 20px;
+    }
+    .rd-subtab-item {
+      padding: 8px 16px; font-size: 13px; color: #8c95a6; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s;
+    }
+    .rd-subtab-item:hover { color: #4c78f5; }
+    .rd-subtab-item.active { color: #4c78f5; font-weight: 500; border-bottom-color: #4c78f5; }
+    .rd-subtab-panel { display: none; }
+    .rd-subtab-panel.active { display: block; }
+
+    /* ── 审核弹窗 ── */
+    .rd-review-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center;
+    }
+    .rd-review-overlay.active { display: flex; }
+    .rd-review-card {
+      background: #fff; border-radius: 8px; width: 680px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .rd-review-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .rd-review-title { font-size: 16px; font-weight: 600; color: #262626; }
+    .rd-review-close { cursor: pointer; font-size: 20px; color: #8c8c8c; line-height: 1; }
+    .rd-review-close:hover { color: #262626; }
+    .rd-review-body { padding: 24px; }
+    .rd-review-section { margin-bottom: 24px; }
+    .rd-review-section-title {
+      font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 10px;
+    }
+    .rd-review-section-title .required { color: #ff4d4f; margin-right: 4px; }
+    .rd-review-textarea {
+      width: 100%; min-height: 120px; padding: 10px 12px;
+      border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px;
+      color: #262626; resize: vertical; outline: none; box-sizing: border-box;
+    }
+    .rd-review-textarea:focus { border-color: #4c78f5; box-shadow: 0 0 0 3px rgba(76,120,245,0.1); }
+    .rd-review-char-count { text-align: right; font-size: 12px; color: #bfbfbf; margin-top: 4px; }
+    .rd-review-radio-group { display: flex; align-items: center; gap: 24px; }
+    .rd-review-radio-item {
+      display: flex; align-items: center; gap: 8px; font-size: 14px;
+      color: #262626; cursor: pointer;
+    }
+    .rd-review-radio-item input[type="radio"] { width: 16px; height: 16px; accent-color: #4c78f5; }
+    .rd-review-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 12px 20px 16px; border-top: 1px solid #f0f0f0;
+    }
+
+    /* ── 普查明细表格（同 site-detail 样式）── */
+    .rd-survey-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .rd-survey-title { font-size: 15px; font-weight: 600; color: #262626; }
+    .rd-survey-count { font-size: 13px; color: #8c8c8c; }
+    .rd-table-wrapper { overflow-x: auto; margin-bottom: 12px; }
+    .rd-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 1500px; }
+    .rd-table th, .rd-table td {
+      padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+      font-size: 13px; text-align: left; vertical-align: middle;
+      height: 44px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rd-table th {
+      background: #fafbfc; font-weight: 500; color: #5a5f6d;
+    }
+    .rd-table th:last-child, .rd-table td:last-child {
+      position: sticky; right: 0; z-index: 2;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.08);
+    }
+    .rd-table th:last-child { background: #fafbfc; }
+    .rd-table td:last-child { background: #fff; }
+    .rd-table tbody tr:hover { background: #f5f8ff; }
+    .rd-table tbody tr:hover td:last-child { background: #f5f7fa; }
+    .rd-survey-status {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      font-size: 12px; font-weight: 500; background: #e8f0fe; color: #4c78f5;
+    }
+    .col-center { text-align: center; }
+    .col-right { text-align: right; }
+    .rd-text-green { color: #52c41a; font-weight: 500; }
+    .rd-text-red { color: #f5222d; font-weight: 500; }
+    .rd-action-link { color: #4c78f5; cursor: pointer; font-size: 13px; }
+    .rd-action-link:hover { color: #3a65d9; }
+
+    /* ── 面积对比卡片 ── */
+    .rd-area-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .rd-area-card { border-radius: 6px; padding: 16px 20px; }
+    .rd-area-card.area-original { background: #f5f8ff; border: 1px solid #d6e4ff; }
+    .rd-area-card.area-current { background: #f0fff4; border: 1px solid #b7eb8f; }
+    .rd-area-number { margin-bottom: 12px; }
+    .rd-area-value { font-size: 24px; font-weight: 700; }
+    .rd-area-value.blue { color: #4c78f5; }
+    .rd-area-value.green { color: #389e0d; }
+    .rd-area-unit { font-size: 14px; font-weight: 400; }
+    .rd-area-label { font-size: 13px; color: #8c8c8c; margin-top: 2px; }
+    .rd-area-diff { font-size: 13px; color: #8c8c8c; margin-top: 4px; }
+    .rd-area-section { margin-bottom: 8px; }
+    .rd-area-section-title { font-size: 13px; font-weight: 500; color: #262626; margin-bottom: 4px; }
+    .rd-area-section-title .subtotal { font-weight: 400; color: #8c8c8c; margin-left: 8px; }
+    .rd-area-section-items { font-size: 12px; color: #595959; line-height: 1.6; }
+
+    /* ── 详情弹窗（同 site-detail）── */
+    .rd-modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center;
+    }
+    .rd-modal-overlay.active { display: flex; }
+    .rd-modal-container {
+      background: #fff; border-radius: 8px; width: 760px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .rd-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .rd-modal-title { font-size: 16px; font-weight: 600; color: #262626; }
+    .rd-modal-close { cursor: pointer; font-size: 20px; color: #8c8c8c; line-height: 1; }
+    .rd-modal-close:hover { color: #262626; }
+    .rd-modal-content { padding: 20px; }
+    .rd-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-bottom: 20px; }
+    .rd-modal-item { display: flex; font-size: 14px; line-height: 22px; }
+    .rd-modal-label { color: #8c8c8c; white-space: nowrap; flex-shrink: 0; width: 90px; }
+    .rd-modal-value { color: #262626; }
+    .rd-modal-divider {
+      border-top: 1px solid #f0f0f0; padding-top: 16px; margin-top: 8px;
+    }
+    .rd-modal-divider-title { font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+    .rd-modal-table { width: 100%; border-collapse: collapse; }
+    .rd-modal-table th, .rd-modal-table td {
+      padding: 8px 10px; border-bottom: 1px solid #f0f0f0;
+      font-size: 13px; text-align: left;
+    }
+    .rd-modal-table th { background: #fafbfc; font-weight: 500; color: #5a5f6d; }
+    .rd-modal-footer { display: flex; justify-content: flex-end; padding: 12px 20px 16px; border-top: 1px solid #f0f0f0; }
+    .rd-pagination {
+      display: flex; align-items: center; justify-content: space-between; padding: 12px 0 4px;
+    }
+    .rd-pagination-info { font-size: 13px; color: #8c8c8c; }
+    .rd-page-btn {
+      width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid #d9dde4; border-radius: 4px; background: #fff; font-size: 13px;
+      color: #595959; cursor: pointer; transition: all .2s;
+    }
+    .rd-page-btn:hover { border-color: #4c78f5; color: #4c78f5; }
+    .rd-page-btn.active { background: #4c78f5; color: #fff; border-color: #4c78f5; }
+    .rd-page-btn[disabled] { cursor: not-allowed; opacity: .5; }
+    .rd-empty { padding: 40px 0; text-align: center; color: #bfbfbf; font-size: 14px; }
+    .rd-record-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 24px; }
+    .rd-record-title-area { margin-bottom: 16px; }
+    .rd-record-main-title { font-size: 16px; font-weight: 700; color: #262626; }
+    .rd-record-sub-title { font-size: 13px; color: #8c8c8c; margin-top: 4px; }
+    .rd-record-summary-box { background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 6px; padding: 12px 16px; font-size: 13px; line-height: 22px; color: #595959; }
+    .rd-notice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .rd-notice-item { display: flex; align-items: center; gap: 8px; }
+    .rd-notice-item span { color: #8c8c8c; min-width: 88px; font-weight: 500; }
+    .rd-notice-section-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 8px; }
+    .rd-notice-content-box { background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; padding: 12px 16px; font-size: 13px; line-height: 22px; margin-bottom: 16px; }
+    .rd-attachment-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fafafa; border-radius: 6px; }
+  </style>
+</head>
+<body data-page="rectification-detail" data-menu="rectification-task">
+  <div id="app"></div>
+  <script src="../../shared/utils/helpers.js"></script>
+  <script src="../../shared/components/Layout/layout.js"></script>
+  <script src="./config.js"></script>
+  <script src="./components.js"></script>
+  <script src="./store/PrototypeStore.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Mock 站点数据 ──（优先从 Store 读取，fallback Mock）
+      var Store = window.PrototypeStore;
+      var mockDetail;
+      // 从 URL 获取站点编码
+      var urlParams = new URLSearchParams(window.location.search);
+      var siteCodeParam = urlParams.get('code') || '';
+      if (siteCodeParam && Store) {
+        var tasks = Store.getRectificationTasks({ siteCode: siteCodeParam });
+        if (tasks && tasks.length) {
+          var rt = tasks[0];
+          var sp = (window.MockData && window.MockData.sitePool) ? window.MockData.sitePool.find(function(s){return s.code===siteCodeParam}) : null;
+          mockDetail = {
+            code: rt.siteCode, name: rt.stationName, shortName: rt.stationName.replace(/^(裕华|长安|桥西)(区)?/, '').replace(/站$/, '') || rt.stationName,
+            address: sp ? (sp.address || '—') : '—',
+            district: '—', office: '—', dept: rt.dept || '—',
+            areaOffice: rt.area || '—', contact: '—', phone: '—',
+            status: rt.status, censusStaff: '—', inspector: (Store.getCheckRecord(rt.siteCode) || {}).inspector || '赵立成',
+            assignee: rt.assignee || '—',
+            unregisteredInfo: '无',
+            originalArea: sp && sp.originalArea ? sp.originalArea : { total: 0, residential: { subtotal: 0, multiLayer: 0, highRise: 0, apartment: 0 }, nonResidential: { subtotal: 0, nonResident: 0, nonCoop: 0 } },
+            currentArea: sp && sp.currentArea ? sp.currentArea : { total: 0, residential: { subtotal: 0 }, nonResidential: { subtotal: 0 } },
+            areaDiff: 0,
+            rectificationInfo: rt.rectificationInfo || '',
+            rectificationFiles: rt.rectificationFiles || [],
+            signatures: rt.signatures || []
+          };
+        }
+      }
+      if (!mockDetail) {
+        mockDetail = {
+          code: '60218B004', name: '裕华区万达站', shortName: '万达',
+          address: '裕华区槐安路与翟营大街交叉口东行200米路北',
+          district: '裕华区', office: '裕华区办事处', dept: '裕华管理部',
+          areaOffice: '裕华片区所', contact: '王工', phone: '138-0001-2001',
+          status: '待专家审核', censusStaff: '王建国', inspector: '赵立成',
+          assignee: '刘建军',
+          unregisteredInfo: '无',
+          originalArea: { total: 35268.19, residential: { subtotal: 29873.52, multiLayer: 15246.80, highRise: 10342.37, apartment: 4284.35 }, nonResidential: { subtotal: 5394.67, nonResident: 3892.50, nonCoop: 1502.17 } },
+          currentArea: { total: 35981.44, residential: { subtotal: 30586.77, multiLayer: 15782.10, highRise: 10469.83, apartment: 4334.84 }, nonResidential: { subtotal: 5394.67, nonResident: 3892.50, nonCoop: 1502.17 } },
+          areaDiff: 713.25,
+          rectificationInfo: '',
+          rectificationFiles: [],
+          signatures: []
+        };
+      }
+
+      // ── 普查明细 Mock 数据（收费类别：高层、多层、公寓、非居、非协）──
+      var surveyData = [
+        { id: 1, building: '1号楼(住宅)', floors: 6, heatNature: '住宅', chargeType: '多层', status: '已普查', originalArea: 2536.40, currentArea: 2536.40, diff: 0, rate: '0.00%', controlMode: '分户控制', heatingType: '暖气片', buildYear: '2009年', basis: '图纸实测', attachment: '—', remark: '—' },
+        { id: 2, building: '2号楼(住宅)', floors: 18, heatNature: '住宅', chargeType: '高层', status: '已普查', originalArea: 3142.80, currentArea: 3142.80, diff: 0, rate: '0.00%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2015年', basis: '图纸实测', attachment: '—', remark: '—' },
+        { id: 3, building: '3号楼(公寓)', floors: 12, heatNature: '住宅', chargeType: '公寓', status: '已普查', originalArea: 4284.35, currentArea: 4334.84, diff: 50.49, rate: '1.18%', controlMode: '分户控制', heatingType: '暖气片', buildYear: '2018年', basis: '实测核实', attachment: '照片.jpg', remark: '阳台扩建' },
+        { id: 4, building: '商业A座', floors: 4, heatNature: '商业', chargeType: '非居', status: '已普查', originalArea: 3892.50, currentArea: 3892.50, diff: 0, rate: '0.00%', controlMode: '独立控制', heatingType: '中央空调', buildYear: '2020年', basis: '图纸实测', attachment: '—', remark: '—' },
+        { id: 5, building: '配套公建', floors: 2, heatNature: '公建', chargeType: '非协', status: '已普查', originalArea: 1502.17, currentArea: 1502.17, diff: 0, rate: '0.00%', controlMode: '独立控制', heatingType: '暖气片', buildYear: '2012年', basis: '确权书', attachment: '确权书.pdf', remark: '—' }
+      ];
+
+      // ============================================================
+      // 实测复核照片
+      // ============================================================
+      function renderVerificationPhotos(data) {
+        var measured = data.filter(function(s) { return s.basis === '实测核实'; });
+        if (!measured.length) {
+          return '<div class="rd-empty">当前站点暂无实测楼栋，无需展示实测复核照</div>';
+        }
+        var html = '<div style="padding:16px 0;">';
+        measured.forEach(function(b) {
+          html += '\
+            <div style="background:#fff;border:1px solid #ebeef5;border-radius:8px;margin-bottom:16px;overflow:hidden;">' +
+              '<div style="padding:12px 16px;background:#f5f7fa;border-bottom:1px solid #ebeef5;display:flex;justify-content:space-between;align-items:center;">' +
+                '<div>' +
+                  '<span style="font-size:14px;font-weight:600;color:#1a1a1a;">' + b.building + '</span>' +
+                  '<span style="font-size:12px;color:#999;margin-left:8px;">' + b.floors + '层</span>' +
+                '</div>' +
+                '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:#e6f7ff;color:#1677ff;border:1px solid #91d5ff;">实测复核</span>' +
+              '</div>' +
+              '<div style="padding:16px;">' +
+                '<div style="display:flex;gap:12px;margin-bottom:16px;">' +
+                  '<div style="flex:1;background:#f5f5f5;border-radius:6px;height:160px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;">照片1<br>全景</div>' +
+                  '<div style="flex:1;background:#f5f5f5;border-radius:6px;height:160px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;">照片2<br>侧视</div>' +
+                  '<div style="flex:1;background:#f5f5f5;border-radius:6px;height:160px;display:flex;align-items:center;justify-content:center;color:#999;font-size:13px;">照片3<br>俯视</div>' +
+                '</div>' +
+                '<div style="display:flex;gap:16px;flex-wrap:wrap;">' +
+                  '<div><span style="color:#999;font-size:12px;">原面积</span><div style="font-size:16px;font-weight:600;color:#333;">' + b.originalArea.toFixed(2) + ' ㎡</div></div>' +
+                  '<div><span style="color:#999;font-size:12px;">现面积</span><div style="font-size:16px;font-weight:600;color:#333;">' + b.currentArea.toFixed(2) + ' ㎡</div></div>' +
+                  '<div><span style="color:#999;font-size:12px;">面积变化</span><div style="font-size:16px;font-weight:600;color:' + (b.diff>0?'#ff4d4f':'#52c41a') + ';">' + (b.diff>0?'+':'') + b.diff.toFixed(2) + ' ㎡</div></div>' +
+                  '<div><span style="color:#999;font-size:12px;">变化率</span><div style="font-size:16px;font-weight:600;color:#333;">' + b.rate + '</div></div>' +
+                '</div>' +
+                '<div style="margin-top:12px;font-size:12px;color:#999;">备注：' + (b.remark||'—') + '</div>' +
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+        return html;
+      }
+
+      // ============================================================
+      // 面积对比卡片
+      // ============================================================
+      function renderAreaCard(d) {
+        var orig = d.originalArea, curr = d.currentArea;
+        var origCard = '\
+          <div class="rd-area-card area-original">\
+            <div class="rd-area-number">\
+              <div class="rd-area-value blue">' + orig.total.toFixed(2) + '<span class="rd-area-unit"> ㎡</span></div>\
+              <div class="rd-area-label">原面积</div>\
+            </div>\
+            <div class="rd-area-details">\
+              <div class="rd-area-section"><div class="rd-area-section-title">住宅分类<span class="subtotal">小计 ' + orig.residential.subtotal.toFixed(2) + ' ㎡</span></div>\
+                <div class="rd-area-section-items">多层 ' + orig.residential.multiLayer.toFixed(2) + ' ㎡ | 高层 ' + orig.residential.highRise.toFixed(2) + ' ㎡ | 公寓 ' + orig.residential.apartment.toFixed(2) + ' ㎡</div></div>\
+              <div class="rd-area-section"><div class="rd-area-section-title">非住宅分类<span class="subtotal">小计 ' + orig.nonResidential.subtotal.toFixed(2) + ' ㎡</span></div>\
+                <div class="rd-area-section-items">非居 ' + orig.nonResidential.nonResident.toFixed(2) + ' ㎡ | 非协 ' + orig.nonResidential.nonCoop.toFixed(2) + ' ㎡</div></div>\
+            </div>\
+          </div>';
+        var diffSign = d.areaDiff >= 0 ? '+' : '';
+        var currCard = '\
+          <div class="rd-area-card area-current">\
+            <div class="rd-area-number">\
+              <div class="rd-area-value green">' + curr.total.toFixed(2) + '<span class="rd-area-unit"> ㎡</span></div>\
+              <div class="rd-area-label">现面积</div>\
+              <div class="rd-area-diff">差异：' + diffSign + d.areaDiff.toFixed(2) + ' ㎡</div>\
+            </div>\
+            <div class="rd-area-details">\
+              <div class="rd-area-section"><div class="rd-area-section-title">住宅分类<span class="subtotal">小计 ' + curr.residential.subtotal.toFixed(2) + ' ㎡</span></div>\
+                <div class="rd-area-section-items">多层 ' + curr.residential.multiLayer.toFixed(2) + ' ㎡ | 高层 ' + curr.residential.highRise.toFixed(2) + ' ㎡ | 公寓 ' + curr.residential.apartment.toFixed(2) + ' ㎡</div></div>\
+              <div class="rd-area-section"><div class="rd-area-section-title">非住宅分类<span class="subtotal">小计 ' + curr.nonResidential.subtotal.toFixed(2) + ' ㎡</span></div>\
+                <div class="rd-area-section-items">非居 ' + curr.nonResidential.nonResident.toFixed(2) + ' ㎡ | 非协 ' + curr.nonResidential.nonCoop.toFixed(2) + ' ㎡</div></div>\
+            </div>\
+          </div>';
+        return '<div class="rd-area-grid">' + origCard + currCard + '</div>';
+      }
+
+      // ============================================================
+      // 普查明细表格
+      // ============================================================
+      function renderSurveyTable(details) {
+        var rows = '';
+        for (var i = 0; i < details.length; i++) {
+          var d = details[i];
+          var diffSign = d.diff >= 0 ? '+' : '';
+          var diffClass = d.diff >= 0 ? 'rd-text-green' : 'rd-text-red';
+          rows += '<tr data-building="' + d.building + '" data-floors="' + d.floors + '" data-year="' + d.buildYear + '" data-heat-nature="' + d.heatNature + '" data-charge="' + d.chargeType + '" data-control="' + d.controlMode + '" data-heating="' + d.heatingType + '" data-basis="' + d.basis + '" data-orig-area="' + d.originalArea + '" data-curr-area="' + d.currentArea + '" data-diff-area="' + (d.diff >= 0 ? '+' : '') + d.diff + '" data-diff-rate="' + d.rate + '" data-attachment="' + d.attachment + '" data-remark="' + d.remark + '">' +
+            '<td class="col-center">' + d.id + '</td>' +
+            '<td>' + d.building + '</td>' +
+            '<td class="col-center">' + d.floors + '</td>' +
+            '<td>' + d.heatNature + '</td>' +
+            '<td>' + d.chargeType + '</td>' +
+            '<td class="col-center"><span class="rd-survey-status">' + d.status + '</span></td>' +
+            '<td class="col-right">' + d.originalArea.toFixed(2) + '</td>' +
+            '<td class="col-right">' + d.currentArea.toFixed(2) + '</td>' +
+            '<td class="col-right"><span class="' + diffClass + '">' + diffSign + d.diff.toFixed(2) + '</span></td>' +
+            '<td class="col-right"><span class="' + diffClass + '">' + d.rate + '</span></td>' +
+            '<td>' + d.controlMode + '</td>' +
+            '<td>' + d.heatingType + '</td>' +
+            '<td>' + d.buildYear + '</td>' +
+            '<td>' + d.basis + '</td>' +
+            '<td>' + d.attachment + '</td>' +
+            '<td>' + d.remark + '</td>' +
+            '<td class="col-center"><a class="rd-action-link" href="javascript:void(0)">详情</a></td>' +
+            '</tr>';
+        }
+        return '\
+          <div class="rd-survey-header"><span class="rd-survey-title">普查明细</span><span class="rd-survey-count">共 ' + details.length + ' 条</span></div>\
+          <div class="rd-table-wrapper"><table class="rd-table">\
+            <thead><tr>\
+              <th class="col-center">序号</th>\
+              <th>楼号/建筑物名称</th>\
+              <th class="col-center">层数</th>\
+              <th>用热性质</th>\
+              <th>收费类别</th>\
+              <th class="col-center">普查状态</th>\
+              <th class="col-right">原普查表面积 (㎡)</th>\
+              <th class="col-right">现普查表面积 (㎡)</th>\
+              <th class="col-right">现较原面积变化 (㎡)</th>\
+              <th class="col-right">变化率</th>\
+              <th>控制方式</th>\
+              <th>暖气类型</th>\
+              <th>建筑物年代</th>\
+              <th>普查依据</th>\
+              <th>附件</th>\
+              <th>备注</th>\
+              <th class="col-center">操作</th>\
+            </tr></thead>\
+            <tbody>' + rows + '</tbody>\
+          </table></div>\
+          <div class="rd-pagination">\
+            <span class="rd-pagination-info">第 1 - ' + details.length + ' 条 / 共 ' + details.length + ' 条</span>\
+            <div><button class="rd-page-btn" disabled>&lt;</button><button class="rd-page-btn active">1</button><button class="rd-page-btn">&gt;</button></div>\
+          </div>';
+      }
+
+      // ============================================================
+      // 页面渲染
+      // ============================================================
+      function renderPageContent() {
+        var d = mockDetail;
+
+        var statusCls = 'rd-status-tag';
+        if (d.status === '待整改') statusCls += '';
+        else if (d.status === '整改中') statusCls += ' blue';
+        else if (d.status === '待专家审核') statusCls += ' green';
+        else if (d.status === '已完成') statusCls += ' gray';
+        else if (d.status === '已超期') statusCls += ' red';
+
+        return '\
+          <div class="rd-page">\
+            <div class="rd-page-header">\
+              <div class="rd-header-left">\
+                <h2 class="rd-title">' + d.name + '详情</h2>\
+                <span class="' + statusCls + '">' + d.status + '</span>\
+              </div>\
+              <div class="rd-header-right">\
+                ' + (d.status === '待专家审核' ? '<button class="btn primary" id="rd-review-btn" style="margin-right:8px;">专家审核</button>' : '') + '\
+                <a class="btn" href="./rectification-task.html">返回列表</a>\
+              </div>\
+            </div>\
+            <div class="rd-info-card">\
+              <div class="rd-info-header"><span class="rd-info-title">基础信息</span></div>\
+              <div class="rd-info-grid">\
+                <div class="rd-info-item"><span class="rd-info-label">站点名称：</span><span class="rd-info-value">' + d.name + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">用户编码：</span><span class="rd-info-value">' + d.code + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">简称：</span><span class="rd-info-value">' + d.shortName + '</span></div>\
+                <div class="rd-info-item full-width"><span class="rd-info-label">用热地址：</span><span class="rd-info-value">' + d.address + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">管理部：</span><span class="rd-info-value">' + d.dept + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">片区所：</span><span class="rd-info-value">' + d.areaOffice + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">联系人：</span><span class="rd-info-value">' + d.contact + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">联系方式：</span><span class="rd-info-value">' + d.phone + '</span></div>\
+                <div class="rd-info-item"><span class="rd-info-label">整改负责人：</span><span class="rd-info-value" style="font-weight:500;color:#1677ff;">' + (d.assignee || '—') + '</span></div>\
+                <div class="rd-info-item full-width"><span class="rd-info-label">来源：</span><span class="rd-info-value" style="color:#999;">站点所属片区所所长</span></div>\
+              </div>\
+            </div>\
+            <div class="rd-sign-card" style="background:#fff;border-radius:6px;padding:12px 16px;margin-bottom:12px;border:1px solid #f0f0f0;">\
+              <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;">双专家会签状态</div>\
+              ' + (d.signatures && d.signatures.length ? d.signatures.map(function(s){\
+                var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;';\
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px;"><span style="font-weight:500;">' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:12px;">' + (s.signTime || '') + '</span></div>';\
+              }).join('') : '<div style="font-size:13px;color:#999;">待会签</div>') + '\
+            </div>\
+            <div class="rd-tab-card">\
+              <div class="rd-tab-header">\
+                <div class="rd-tab-item active" data-tab="survey">普查信息</div>\
+                <div class="rd-tab-item" data-tab="photos">实测复核照</div>\
+                <div class="rd-tab-item" data-tab="checklist">检查记录单</div>\
+                <div class="rd-tab-item" data-tab="notice">整改通知单</div>\
+                <div class="rd-tab-item" data-tab="letter">整改告知书</div>\
+              </div>\
+              <div class="rd-tab-body">\
+                <div class="rd-tab-panel active" id="tab-survey">\
+                  <div class="rd-subtab-header">\
+                    <div class="rd-subtab-item active" data-subtab="summary">汇总表</div>\
+                    <div class="rd-subtab-item" data-subtab="floorplan">平面图</div>\
+                    <div class="rd-subtab-item" data-subtab="facade">门头图片</div>\
+                  </div>\
+                  <div class="rd-subtab-panel active" id="subtab-summary">' + renderAreaCard(mockDetail) + renderSurveyTable(surveyData) + '</div>\
+                  <div class="rd-subtab-panel" id="subtab-floorplan"><div class="rd-empty">平面图预览（占位）</div></div>\
+                  <div class="rd-subtab-panel" id="subtab-facade"><div class="rd-empty">门头图片预览（占位）</div></div>\
+                </div>\
+                <div class="rd-tab-panel" id="tab-photos">' + renderVerificationPhotos(surveyData) + '</div>\
+                <div class="rd-tab-panel" id="tab-checklist">\
+                  <div class="rd-record-card">\
+                    <div class="rd-record-title-area">\
+                      <div class="rd-record-main-title">面积检查检查记录单</div>\
+                      <div class="rd-record-sub-title">' + mockDetail.name + ' (' + mockDetail.code + ')</div>\
+                    </div>\
+                    <div style="margin-bottom:16px;display:flex;gap:8px;">\
+                      <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;background:#fff1f0;color:#f5222d;border:1px solid #ffa39e;">不合格</span>\
+                      <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f;">已提交</span>\
+                    </div>\
+                    <div class="rd-record-summary-box">\
+                      经现场核查，' + mockDetail.name + ' 共发现 <strong>3</strong> 项不合格：用热范围平面图是否具备绘制人、审批流程（现场建筑名称与图纸不一致）；面积核查依据（确权书缺失或无效）；面积核查汇总表与用热现场是否一致（未入网建筑信息不一致）。检查结论为<strong>不合格</strong>。\
+                    </div>\
+                    <table class="rd-table" style="margin-top:16px;">\
+                      <thead><tr>\
+                        <th style="width:50%;">检查项</th>\
+                        <th style="width:15%;">结果</th>\
+                        <th style="width:35%;">不合格原因</th>\
+                      </tr></thead>\
+                      <tbody>\
+                        <tr><td>1. 面积核查汇总表是否完整、数据填写正确？</td><td style="color:#52c41a;">是</td><td style="color:#bfbfbf;">-</td></tr>\
+                        <tr><td>2. 用热范围平面图是否具备绘制人、审批流程？</td><td style="color:#f5222d;">否</td><td style="color:#fa8c16;">现场建筑名称与图纸不一致</td></tr>\
+                        <tr><td>3. 面积核查依据是否有效且齐全？</td><td style="color:#f5222d;">否</td><td style="color:#fa8c16;">确权书缺失或无效</td></tr>\
+                        <tr><td>4. 是否存在面积变化情况？</td><td style="color:#bfbfbf;">-</td><td style="color:#bfbfbf;">-</td></tr>\
+                        <tr><td>5. 面积核查汇总表与用热现场是否一致？</td><td style="color:#f5222d;">否</td><td style="color:#fa8c16;">未入网建筑信息不一致</td></tr>\
+                        <tr><td>6. 商业门头平面图与现场顺序是否一致？</td><td style="color:#bfbfbf;">-</td><td style="color:#bfbfbf;">-</td></tr>\
+                        <tr><td>7. 实测计算是否满足制度要求？</td><td style="color:#bfbfbf;">-</td><td style="color:#bfbfbf;">-</td></tr>\
+                      </tbody>\
+                    </table>\
+                    <div style="font-size:13px;color:#8c8c8c;margin-top:16px;line-height:22px;">\
+                      <div>检查人：赵立成 &nbsp;&nbsp;&nbsp; 检查日期：2026-07-03</div>\
+                    </div>\
+                  </div>\
+                </div>\
+                <div class="rd-tab-panel" id="tab-notice">\
+                  <div class="rd-record-card">\
+                    <div class="rd-record-title-area" style="margin-bottom:32px;">\
+                      <div class="rd-record-main-title" style="font-size:22px;letter-spacing:1px;">面积核查整改通知单</div>\
+                    </div>\
+                    <div class="rd-notice-grid">\
+                      <div class="rd-notice-item"><span>通知单编号</span>ZG-2026-07-01</div>\
+                      <div class="rd-notice-item"><span>部门</span>' + mockDetail.dept + '</div>\
+                      <div class="rd-notice-item"><span>站点名称</span>' + mockDetail.name + '</div>\
+                      <div class="rd-notice-item"><span>用户编码</span>' + mockDetail.code + '</div>\
+                      <div class="rd-notice-item"><span>管理部/片区所</span>' + mockDetail.dept + ' / ' + mockDetail.areaOffice + '</div>\
+                      <div class="rd-notice-item"><span>用地地址</span>' + mockDetail.address + '</div>\
+                    </div>\
+                    <div class="rd-notice-section-title">整改事项</div>\
+                    <div class="rd-notice-content-box">地下室新增用热面积约160㎡未同步到普查台账，需补录并更新核查表。</div>\
+                    <div class="rd-notice-section-title">整改意见</div>\
+                    <div class="rd-notice-content-box"><ol><li>补录新增用热面积</li><li>更新台账及附件</li><li>提交整改说明</li></ol></div>\
+                    <div class="rd-notice-grid" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">\
+                      <div class="rd-notice-item"><span>整改期限</span>5天（截止 <strong style="color:#f5222d;">2026-07-10</strong>）</div>\
+                      <div class="rd-notice-item"><span>被检查单位人员</span>王志强</div>\
+                      <div class="rd-notice-item"><span>检查人员</span>赵立成</div>\
+                      <div class="rd-notice-item"><span>检查人员联系方式</span>138-0001-1001</div>\
+                      <div class="rd-notice-item" style="grid-column:span 2;margin-top:8px;">\
+                        <span>状态</span>\
+                        <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;">已发送</span>\
+                      </div>\
+                    </div>\
+                  </div>\
+                </div>\
+                <div class="rd-tab-panel" id="tab-letter">\
+                  <div class="rd-record-card">\
+                    <div class="rd-notice-section-title" style="font-size:15px;">整改情况</div>\
+                    <div class="rd-record-summary-box" style="background:#fafafa;">已补传现场照片，建筑图纸待补。</div>\
+                    <div style="font-size:13px;color:#8c8c8c;margin-top:12px;">整改人：赵国强 &nbsp;&nbsp;&nbsp; 最近保存：2026-07-03 16:20</div>\
+                    <div class="rd-notice-section-title" style="font-size:15px;margin-top:24px;">整改附件</div>\
+                    <div class="rd-attachment-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#fafafa;border-radius:6px;">\
+                      <div style="display:flex;align-items:center;gap:8px;">\
+                        <span>📄</span>\
+                        <strong>整改说明.docx</strong>\
+                        <span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff;">已上传</span>\
+                      </div>\
+                      <a href="javascript:void(0);" class="rd-action-link rd-letter-download" style="font-size:13px;">下载</a>\
+                    </div>\
+                  </div>\
+                </div>\
+              </div>\
+            </div>\
+            <!-- 普查详情弹窗 -->\
+            <div class="rd-modal-overlay" id="rd-detail-modal">\
+              <div class="rd-modal-container">\
+                <div class="rd-modal-header">\
+                  <span class="rd-modal-title" id="rd-modal-building-title">楼栋详情</span>\
+                  <span class="rd-modal-close" id="rd-modal-close-btn">&times;</span>\
+                </div>\
+                <div class="rd-modal-content">\
+                  <div class="rd-modal-grid">\
+                    <div class="rd-modal-item"><span class="rd-modal-label">楼号名称：</span><span class="rd-modal-value" id="rd-modal-field-name">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">层数：</span><span class="rd-modal-value" id="rd-modal-field-floors">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">建筑年代：</span><span class="rd-modal-value" id="rd-modal-field-year">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">用热性质：</span><span class="rd-modal-value" id="rd-modal-field-type">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">收费类别：</span><span class="rd-modal-value" id="rd-modal-field-charge">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">控制方式：</span><span class="rd-modal-value" id="rd-modal-field-control">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">普查依据：</span><span class="rd-modal-value" id="rd-modal-field-basis">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">暖气类型：</span><span class="rd-modal-value" id="rd-modal-field-heating">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">原面积(㎡)：</span><span class="rd-modal-value" id="rd-modal-field-prev-area">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">现面积(㎡)：</span><span class="rd-modal-value" id="rd-modal-field-curr-area">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">面积变化(㎡)：</span><span class="rd-modal-value" id="rd-modal-field-diff-area">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">变化率：</span><span class="rd-modal-value" id="rd-modal-field-diff-rate">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">附件：</span><span class="rd-modal-value" id="rd-modal-field-attachments">—</span></div>\
+                    <div class="rd-modal-item"><span class="rd-modal-label">备注：</span><span class="rd-modal-value" id="rd-modal-field-remark">—</span></div>\
+                  </div>\
+                  <div class="rd-modal-divider">\
+                    <div class="rd-modal-divider-title">变更详情</div>\
+                    <table class="rd-modal-table"><thead><tr><th style="width:60px;">序号</th><th>热费卡号</th><th>普查面积</th><th>普查依据</th><th>附件</th><th>备注</th></tr></thead>\
+                      <tbody><tr><td>1</td><td id="rd-modal-table-card">—</td><td id="rd-modal-table-area">—</td><td id="rd-modal-table-basis">—</td><td id="rd-modal-table-attachment">—</td><td id="rd-modal-table-remark">—</td></tr></tbody>\
+                    </table>\
+                  </div>\
+                </div>\
+                <div class="rd-modal-footer"><button class="btn" id="rd-modal-cancel-btn">取消</button></div>\
+              </div>\
+            </div>\
+            <!-- 双专家会签审核弹窗 -->\
+            <div class="rd-review-overlay" id="rd-review-modal">\
+              <div class="rd-review-card">\
+                <div class="rd-review-header">\
+                  <span class="rd-review-title">专家会签审核</span>\
+                  <span class="rd-review-close" id="rd-review-close">&times;</span>\
+                </div>\
+                <div class="rd-review-body">\
+                  <div class="rd-review-section">\
+                    <div class="rd-review-section-title">专家A — 张明远（主任工程师）</div>\
+                    <div class="rd-review-radio-group">\
+                      <label class="rd-review-radio-item"><input type="radio" name="rd-review-expert-a" value="同意"><span>同意</span></label>\
+                      <label class="rd-review-radio-item"><input type="radio" name="rd-review-expert-a" value="不同意"><span>不同意</span></label>\
+                    </div>\
+                    <textarea class="rd-review-textarea rd-expert-a-opinion" placeholder="请输入审核意见" maxlength="300"></textarea>\
+                    <div class="rd-review-char-count rd-expert-a-count">0 / 300</div>\
+                  </div>\
+                  <div style="border-top:1px dashed #e8e8e8;margin:20px 0;"></div>\
+                  <div class="rd-review-section">\
+                    <div class="rd-review-section-title">专家B — 李建华（高级工程师）</div>\
+                    <div class="rd-review-radio-group">\
+                      <label class="rd-review-radio-item"><input type="radio" name="rd-review-expert-b" value="同意"><span>同意</span></label>\
+                      <label class="rd-review-radio-item"><input type="radio" name="rd-review-expert-b" value="不同意"><span>不同意</span></label>\
+                    </div>\
+                    <textarea class="rd-review-textarea rd-expert-b-opinion" placeholder="请输入审核意见" maxlength="300"></textarea>\
+                    <div class="rd-review-char-count rd-expert-b-count">0 / 300</div>\
+                  </div>\
+                  <div style="background:#f0f5ff;border:1px solid #d6e4ff;border-radius:6px;padding:10px 14px;font-size:12px;color:#4c78f5;line-height:20px;">\
+                    会签规则：两位专家均同意 → 完成整改；任一专家不同意 → 退回整改中。\
+                  </div>\
+                </div>\
+                <div class="rd-review-footer">\
+                  <button class="btn" id="rd-review-cancel">取消</button>\
+                  <button class="btn primary" id="rd-review-submit">提交审核</button>\
+                </div>\
+              </div>\
+            </div>\
+          </div>';
+      }
+
+      function renderPage() {
+        document.getElementById('app').innerHTML = AppComponents.renderShell(renderPageContent());
+        bindEvents();
+      }
+
+      function bindEvents() {
+        // Tab 切换
+        var tabItems = document.querySelectorAll('.rd-tab-item');
+        var tabPanels = document.querySelectorAll('.rd-tab-panel');
+        tabItems.forEach(function (item) {
+          item.addEventListener('click', function () {
+            tabItems.forEach(function (t) { t.classList.remove('active'); });
+            tabPanels.forEach(function (p) { p.classList.remove('active'); });
+            item.classList.add('active');
+            var target = document.getElementById('tab-' + item.dataset.tab);
+            if (target) target.classList.add('active');
+          });
+        });
+
+        // 子Tab切换
+        var subtabItems = document.querySelectorAll('.rd-subtab-item');
+        var subtabPanels = document.querySelectorAll('.rd-subtab-panel');
+        subtabItems.forEach(function (item) {
+          item.addEventListener('click', function () {
+            subtabItems.forEach(function (t) { t.classList.remove('active'); });
+            subtabPanels.forEach(function (p) { p.classList.remove('active'); });
+            item.classList.add('active');
+            var target = document.getElementById('subtab-' + item.dataset.subtab);
+            if (target) target.classList.add('active');
+          });
+        });
+
+        // 普查详情弹窗
+        var detailModal = document.getElementById('rd-detail-modal');
+        var modalCloseBtn = document.getElementById('rd-modal-close-btn');
+        var modalCancelBtn = document.getElementById('rd-modal-cancel-btn');
+
+        function closeDetailModal() {
+          if (detailModal) detailModal.classList.remove('active');
+        }
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeDetailModal);
+        if (modalCancelBtn) modalCancelBtn.addEventListener('click', closeDetailModal);
+        if (detailModal) {
+          detailModal.addEventListener('click', function (e) {
+            if (e.target === detailModal) closeDetailModal();
+          });
+        }
+
+        document.querySelectorAll('.rd-action-link').forEach(function (link) {
+          link.addEventListener('click', function () {
+            var row = this.closest('tr');
+            if (!row || !detailModal) return;
+            var getAttr = function (name) { return row.getAttribute('data-' + name) || '—'; };
+            var setVal = function (id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
+            var setStyle = function (id, prop, val) { var el = document.getElementById(id); if (el) el.style[prop] = val; };
+
+            setVal('rd-modal-building-title', getAttr('building'));
+            setVal('rd-modal-field-name', getAttr('building'));
+            setVal('rd-modal-field-floors', getAttr('floors'));
+            setVal('rd-modal-field-year', getAttr('year'));
+            setVal('rd-modal-field-type', getAttr('heat-nature'));
+            setVal('rd-modal-field-charge', getAttr('charge'));
+            setVal('rd-modal-field-control', getAttr('control'));
+            setVal('rd-modal-field-basis', getAttr('basis'));
+            setVal('rd-modal-field-heating', getAttr('heating'));
+            setVal('rd-modal-field-prev-area', getAttr('orig-area'));
+            setVal('rd-modal-field-curr-area', getAttr('curr-area'));
+            setVal('rd-modal-field-diff-area', getAttr('diff-area'));
+            setVal('rd-modal-field-diff-rate', getAttr('diff-rate'));
+            setVal('rd-modal-field-attachments', getAttr('attachment'));
+            setVal('rd-modal-field-remark', getAttr('remark'));
+
+            var diffArea = getAttr('diff-area');
+            var diffColor = diffArea.indexOf('-') >= 0 ? '#f5222d' : '#52c41a';
+            setStyle('rd-modal-field-diff-area', 'color', diffColor);
+            setStyle('rd-modal-field-diff-rate', 'color', diffColor);
+
+            setVal('rd-modal-table-card', getAttr('building') + '#01');
+            setVal('rd-modal-table-area', getAttr('curr-area'));
+            setVal('rd-modal-table-basis', getAttr('basis'));
+            setVal('rd-modal-table-attachment', getAttr('attachment'));
+            setVal('rd-modal-table-remark', getAttr('remark'));
+
+            detailModal.classList.add('active');
+          });
+        });
+
+        // 双专家会签审核弹窗
+        var modal = document.getElementById('rd-review-modal');
+        var reviewBtn = document.getElementById('rd-review-btn');
+        var closeBtn = document.getElementById('rd-review-close');
+        var cancelBtn = document.getElementById('rd-review-cancel');
+        var submitBtn = document.getElementById('rd-review-submit');
+
+        function openModal() {
+          if (!modal) return;
+          // 重置表单
+          document.querySelectorAll('.rd-review-textarea').forEach(function (ta) { ta.value = ''; });
+          document.querySelectorAll('.rd-review-char-count').forEach(function (el) { el.textContent = '0 / 300'; });
+          document.querySelectorAll('input[name="rd-review-expert-a"], input[name="rd-review-expert-b"]').forEach(function (r) { r.checked = false; });
+          modal.classList.add('active');
+        }
+
+        function closeModal() {
+          if (modal) modal.classList.remove('active');
+        }
+
+        if (reviewBtn) reviewBtn.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+        if (modal) {
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+          });
+        }
+
+        // 字数计数
+        document.querySelectorAll('.rd-review-textarea').forEach(function (ta) {
+          var countEl = ta.nextElementSibling;
+          if (countEl && countEl.classList.contains('rd-review-char-count')) {
+            ta.addEventListener('input', function () {
+              countEl.textContent = this.value.length + ' / 300';
+            });
+          }
+        });
+
+        // 提交：会签规则 - 通过 Store 持久化
+        if (submitBtn) {
+          submitBtn.addEventListener('click', function () {
+            var expertA = document.querySelector('input[name="rd-review-expert-a"]:checked');
+            var expertB = document.querySelector('input[name="rd-review-expert-b"]:checked');
+
+            if (!expertA || !expertB) {
+              showToast('请两位专家均完成审核选择', 'warning');
+              return;
+            }
+
+            var resultA = expertA.value;
+            var resultB = expertB.value;
+            var opinionA = document.querySelector('.rd-expert-a-opinion').value.trim();
+            var opinionB = document.querySelector('.rd-expert-b-opinion').value.trim();
+
+            // 任一不同意需填审核意见
+            if (resultA === '不同意' && !opinionA) {
+              showToast('专家A不同意时请填写审核意见', 'warning');
+              document.querySelector('.rd-expert-a-opinion').focus();
+              return;
+            }
+            if (resultB === '不同意' && !opinionB) {
+              showToast('专家B不同意时请填写审核意见', 'warning');
+              document.querySelector('.rd-expert-b-opinion').focus();
+              return;
+            }
+
+            // 通过 Store 持久化签名
+            try {
+              var rectTasks = Store && Store.getRectificationTasks({ siteCode: siteCodeParam });
+              var rectId = rectTasks && rectTasks.length ? rectTasks[0].id : null;
+              if (rectId && Store && Store.signRectificationReview) {
+                Store.signRectificationReview(rectId, '张建国', resultA === '同意');
+                Store.signRectificationReview(rectId, '李建华', resultB === '同意');
+                showToast('双专家会签结果已保存', 'success');
+                // 刷新页面
+                setTimeout(function(){ window.location.reload(); }, 1200);
+              } else {
+                // 降级：旧逻辑
+                if (resultA === '同意' && resultB === '同意') {
+                  showToast('双专家会签通过，整改任务已完成归档', 'success');
+                } else {
+                  var disagreeExpert = resultA === '不同意' ? '专家A' : '专家B';
+                  showToast(disagreeExpert + '不同意，整改任务已退回「整改中」', 'success');
+                }
+              }
+            } catch(e) {
+              showToast('保存失败：' + e.message, 'warning');
+            }
+
+            closeModal();
+          });
+        }
+      }
+
+      function showToast(message, type) {
+        var existing = document.querySelector('.rd-toast');
+        if (existing) existing.remove();
+        var toast = document.createElement('div');
+        toast.className = 'rd-toast';
+        toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:6px;font-size:14px;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+        if (type === 'warning') {
+          toast.style.background = '#fffbe6'; toast.style.color = '#d48806';
+          toast.style.border = '1px solid #ffe58f';
+        } else if (type === 'success') {
+          toast.style.background = '#f0fff4'; toast.style.color = '#389e0d';
+          toast.style.border = '1px solid #b7eb8f';
+        } else {
+          toast.style.background = '#fff'; toast.style.color = '#262626';
+          toast.style.border = '1px solid #d9d9d9';
+        }
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2500);
+      }
+
+      // 分页按钮原型提示
+      function bindPaginationBtn() {
+        document.querySelectorAll('.rd-page-btn').forEach(function (el) {
+          el.addEventListener('click', function () {
+            showToast('当前为原型预览，分页未实现', 'info');
+          });
+        });
+
+        // 整改告知书「下载」链接
+        document.querySelectorAll('.rd-letter-download').forEach(function (el) {
+          el.addEventListener('click', function (e) {
+            e.preventDefault();
+            showToast('当前为原型预览，下载功能未实现', 'info');
+          });
+        });
+      }
+
+      renderPage();
+    })();
+  </script>
+</body>
+</html>

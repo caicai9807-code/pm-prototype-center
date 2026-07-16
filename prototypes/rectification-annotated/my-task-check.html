@@ -1,0 +1,4371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>开始检查 - 我的面积检查任务</title>
+    <link rel="stylesheet" href="../../shared/styles/shared.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      /* ============================================================
+       * my-task-check.html 内联样式
+       * 零污染原则：所有类名加注 .mc- 前缀，不修改 styles.css / app.js
+       * ============================================================ */
+
+      /* ---- 任务基本信息卡片 ---- */
+      .mc-info-card {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        border: 1px solid #f0f0f0;
+      }
+      .mc-info-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .mc-info-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .mc-info-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+      .mc-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px 24px;
+      }
+      .mc-info-item {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        line-height: 22px;
+        white-space: nowrap;
+      }
+      .mc-info-item.full-width {
+        grid-column: span 3;
+      }
+      .mc-info-label {
+        color: #8c8c8c;
+        flex-shrink: 0;
+      }
+      .mc-info-value {
+        color: #262626;
+        font-weight: 400;
+      }
+      .mc-info-value.task-name {
+        font-weight: 500;
+        color: #1f1f1f;
+      }
+      .mc-font-highlight {
+        font-weight: 500;
+        color: #1890ff;
+      }
+      @media (max-width: 992px) {
+        .mc-info-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .mc-info-item.full-width {
+          grid-column: span 2;
+        }
+      }
+
+      /* ---- 站点卡片 ---- */
+      .mc-station-card {
+        background: #ffffff;
+        border-radius: 6px;
+        border: 1px solid #f0f0f0;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .mc-station-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .mc-station-card-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1d2129;
+      }
+      .mc-station-card-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 13px;
+        color: #595959;
+        white-space: nowrap;
+      }
+      .mc-station-card-tabs {
+        display: flex;
+        gap: 0;
+        flex-wrap: wrap;
+        padding: 0 20px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .mc-station-tab {
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #8c95a6;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s, border-color 0.2s;
+        user-select: none;
+        white-space: nowrap;
+        margin-bottom: -1px;
+      }
+      .mc-station-tab:hover {
+        color: #4c78f5;
+      }
+      .mc-station-tab.active {
+        color: #4c78f5;
+        font-weight: 500;
+        border-bottom-color: #4c78f5;
+      }
+      .mc-station-tab .mc-station-status {
+        display: inline-block;
+        padding: 0 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        margin-left: 6px;
+        vertical-align: middle;
+        line-height: 18px;
+      }
+      .mc-station-info-panel {
+        padding: 18px 20px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .mc-station-info-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1d2129;
+        margin-bottom: 14px;
+      }
+      .mc-station-info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px 24px;
+        font-size: 13px;
+      }
+      .mc-station-info-item {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+      }
+      .mc-station-info-label {
+        color: #8c8c8c;
+        flex-shrink: 0;
+      }
+      .mc-station-info-value {
+        color: #262626;
+      }
+      .mc-station-info-value.full-width {
+        grid-column: span 3;
+      }
+      .mc-station-status.status-done {
+        background: #f6ffed;
+        color: #52c41a;
+        border: 1px solid #b7eb8f;
+      }
+      .mc-station-status.status-doing {
+        background: #e6f7ff;
+        color: #1890ff;
+        border: 1px solid #91d5ff;
+      }
+      .mc-station-status.status-pending-rectify {
+        background: #fff7e6;
+        color: #fa8c16;
+        border: 1px solid #ffd591;
+      }
+      .mc-station-status.status-sent-rectify {
+        background: #fff7e6;
+        color: #d48806;
+        border: 1px solid #ffd591;
+      }
+      .mc-station-status.status-todo {
+        background: #fafafa;
+        color: #bfbfbf;
+        border: 1px solid #d9d9d9;
+      }
+
+      /* ---- 内容Tab系统 ---- */
+      .mc-tab-card {
+        background: #ffffff;
+        border-radius: 6px;
+        border: 1px solid #f0f0f0;
+        margin-bottom: 16px;
+        overflow: hidden;
+      }
+      .mc-tab-header {
+        display: flex;
+        border-bottom: 1px solid #e8ecf1;
+        padding: 0 20px;
+      }
+      .mc-tab-item {
+        padding: 12px 20px;
+        font-size: 14px;
+        color: #8c95a6;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s, border-color 0.2s;
+        user-select: none;
+      }
+      .mc-tab-item:hover {
+        color: #4c78f5;
+      }
+      .mc-tab-item.active {
+        color: #4c78f5;
+        font-weight: 500;
+        border-bottom-color: #4c78f5;
+      }
+      .mc-tab-body {
+        padding: 20px;
+      }
+      .mc-tab-panel {
+        display: none;
+      }
+      .mc-tab-panel.active {
+        display: block;
+      }
+
+      /* ---- 面积比对核心区 ---- */
+      .mc-area-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .mc-area-card {
+        border-radius: 6px;
+        padding: 18px 20px;
+        border: 1px solid;
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+      }
+      .mc-area-card.area-original {
+        background: #f8f9fc;
+        border-color: #e8ecf1;
+      }
+      .mc-area-card.area-current {
+        background: #f6ffed;
+        border-color: #d9f7be;
+      }
+      .mc-area-number {
+        flex-shrink: 0;
+        min-width: 140px;
+      }
+      .mc-area-value {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .mc-area-value.blue {
+        color: #1890ff;
+      }
+      .mc-area-value.green {
+        color: #52c41a;
+      }
+      .mc-area-unit {
+        font-size: 14px;
+        font-weight: 400;
+        color: #8c8c8c;
+        margin-left: 2px;
+      }
+      .mc-area-label {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-top: 4px;
+      }
+      .mc-area-diff {
+        font-size: 13px;
+        font-weight: 500;
+        color: #ff4d4f;
+        margin-top: 6px;
+      }
+      .mc-area-details {
+        flex: 1;
+        min-width: 0;
+      }
+      .mc-area-section {
+        margin-bottom: 10px;
+      }
+      .mc-area-section:last-child {
+        margin-bottom: 0;
+      }
+      .mc-area-section-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #262626;
+        margin-bottom: 4px;
+      }
+      .mc-area-section-title .subtotal {
+        color: #595959;
+        font-weight: 400;
+        margin-left: 8px;
+      }
+      .mc-area-section-items {
+        font-size: 12px;
+        color: #8c8c8c;
+        line-height: 1.8;
+      }
+
+      /* ---- 普查子Tab系统 ---- */
+      .mc-subtab-header {
+        display: flex;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 16px;
+        padding: 0 4px;
+      }
+      .mc-subtab-item {
+        padding: 8px 16px;
+        font-size: 13px;
+        color: #8c95a6;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s, border-color 0.2s;
+        user-select: none;
+        margin-bottom: -1px;
+      }
+      .mc-subtab-item:hover {
+        color: #4c78f5;
+      }
+      .mc-subtab-item.active {
+        color: #4c78f5;
+        font-weight: 500;
+        border-bottom-color: #4c78f5;
+      }
+      .mc-subtab-panel {
+        display: none;
+      }
+      .mc-subtab-panel.active {
+        display: block;
+      }
+
+      /* ---- 占位卡片（平面图/门头图片） ---- */
+      .mc-placeholder-box {
+        text-align: center;
+        padding: 60px 0;
+        background: #fafbfc;
+        border-radius: 6px;
+        border: 1px dashed #d9d9d9;
+      }
+      .mc-placeholder-icon {
+        font-size: 36px;
+        margin-bottom: 12px;
+      }
+      .mc-placeholder-title {
+        font-size: 15px;
+        font-weight: 500;
+        color: #262626;
+        margin-bottom: 8px;
+      }
+      .mc-placeholder-desc {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-bottom: 20px;
+      }
+      .mc-placeholder-card-group {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+      .mc-placeholder-card {
+        width: 160px;
+        height: 100px;
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: #595959;
+      }
+
+      /* ---- 详情弹窗 ---- */
+      .mc-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .mc-modal-container {
+        background: #ffffff;
+        border-radius: 8px;
+        width: 760px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      }
+      .mc-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .mc-modal-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+      .mc-modal-close {
+        font-size: 20px;
+        color: #8c8c8c;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .mc-modal-close:hover {
+        color: #262626;
+      }
+      .mc-modal-content {
+        padding: 20px 24px;
+      }
+      .mc-modal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px 24px;
+      }
+      .mc-modal-item {
+        font-size: 13px;
+        color: #262626;
+      }
+      .mc-modal-item.full-width {
+        grid-column: span 2;
+      }
+      .mc-modal-label {
+        color: #8c8c8c;
+        margin-right: 6px;
+      }
+      .mc-modal-value {
+        font-weight: 500;
+      }
+      .mc-modal-value-text {
+        color: #595959;
+      }
+      .mc-modal-divider {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #f0f0f0;
+      }
+      .mc-modal-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .mc-modal-table th,
+      .mc-modal-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        text-align: left;
+      }
+      .mc-modal-table th {
+        background: #fafbfc;
+        font-weight: 500;
+        color: #5a5f6d;
+      }
+      .mc-modal-footer {
+        padding: 12px 24px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .mc-survey-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .mc-survey-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f1f1f;
+      }
+      .mc-survey-count {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+      .mc-table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 12px;
+      }
+      .mc-survey-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        min-width: 1500px;
+      }
+      .mc-survey-table th,
+      .mc-survey-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        text-align: left;
+        vertical-align: middle;
+        height: 44px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mc-survey-table th {
+        background: #fafbfc;
+        font-weight: 500;
+        color: #5a5f6d;
+      }
+      /* 操作列 sticky 固定 */
+      .mc-survey-table th:last-child,
+      .mc-survey-table td:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        box-shadow: -2px 0 6px rgba(0,0,0,0.08);
+      }
+      .mc-survey-table th:last-child {
+        background: #fafbfc;
+      }
+      .mc-survey-table td:last-child {
+        background: #fff;
+      }
+      .mc-survey-table tbody tr:hover td:last-child {
+        background: #f5f7fa;
+      }
+      .mc-survey-table tbody tr:hover {
+        background: #f5f8ff;
+      }
+      .mc-survey-table .col-center {
+        text-align: center;
+      }
+      .mc-survey-table .col-right {
+        text-align: right;
+      }
+      .mc-text-green {
+        color: #52c41a;
+        font-weight: 500;
+      }
+      .mc-text-red {
+        color: #f5222d;
+        font-weight: 500;
+      }
+      .mc-survey-status {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        background: #e6f7ff;
+        color: #1890ff;
+        border: 1px solid #91d5ff;
+      }
+      .mc-action-link {
+        color: #1890ff;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .mc-action-link:hover {
+        color: #4c78f5;
+      }
+
+      /* ---- 检查记录单弹窗表格样式 ---- */
+      .mc-check-modal-card {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 20px 24px;
+      }
+      .mc-check-modal-card .mc-record-main-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+      .mc-check-modal-card .mc-record-sub-title {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-top: 4px;
+        margin-bottom: 20px;
+      }
+      .mc-check-item {
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+      }
+      .mc-check-item-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #262626;
+        margin-bottom: 10px;
+        line-height: 22px;
+      }
+      .mc-check-item-title .mc-check-index {
+        color: #1890ff;
+        font-weight: 600;
+        margin-right: 4px;
+      }
+      .mc-check-radio-group {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 10px;
+      }
+      .mc-check-radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #262626;
+        cursor: pointer;
+      }
+      .mc-check-radio-group label input[type="radio"] {
+        accent-color: #4c78f5;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+      }
+      .mc-check-sub-items {
+        display: none;
+        padding: 12px 16px;
+        background: #fafbfc;
+        border-radius: 4px;
+        border: 1px solid #f0f0f0;
+        margin-top: 4px;
+      }
+      .mc-check-sub-items.show {
+        display: block;
+      }
+      .mc-check-sub-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #595959;
+        margin-bottom: 8px;
+      }
+      .mc-check-sub-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px 16px;
+      }
+      .mc-check-sub-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #595959;
+        cursor: pointer;
+        line-height: 28px;
+      }
+      .mc-check-sub-item input[type="checkbox"] {
+        accent-color: #4c78f5;
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+      }
+      .mc-check-other-input {
+        border: none;
+        border-bottom: 1px solid #d9d9d9;
+        background: transparent;
+        font-size: 13px;
+        color: #262626;
+        padding: 2px 4px;
+        width: 180px;
+        outline: none;
+      }
+      .mc-check-other-input:focus {
+        border-bottom-color: #4c78f5;
+      }
+      .mc-check-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+      .mc-record-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 24px;
+      }
+      .mc-record-title-area {
+        margin-bottom: 16px;
+      }
+      .mc-record-main-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d2129;
+      }
+      .mc-record-sub-title {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-top: 4px;
+      }
+      .mc-record-form-group {
+        margin-bottom: 20px;
+      }
+      .mc-record-form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #262626;
+        margin-bottom: 8px;
+      }
+      .mc-record-form-label .mc-required {
+        color: #ff4d4f;
+        margin-right: 4px;
+      }
+      .mc-record-radio-group {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 8px;
+      }
+      .mc-record-radio {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #262626;
+        cursor: pointer;
+      }
+      .mc-record-radio input[type="radio"] {
+        accent-color: #4c78f5;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+      }
+      .mc-record-textarea {
+        width: 100%;
+        min-height: 100px;
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 14px;
+        line-height: 22px;
+        color: #262626;
+        resize: vertical;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      .mc-record-textarea:focus {
+        outline: none;
+        border-color: #4c78f5;
+        box-shadow: 0 0 0 2px rgba(76, 120, 245, 0.1);
+      }
+      .mc-record-textarea::placeholder {
+        color: #bfbfbf;
+      }
+      .mc-record-char-count {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      /* ---- 检查记录单展示态 ---- */
+      .mc-record-display-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 24px;
+      }
+      .mc-record-display-header {
+        text-align: center;
+        margin-bottom: 20px;
+        position: relative;
+        padding-top: 36px;
+      }
+      .mc-record-display-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d2129;
+        margin-bottom: 6px;
+      }
+      .mc-record-display-subtitle {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-bottom: 12px;
+      }
+      .mc-record-display-tags {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+      }
+      .mc-record-display-summary {
+        background: #f8faff;
+        border: 1px solid #e6efff;
+        border-radius: 6px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #595959;
+      }
+      .mc-record-display-summary p {
+        margin: 0 0 6px;
+      }
+      .mc-record-display-summary p:last-child {
+        margin-bottom: 0;
+      }
+      .mc-record-display-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .mc-record-display-table th,
+      .mc-record-display-table td {
+        padding: 12px 10px;
+        border: 1px solid #f0f0f0;
+        color: #262626;
+        vertical-align: top;
+      }
+      .mc-record-display-table th {
+        background: #fafafa;
+        font-weight: 500;
+        color: #595959;
+      }
+      .mc-record-display-table td:first-child {
+        line-height: 1.6;
+      }
+      .mc-record-display-footer {
+        display: flex;
+        gap: 32px;
+        font-size: 14px;
+        color: #595959;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      /* ---- 整改通知书表单 ---- */
+      .mc-notice-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 24px;
+      }
+      .mc-notice-main-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1d2129;
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .mc-notice-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 24px;
+        margin-bottom: 16px;
+      }
+      .mc-notice-form-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .mc-notice-form-item.full-row {
+        grid-column: span 2;
+      }
+      .mc-notice-form-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #262626;
+        margin-bottom: 6px;
+      }
+      .mc-notice-form-label .mc-required {
+        color: #ff4d4f;
+        margin-right: 2px;
+      }
+      .mc-notice-form-input {
+        height: 36px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        padding: 0 12px;
+        font-size: 13px;
+        color: #262626;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+      .mc-notice-form-input:focus {
+        border-color: #4c78f5;
+        box-shadow: 0 0 0 2px rgba(76,120,245,0.1);
+      }
+      .mc-notice-form-textarea {
+        min-height: 80px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #262626;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        line-height: 1.6;
+      }
+      .mc-notice-form-textarea:focus {
+        border-color: #4c78f5;
+        box-shadow: 0 0 0 2px rgba(76,120,245,0.1);
+      }
+      .mc-notice-form-textarea::placeholder,
+      .mc-notice-form-input::placeholder {
+        color: #bfbfbf;
+      }
+      .mc-notice-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+
+      /* ---- 整改通知书展示态 ---- */
+      .mc-notice-display-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 24px;
+      }
+      .mc-notice-display-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d2129;
+        text-align: center;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #4c78f5;
+        padding-bottom: 12px;
+      }
+      .mc-notice-display-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 24px;
+        margin-bottom: 20px;
+      }
+      .mc-notice-display-footer-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 24px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+      }
+      .mc-notice-display-item {
+        display: flex;
+        font-size: 14px;
+        line-height: 22px;
+        color: #262626;
+      }
+      .mc-notice-display-item span:first-child {
+        color: #8c8c8c;
+        min-width: 110px;
+        flex-shrink: 0;
+      }
+      .mc-notice-display-section {
+        margin-bottom: 16px;
+      }
+      .mc-notice-display-section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 10px;
+      }
+      .mc-notice-display-section-body {
+        background: #f7f8fa;
+        border-radius: 6px;
+        padding: 14px 16px;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #595959;
+        white-space: pre-wrap;
+      }
+      .mc-notice-display-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 20px;
+      }
+
+      /* ---- 整改通知书确认区 ---- */
+      .mc-notice-countersign-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 16px 20px;
+        margin-top: 16px;
+      }
+      .mc-notice-countersign-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 12px;
+      }
+      .mc-notice-countersign-alert {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #0050b3;
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
+      /* ---- 开始检查主按钮 ---- */
+      .mc-start-check-bar {
+        position: sticky;
+        bottom: 0;
+        background: #ffffff;
+        border-top: 1px solid #f0f0f0;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        z-index: 10;
+        border-radius: 0 0 6px 6px;
+      }
+      .mc-btn {
+        display: inline-block;
+        padding: 5px 16px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        background: #fff;
+        color: #595959;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        line-height: 22px;
+      }
+      .mc-btn:hover {
+        color: #4c78f5;
+        border-color: #4c78f5;
+      }
+      .mc-btn-primary {
+        background: #2f54eb;
+        border-color: #2f54eb;
+        color: #ffffff;
+        font-weight: 500;
+        padding: 5px 24px;
+      }
+      .mc-btn-primary:hover {
+        background: #4c78f5;
+        border-color: #4c78f5;
+        color: #ffffff;
+      }
+      .mc-btn-default {
+        background: #ffffff;
+        border-color: #d9d9d9;
+        color: #595959;
+        padding: 5px 24px;
+      }
+      .mc-btn-default:hover {
+        color: #4c78f5;
+        border-color: #4c78f5;
+      }
+      .mc-btn-success {
+        background: #52c41a;
+        border-color: #52c41a;
+        color: #ffffff;
+        font-weight: 500;
+        padding: 5px 24px;
+      }
+      .mc-btn-success:hover {
+        background: #73d13d;
+        border-color: #73d13d;
+        color: #ffffff;
+      }
+      .mc-btn-danger {
+        background: #ff4d4f;
+        border-color: #ff4d4f;
+        color: #ffffff;
+        font-weight: 500;
+      }
+      .mc-btn-danger:hover {
+        background: #ff7875;
+        border-color: #ff7875;
+        color: #ffffff;
+      }
+
+      /* ---- Toast提示 ---- */
+      .mc-toast {
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-100px);
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 10px 24px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        font-size: 14px;
+        color: #262626;
+        z-index: 9999;
+        transition: transform 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mc-toast.show {
+        transform: translateX(-50%) translateY(0);
+      }
+      .mc-toast.success {
+        border-left: 3px solid #52c41a;
+      }
+      .mc-toast.error {
+        border-left: 3px solid #ff4d4f;
+      }
+      .mc-toast.warning {
+        border-left: 3px solid #faad14;
+      }
+      .mc-toast-icon {
+        font-size: 16px;
+      }
+
+      /* ---- 状态Tag ---- */
+      .mc-status-tag {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .mc-status-tag.progress {
+        background: #e6f7ff;
+        color: #1890ff;
+        border: 1px solid #91d5ff;
+      }
+      .mc-status-tag.done {
+        background: #f6ffed;
+        color: #52c41a;
+        border: 1px solid #b7eb8f;
+      }
+      .mc-status-tag.pending {
+        background: #fafafa;
+        color: #bfbfbf;
+        border: 1px solid #d9d9d9;
+      }
+      .mc-status-tag.fail {
+        background: #fff2f0;
+        color: #ff4d4f;
+        border: 1px solid #ffccc7;
+      }
+
+      /* ---- 分页器 ---- */
+      .mc-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 13px;
+        color: #8c8c8c;
+      }
+      .mc-pagination-btns {
+        display: flex;
+        gap: 4px;
+      }
+      .mc-page-btn {
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        background: #fff;
+        color: #595959;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        line-height: 26px;
+        text-align: center;
+      }
+      .mc-page-btn:hover:not(:disabled) {
+        color: #4c78f5;
+        border-color: #4c78f5;
+      }
+      .mc-page-btn.active {
+        color: #4c78f5;
+        border-color: #4c78f5;
+        font-weight: 500;
+      }
+      .mc-page-btn:disabled {
+        color: #d9d9d9;
+        border-color: #d9d9d9;
+        cursor: not-allowed;
+      }
+
+      /* ===== 确认区样式 ===== */
+      .mc-countersign-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-top: 16px;
+      }
+      .mc-countersign-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 12px;
+      }
+      .mc-countersign-alert {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #1890ff;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-countersign-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+        word-wrap: break-word;
+      }
+      .mc-countersign-table th,
+      .mc-countersign-table td {
+        padding: 10px 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mc-countersign-table th {
+        border-bottom: 2px solid #f0f0f0;
+        background: #fafbfc;
+        font-weight: 500;
+        color: #5a5f6d;
+        text-align: left;
+        white-space: nowrap;
+      }
+      .mc-countersign-table td {
+        border-bottom: 1px solid #f0f0f0;
+        color: #262626;
+      }
+      .mc-countersign-opinion {
+        margin-top: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .mc-countersign-opinion label {
+        font-size: 13px;
+        color: #595959;
+        white-space: nowrap;
+        line-height: 32px;
+        font-weight: 500;
+      }
+      .mc-countersign-opinion textarea {
+        flex: 1;
+        height: 32px;
+        padding: 5px 10px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 32px;
+      }
+      .mc-countersign-opinion textarea:focus {
+        border-color: #1890ff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+      }
+      .mc-countersign-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .mc-cs-btn-agree {
+        padding: 4px 16px;
+        background: #1890ff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .mc-cs-btn-agree:hover { background: #40a9ff; }
+      .mc-cs-btn-reject {
+        padding: 4px 16px;
+        background: #fff;
+        color: #ff4d4f;
+        border: 1px solid #ff4d4f;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .mc-cs-btn-reject:hover { background: #fff2f0; }
+
+      /* ===== 操作记录区样式 ===== */
+      .mc-operation-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-top: 16px;
+      }
+      .mc-operation-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #262626;
+        margin-bottom: 14px;
+      }
+      .mc-operation-timeline {
+        position: relative;
+        padding-left: 20px;
+      }
+      .mc-operation-timeline::before {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 4px;
+        bottom: 4px;
+        width: 2px;
+        background: #f0f0f0;
+      }
+      .mc-operation-item {
+        position: relative;
+        padding: 0 0 14px 16px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .mc-operation-item:last-child {
+        padding-bottom: 0;
+      }
+      .mc-operation-item::before {
+        content: '';
+        position: absolute;
+        left: -18px;
+        top: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d9d9d9;
+        border: 2px solid #fff;
+      }
+      .mc-operation-item.op-active::before {
+        background: #1890ff;
+      }
+      .mc-operation-time {
+        font-size: 12px;
+        color: #8c8c8c;
+        margin-left: 8px;
+      }
+      .mc-operation-desc {
+        color: #595959;
+      }
+      .mc-operation-type {
+        font-weight: 500;
+        color: #262626;
+      }
+      .mc-operation-empty {
+        text-align: center;
+        padding: 30px 20px;
+        color: #8c8c8c;
+        font-size: 13px;
+      }
+
+      /* ===== 用户切换器 ===== */
+      .mc-user-switcher {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        font-size: 13px;
+        color: #595959;
+      }
+      .mc-user-switcher select {
+        padding: 3px 8px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #262626;
+        background: #fff;
+        cursor: pointer;
+      }
+      .mc-user-switcher select:focus {
+        border-color: #1890ff;
+        outline: none;
+      }
+      .mc-user-badge {
+        display: inline-block;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 500;
+        margin-left: 4px;
+      }
+      .mc-user-badge.is-me {
+        background: #e6f7ff;
+        color: #1890ff;
+      }
+      .mc-user-badge.is-filler {
+        background: #f6ffed;
+        color: #52c41a;
+      }
+
+      /* ===== 检查记录单状态卡片 ===== */
+      .mc-checklist-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-alert-error {
+        background: #fff2f0;
+        border: 1px solid #ffccc7;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #cf1322;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-alert-info {
+        background: #e6f7ff;
+        border: 1px solid #91d5ff;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: #1890ff;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .mc-checklist-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #262626;
+      }
+      .mc-checklist-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
+      .mc-action-btn {
+        padding: 4px 14px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        color: #595959;
+        white-space: nowrap;
+      }
+      .mc-action-btn:hover { border-color: #1890ff; color: #1890ff; }
+      .mc-action-btn.primary {
+        background: #1890ff;
+        color: #fff;
+        border-color: #1890ff;
+      }
+      .mc-action-btn.primary:hover { background: #40a9ff; }
+      .mc-action-btn.danger {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+      }
+      .mc-action-btn.danger:hover { background: #fff2f0; }
+
+      /* ===== 系统判定提示 ===== */
+      .mc-sys-judge-hint {
+        margin-top: 10px;
+        padding: 6px 12px;
+        background: #fafafa;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #8c8c8c;
+        border-left: 3px solid #d9d9d9;
+      }
+
+      /* ===== 确认进度标签 ===== */
+      .mc-sign-progress {
+        font-size: 12px;
+        color: #8c8c8c;
+      }
+      .mc-sign-progress .done { color: #52c41a; }
+      .mc-sign-progress .pending { color: #faad14; }
+      .mc-sign-progress .rejected { color: #ff4d4f; }
+    </style>
+  <link rel="stylesheet" href="./annotations/annotation.css" />
+</head>
+  <body data-page="my-task-check" data-menu="my-task-list">
+    <div id="app"></div>
+    <script src="../../shared/utils/helpers.js"></script>
+    <script src="../../shared/components/Layout/layout.js"></script>
+    <script src="../../shared/components/Table/table.js"></script>
+    <script src="../../shared/components/Form/form.js"></script>
+    <script src="../../shared/components/Modal/modal.js"></script>
+    <script src="../../shared/components/Status/status.js"></script>
+    <script src="./config.js"></script>
+    <script src="./components.js"></script>
+    <script src="../../shared/router/router.js"></script>
+    <script src="./mock/data.js"></script>
+    <script src="./store/PrototypeStore.js"></script>
+    <script src="./service/task-service.js"></script>
+    <script src="./pages/index.js"></script>
+    <script src="./pages/task-list.js"></script>
+    <script src="./pages/task-detail.js"></script>
+    <script src="./pages/task-create.js"></script>
+    <script src="./pages/task-expert.js"></script>
+    <script src="./pages/site-detail.js"></script>
+    <script src="./pages/my-task-list.js"></script>
+    <script>
+      /* ============================================================
+       * my-task-check.html 内联脚本
+       * 零污染原则：所有逻辑内联，不修改 app.js
+       * ============================================================ */
+      (function () {
+        // ---- Mock数据：我的任务检查 ----
+        var myCheckTask = {
+          id: 'MT-2026-001',
+          name: '2026 第27周 裕华片区常规面积核查任务',
+          status: '进行中',
+          year: '2026',
+          expert: '赵立成、李建华',
+          start: '2026-07-01',
+          end: '2026-07-07',
+          issuedAt: '2026-06-30 09:30',
+          progress: '1/3 站点已完成',
+          executionStatus: '正常执行'
+        };
+
+        var myCheckSites = [
+          { code: '60218B001', name: '裕华区中心站', dept: '裕华管理部', checkStatus: '已检查' },
+          { code: '60218B002', name: '长安区东站', dept: '长安管理部', checkStatus: '待整改' },
+          { code: '60218B003', name: '桥西区南站', dept: '桥西管理部', checkStatus: '检查中' }
+        ];
+
+        // 面积比对Mock数据（按站点code索引）
+        var areaDataMap = {
+          '60218B001': {
+            originalArea: { total: 5580.00, residential: { subtotal: 4688.00, multiLayer: 3460.00, highRise: 1228.00, apartment: 0 }, nonResidential: { subtotal: 892.00, nonResident: 892.00, carPark: 0, other: 0 } },
+            currentArea: { total: 5740.00, residential: { subtotal: 4808.00, multiLayer: 3540.00, highRise: 1268.00, apartment: 0 }, nonResidential: { subtotal: 932.00, nonResident: 932.00, carPark: 0, other: 0 } },
+            areaDiff: 160.00
+          },
+          '60218B002': {
+            originalArea: { total: 4200.00, residential: { subtotal: 3200.00, multiLayer: 2000.00, highRise: 1200.00, apartment: 0 }, nonResidential: { subtotal: 1000.00, nonResident: 800.00, carPark: 200.00, other: 0 } },
+            currentArea: { total: 4350.00, residential: { subtotal: 3300.00, multiLayer: 2100.00, highRise: 1200.00, apartment: 0 }, nonResidential: { subtotal: 1050.00, nonResident: 850.00, carPark: 200.00, other: 0 } },
+            areaDiff: 150.00
+          },
+          '60218B003': {
+            originalArea: { total: 4260.00, residential: { subtotal: 3200.00, multiLayer: 1800.00, highRise: 1400.00, apartment: 0 }, nonResidential: { subtotal: 1060.00, nonResident: 760.00, carPark: 200.00, other: 100.00 } },
+            currentArea: { total: 4380.00, residential: { subtotal: 3280.00, multiLayer: 1860.00, highRise: 1420.00, apartment: 0 }, nonResidential: { subtotal: 1100.00, nonResident: 780.00, carPark: 220.00, other: 100.00 } },
+            areaDiff: 120.00
+          }
+        };
+
+        // 普查明细Mock数据
+        var surveyDataMap = {
+          '60218B001': [
+            { id: 1, building: '1号楼(住宅)', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 3460.00, currentArea: 3540.00, diff: 80.00, rate: '2.31%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2009年', basis: '实测核实', attachment: '1份', remark: '—' },
+            { id: 2, building: '2号楼(商业配套)', floors: 3, heatNature: '商业', chargeType: '按面积收费', status: '已普查', originalArea: 892.00, currentArea: 932.00, diff: 40.00, rate: '4.48%', controlMode: '总阀控制', heatingType: '暖气片', buildYear: '2015年', basis: '实测核实', attachment: '2份', remark: '含增建部分' },
+            { id: 3, building: '3号楼(住宅)', floors: 18, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1228.00, currentArea: 1268.00, diff: 40.00, rate: '3.26%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2018年', basis: '实测核实', attachment: '1份', remark: '—' }
+          ],
+          '60218B002': [
+            { id: 1, building: '1号楼(住宅)', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 2000.00, currentArea: 2100.00, diff: 100.00, rate: '5.00%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2010年', basis: '实测核实', attachment: '1份', remark: '含新增面积' },
+            { id: 2, building: '2号楼(商业)', floors: 2, heatNature: '商业', chargeType: '按面积收费', status: '未普查', originalArea: 1200.00, currentArea: 1250.00, diff: 50.00, rate: '4.17%', controlMode: '总阀控制', heatingType: '暖气片', buildYear: '2015年', basis: '—', attachment: '—', remark: '待复核' }
+          ],
+          '60218B003': [
+            { id: 1, building: '1号楼(住宅)', floors: 6, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1800.00, currentArea: 1860.00, diff: 60.00, rate: '3.33%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2010年', basis: '实测核实', attachment: '1份', remark: '—' },
+            { id: 2, building: '2号楼(住宅)', floors: 18, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 1400.00, currentArea: 1420.00, diff: 20.00, rate: '1.43%', controlMode: '分户控制', heatingType: '地暖', buildYear: '2014年', basis: '实测核实', attachment: '1份', remark: '—' },
+            { id: 3, building: '3号楼(商业)', floors: 3, heatNature: '商业', chargeType: '按面积收费', status: '未普查', originalArea: 760.00, currentArea: 780.00, diff: 20.00, rate: '2.63%', controlMode: '总阀控制', heatingType: '暖气片', buildYear: '2012年', basis: '—', attachment: '—', remark: '待现场复核' },
+            { id: 4, building: '地下车库', floors: 1, heatNature: '车库', chargeType: '按面积收费', status: '未普查', originalArea: 300.00, currentArea: 320.00, diff: 20.00, rate: '6.67%', controlMode: '总阀控制', heatingType: '暖气片', buildYear: '2010年', basis: '—', attachment: '—', remark: '含新增车位' }
+          ]
+        };
+
+        // 站点详情Mock数据
+        var siteDetailMap = {
+          '60218B001': {
+            name: '裕华区中心站',
+            code: '60218B001',
+            shortName: '裕华中心站',
+            address: '裕华区槐安路与翟营大街交叉口东行200米路北',
+            dept: '裕华管理部',
+            officeArea: '裕华片区所',
+            district: '裕华区',
+            street: '裕东街道',
+            contact: '王志强',
+            phone: '138-0001-1001',
+            censusUser: '赵普查',
+            censusDate: '2026-06-28',
+            unregisteredBuildings: 1
+          },
+          '60218B002': {
+            name: '长安区东站',
+            code: '60218B002',
+            shortName: '长安东站',
+            address: '长安区中山东路与建设大街交叉口北行100米路东',
+            dept: '长安管理部',
+            officeArea: '长安片区所',
+            district: '长安区',
+            street: '建北街道',
+            contact: '李志强',
+            phone: '138-0001-1002',
+            censusUser: '钱普查',
+            censusDate: '2026-06-27',
+            unregisteredBuildings: 0
+          },
+          '60218B003': {
+            name: '桥西区南站',
+            code: '60218B003',
+            shortName: '桥西南站',
+            address: '桥西区中华南大街与南二环交叉口西行300米路北',
+            dept: '桥西管理部',
+            officeArea: '桥西片区所',
+            district: '桥西区',
+            street: '新石街道',
+            contact: '张志强',
+            phone: '138-0001-1003',
+            censusUser: '孙普查',
+            censusDate: '2026-06-26',
+            unregisteredBuildings: 2
+          }
+        };
+
+        // 检查记录单弹窗渲染（7项检查项 + 结论 + 描述）
+        var checkRecordItems = [
+          {
+            id: 1,
+            text: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？',
+            hasSub: true,
+            subItems: ['数据是否正确', '项目填写不齐全', '表格不完整'],
+            hasOther: true
+          },
+          {
+            id: 2,
+            text: '用热范围平面图是否具备绘制人、审批流程是否完整、绘制日期，且方位正确？',
+            hasSub: true,
+            subItems: ['无绘制人签字', '无绘制日期', '方位标注不正确', '现场建筑名称与图纸不一致', '楼号/层数不一致', '未入网建筑与平面图不符'],
+            hasOther: true
+          },
+          {
+            id: 3,
+            text: '面积核查依据（确权书及相关证明材料）是否有效且齐全？',
+            hasSub: true,
+            subItems: ['确权书缺失或无效', '军方产权证缺失', '铁路产权证缺失', '预售商品房合同备案书缺失', '竣工图纸缺失', '建筑图纸缺失', '建筑图首页说明缺失', '购房协议缺失', '规划证缺失', '预售证缺失', '现场实测资料缺失'],
+            hasOther: true,
+            otherLabel: '其他证明材料缺失'
+          },
+          {
+            id: 4,
+            text: '是否存在面积变化情况？',
+            hasSub: false,
+            values: ['是（存在变化）', '否（无变化）']
+          },
+          {
+            id: 5,
+            text: '面积核查汇总表与用热现场是否一致（建筑名称、楼号、层数、未入网建筑等）？',
+            hasSub: true,
+            subItems: ['建筑名称不一致', '楼号不一致', '层数不一致', '未入网建筑信息不一致', '现场与汇总表数据不符', '用热性质填写不规范'],
+            hasOther: true
+          },
+          {
+            id: 6,
+            text: '商业门头平面图与现场顺序是否一致？',
+            hasSub: true,
+            subItems: ['平面图顺序与现场不一致', '商业门头位置错误', '标识不清或缺失'],
+            hasOther: true,
+            hasNa: true
+          },
+          {
+            id: 7,
+            text: '实测计算是否满足制度要求？',
+            hasSub: true,
+            subItems: ['偏差值大于 3%', '偏差值大于 2%', '偏差值大于±60m²'],
+            hasOther: false,
+            hasNa: true
+          }
+        ];
+
+        // ============================================================
+        // 双人确认统一数据对象
+        // ============================================================
+        var mockCheckData = {
+          currentUser: '赵立成',
+          users: ['赵立成', '李建华'],
+          siteSignState: {}
+        };
+
+        function getInspectors(code) {
+          if (!mockCheckData.siteSignState[code]) {
+            mockCheckData.siteSignState[code] = {
+              filler: null,
+              inspectors: [
+                { name: '赵立成', role: '检查人', isFiller: false, status: 'pending', time: null, opinion: '' },
+                { name: '李建华', role: '检查人', isFiller: false, status: 'pending', time: null, opinion: '' }
+              ],
+              operations: [
+                { operator: '系统', type: '任务下发', time: '2026-06-30 09:30', desc: '任务已下发给检查人：赵立成、李建华' }
+              ]
+            };
+          }
+          return mockCheckData.siteSignState[code];
+        }
+
+        function addOperation(code, operator, type, desc) {
+          var state = getInspectors(code);
+          var now = new Date();
+          var timeStr = now.toISOString().slice(0, 16).replace('T', ' ');
+          state.operations.push({ operator: operator, type: type, time: timeStr, desc: desc });
+        }
+
+        function getChecklistStatus(code) {
+          var cl = taskCheckState[code] && taskCheckState[code].checklist;
+          if (!cl || !cl.submitted) {
+            var signState = mockCheckData.siteSignState[code];
+            if (signState && signState.filler) return 'filling';
+            return 'pending_fill';
+          }
+          if (cl.completed) return 'completed';
+          if (cl.rejected) return 'rejected';
+          if (cl.countersigning) return 'countersigning';
+          return 'submitted';
+        }
+
+        function isCurrentUserFiller(code) {
+          var signState = mockCheckData.siteSignState[code];
+          return signState && signState.filler === mockCheckData.currentUser;
+        }
+
+        function isCurrentUserInspector() {
+          return mockCheckData.users.indexOf(mockCheckData.currentUser) >= 0;
+        }
+
+        // ============================================================
+        // 整改通知书状态管理（对齐检查记录单模式）
+        // ============================================================
+        var mockRectifyData = {
+          currentUser: '赵立成',
+          users: ['赵立成', '李建华'],
+          siteRectifyState: {}
+        };
+
+        function getRectifySignState(code) {
+          if (!mockRectifyData.siteRectifyState[code]) {
+            mockRectifyData.siteRectifyState[code] = {
+              filler: null,
+              inspectors: [
+                { name: '赵立成', role: '检查人', status: 'pending', time: null, opinion: '' },
+                { name: '李建华', role: '检查人', status: 'pending', time: null, opinion: '' }
+              ],
+              operations: [
+                { operator: '系统', type: '任务下发', time: '2026-06-30 09:30', desc: '整改通知书任务已创建' }
+              ]
+            };
+          }
+          return mockRectifyData.siteRectifyState[code];
+        }
+
+        function addRectifyOperation(code, operator, type, desc) {
+          var state = getRectifySignState(code);
+          var now = new Date();
+          var timeStr = now.toISOString().slice(0, 16).replace('T', ' ');
+          state.operations.push({ operator: operator, type: type, time: timeStr, desc: desc });
+        }
+
+        function getRectifyStatus(code) {
+          var notice = taskCheckState[code] && taskCheckState[code].notice;
+          if (!notice || !notice.submitted) {
+            var signState = mockRectifyData.siteRectifyState[code];
+            if (signState && signState.filler) return 'filling';
+            return 'pending_fill';
+          }
+          if (notice.completed) return 'completed';
+          if (notice.submitted) return 'countersigning';
+          return 'submitted';
+        }
+
+        function isCurrentUserRectifyFiller(code) {
+          var signState = mockRectifyData.siteRectifyState[code];
+          return signState && signState.filler === mockRectifyData.currentUser;
+        }
+
+        function getMyRectifyStatus(code) {
+          var signState = getRectifySignState(code);
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].name === mockRectifyData.currentUser) {
+              return signState.inspectors[i];
+            }
+          }
+          return null;
+        }
+
+        function getRectifyStatusTag(status) {
+          switch (status) {
+            case 'pending_fill': return '<span class="mc-status-tag status-pending">待填写</span>';
+            case 'filling': return '<span class="mc-status-tag status-doing">填写中</span>';
+            case 'countersigning':
+            case 'submitted': return '<span class="mc-status-tag status-doing">确认中</span>';
+            case 'completed': return '<span class="mc-status-tag status-done">已完成</span>';
+            default: return '';
+          }
+        }
+
+        function getMyInspectorStatus(code) {
+          var signState = getInspectors(code);
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].name === mockCheckData.currentUser) {
+              return signState.inspectors[i];
+            }
+          }
+          return null;
+        }
+
+        function getInspectorStatusClass(status) {
+          switch (status) {
+            case 'agreed': return 'mc-status-tag status-done';
+            case 'rejected':
+            case 'disagreed': return 'mc-status-tag status-fail';
+            case 'pending': return 'mc-status-tag status-pending';
+            default: return 'mc-status-tag status-pending';
+          }
+        }
+
+        function getInspectorStatusText(status) {
+          switch (status) {
+            case 'agreed': return '已同意';
+            case 'rejected':
+            case 'disagreed': return '不同意';
+            case 'pending': return '待确认';
+            default: return '—';
+          }
+        }
+
+        function getChecklistStatusTag(status) {
+          switch (status) {
+            case 'pending_fill': return '<span class="mc-status-tag status-pending">待填写</span>';
+            case 'filling': return '<span class="mc-status-tag status-doing">填写中</span>';
+            case 'countersigning':
+            case 'submitted': return '<span class="mc-status-tag status-doing">专家确认中</span>';
+            case 'rejected': return '<span class="mc-status-tag status-fail">已驳回</span>';
+            case 'completed': return '<span class="mc-status-tag status-done">已完成</span>';
+            default: return '';
+          }
+        }
+
+        function getSignProgressHtml(code) {
+          var signState = getInspectors(code);
+          var agreed = 0;
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            if (signState.inspectors[i].status === 'agreed') agreed++;
+          }
+          var total = signState.inspectors.length;
+          return '<span class="mc-sign-progress">确认进度：<span class="' + (agreed === total ? 'done' : '') + '">' + agreed + '</span>/' + total + '</span>';
+        }
+        var taskCheckState = {
+          '60218B001': {
+            checklist: {
+              submitted: true, confirmed: false, confirmExpert1: false, confirmExpert2: false,
+              conclusion: '不合格',
+              problemDesc: '地下室新增用热面积约160㎡未同步到普查台账。',
+              siteNote: '',
+              items: [
+                { id: 1, value: '是', reason: '-' },
+                { id: 2, value: '否', reason: '现场建筑名称与图纸不一致' },
+                { id: 3, value: '否', reason: '确权书缺失或无效' },
+                { id: 4, value: '-', reason: '-' },
+                { id: 5, value: '否', reason: '未入网建筑信息不一致' },
+                { id: 6, value: '-', reason: '-' },
+                { id: 7, value: '-', reason: '-' }
+              ],
+              inspector: '赵立成',
+              checkDate: '2026-07-03'
+            },
+            notice: {
+              submitted: true, confirmed: false, confirmExpert1: false, confirmExpert2: false,
+              noticeNo: 'ZG-2026-07-001',
+              dept: '裕华片区所',
+              content: '地下室新增用热面积约160㎡未同步到普查台账，需补录并更新核查表。',
+              opinion: '1. 补录新增用热面积\n2. 更新台账及附件\n3. 提交整改说明',
+              deadlineDays: 5,
+              inspectedPerson: '王志强',
+              inspector: '赵立成',
+              phone: '138-0001-1001',
+              status: '已发送'
+            },
+            verification: {} // 实测复核数据 { buildingId: { photo: '', recheckArea: '' } }
+          },
+          '60218B002': {
+            checklist: { submitted: false, confirmed: false, confirmExpert1: false, confirmExpert2: false, items: [] },
+            notice: { submitted: false, confirmed: false, confirmExpert1: false, confirmExpert2: false },
+            verification: {}
+          },
+          '60218B003': {
+            checklist: { submitted: false, confirmed: false, confirmExpert1: false, confirmExpert2: false, items: [] },
+            notice: { submitted: false, confirmed: false, confirmExpert1: false, confirmExpert2: false },
+            verification: {}
+          }
+        };
+
+        // ---- 渲染检查记录单（双人确认重构版）----
+        function renderChecklistPanel(site) {
+          var code = site.code;
+          var cl = taskCheckState[code] && taskCheckState[code].checklist;
+          var signState = getInspectors(code);
+          var status = getChecklistStatus(code);
+          var isFiller = isCurrentUserFiller(code);
+          var myStatus = getMyInspectorStatus(code);
+          var hasItems = cl && cl.items && cl.items.length > 0;
+
+          function renderAlert() {
+            if (!hasItems) return '';
+            var failCount = 0;
+            var failReasons = [];
+            for (var i = 0; i < cl.items.length; i++) {
+              if (cl.items[i].value === '否' || cl.items[i].value === '不合格') {
+                failCount++;
+                if (cl.items[i].reason && cl.items[i].reason !== '-') failReasons.push(cl.items[i].reason);
+              }
+            }
+            var isQualified = failCount === 0;
+            if (status === 'pending_fill' || status === 'filling') {
+              if (cl && cl.items && cl.items.length > 0) {
+                if (!isQualified) {
+                  return '<div class="mc-checklist-alert-error">⚠ 当前存在 <strong>' + failCount + '</strong> 项检查不合格，请确认检查结果后再提交确认。</div>';
+                }
+                return '<div class="mc-checklist-alert-info">✅ 当前检查项均合格，请核对检查结果并提交确认。</div>';
+              }
+              return '';
+            }
+            if (status === 'countersigning' || status === 'submitted') {
+              if (!isQualified) {
+                return '<div class="mc-checklist-alert-error">⚠ 该检查记录单存在 <strong>' + failCount + '</strong> 项不合格，请确认人核对检查结果后进行同意或驳回。</div>';
+              }
+              return '<div class="mc-checklist-alert-info">✅ 该检查记录单检查项均合格，请确认人核对后进行确认。</div>';
+            }
+            if (status === 'rejected') {
+              var rejectReason = '';
+              for (var i = 0; i < signState.inspectors.length; i++) {
+                if (signState.inspectors[i].status === 'rejected') {
+                  rejectReason = signState.inspectors[i].opinion;
+                }
+              }
+              return '<div class="mc-checklist-alert-error">⚠ 检查记录单已被驳回。驳回原因：' + (rejectReason || '未填写') + '。请填写人修改后重新提交确认。</div>';
+            }
+            if (status === 'completed') {
+              if (!isQualified) {
+                return '<div class="mc-checklist-alert-info">🔒 该检查记录单已完成确认。检查结论：不合格。</div>';
+              }
+              return '<div class="mc-checklist-alert-info">🔒 该检查记录单已完成确认。检查结论：合格。</div>';
+            }
+            return '';
+          }
+
+          function renderTitleActions() {
+            var btns = '';
+            if (status === 'pending_fill') {
+              btns = '<button class="mc-action-btn primary" id="mc-btn-start-fill">开始填写</button>';
+            } else if (status === 'filling') {
+              if (isFiller) {
+                btns = '<button class="mc-action-btn" id="mc-btn-edit-checklist">编辑检查记录单</button><button class="mc-action-btn" id="mc-btn-draft-checklist">暂存</button><button class="mc-action-btn primary" id="mc-btn-submit-checklist">提交</button>';
+              } else {
+                btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+              }
+            } else if (status === 'countersigning' || status === 'submitted') {
+              btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+            } else if (status === 'rejected') {
+              if (isFiller) {
+                btns = '<button class="mc-action-btn" id="mc-btn-edit-checklist">修改检查记录单</button><button class="mc-action-btn primary" id="mc-btn-submit-checklist">重新提交确认</button>';
+              } else {
+                btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+              }
+            } else if (status === 'completed') {
+              btns = '<button class="mc-action-btn" id="mc-btn-view-checklist">查看检查记录单</button>';
+            }
+            return btns ? '<div class="mc-checklist-actions">' + btns + '</div>' : '';
+          }
+
+          function renderItemsTable() {
+            if (!hasItems) {
+              return '<div style="text-align:center;padding:30px 0;color:#8c8c8c;font-size:13px;">暂无检查项数据</div>';
+            }
+            var rows = '';
+            for (var i = 0; i < cl.items.length; i++) {
+              var item = cl.items[i];
+              var itemDef = checkRecordItems[i];
+              var resultText = item.value || '—';
+              var resultClass = item.value === '否' || item.value === '不合格' ? 'status-fail' : (item.value === '是' || item.value === '合格' ? 'status-done' : '');
+              var reasonText = item.reason && item.reason !== '-' ? item.reason : '<span style="color:#bfbfbf;">—</span>';
+              rows += '<tr>' +
+                '<td style="text-align:center;">' + (i + 1) + '</td>' +
+                '<td>' + (itemDef ? itemDef.text : '—') + '</td>' +
+                '<td style="text-align:center;"><span class="mc-status-tag ' + resultClass + '">' + resultText + '</span></td>' +
+                '<td style="color:' + (item.value === '否' ? '#cf1322' : '#595959') + ';">' + reasonText + '</td>' +
+                '<td style="color:#8c8c8c;">—</td>' +
+              '</tr>';
+            }
+            return '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:680px;"><thead><tr>' +
+              '<th style="width:40px;text-align:center;">序号</th>' +
+              '<th style="width:auto;">检查项</th>' +
+              '<th style="width:80px;text-align:center;">检查结果</th>' +
+              '<th style="width:140px;">原因描述</th>' +
+              '<th style="width:80px;">备注</th>' +
+              '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+          }
+
+          // 填写中且非填写人时显示提示
+          var fillingHint = '';
+          if (status === 'filling' && !isFiller) {
+            fillingHint = '<div class="mc-checklist-alert-info">当前检查记录单正在由 <strong>' + signState.filler + '</strong> 填写，提交确认后您可进行确认。</div>';
+          }
+
+          var html = '';
+          html += '<div class="mc-record-card">';
+          // 标题行
+          html += '<div class="mc-checklist-title-row">';
+          html += '<span class="mc-checklist-title">面积核查检查记录单</span>';
+          html += getChecklistStatusTag(status);
+          if (hasItems) {
+            html += '<span style="font-size:12px;color:#8c8c8c;margin-left:4px;">共' + cl.items.length + '项</span>';
+          }
+          html += renderTitleActions();
+          html += '</div>';
+
+          // 状态提示
+          html += fillingHint;
+          html += renderAlert();
+
+          // 检查项表格
+          html += renderItemsTable();
+
+          // 底部检查人/日期
+          if (hasItems) {
+            html += '<div style="margin-top:12px;font-size:12px;color:#8c8c8c;display:flex;gap:24px;">';
+            html += '<span>核查检查人：' + (cl.inspector || '—') + '</span>';
+            html += '<span>核查检查日期：' + (cl.checkDate || '—') + '</span>';
+            html += '</div>';
+          }
+
+          // 系统判定提示
+          if (hasItems) {
+            html += '<div class="mc-sys-judge-hint">系统根据检查记录单填写内容自动判定，可在编辑检查记录单时调整原始填写项。</div>';
+          }
+
+          html += '</div>';
+
+          // 确认区
+          html += renderCountersignArea(code, status, signState, isFiller, myStatus, cl);
+
+          return html;
+        }
+
+        // ---- 渲染确认区 ----
+        function renderCountersignArea(code, status, signState, isFiller, myStatus, cl) {
+          if (status === 'pending_fill' || status === 'filling') {
+            if (status === 'filling' && !isFiller) {
+              // 非填写人在填写中可见确认区（预览）
+            } else {
+              return ''; // 待填写和填写人自己在填写中时隐藏确认区
+            }
+          }
+
+          var isReadonly = (status === 'completed');
+          var isCountersigning = (status === 'countersigning' || status === 'submitted' || status === 'rejected');
+          var showButtons = !isReadonly && isCountersigning;
+
+          var html = '';
+          html += '<div class="mc-countersign-card">';
+          html += '<div class="mc-countersign-title">检查结果确认</div>';
+          html += '<div class="mc-countersign-alert">' +
+            '1. 本任务只需一名检查人完成检查记录单填写。<br>' +
+            '2. 填写人提交后自动视为已同意。<br>' +
+            '3. 另一名检查人确认同意后，当前站点才算完成。' +
+            '</div>';
+
+          // 确认表格
+          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:440px;"><thead><tr>' +
+            '<th style="width:100px;">检查人</th>' +
+            '<th style="width:90px;text-align:center;">状态</th>' +
+            '<th style="width:120px;">确认时间</th>' +
+            '<th style="width:auto;">意见</th>' +
+            '</tr></thead><tbody>';
+
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            var ins = signState.inspectors[i];
+            var isMe = ins.name === mockCheckData.currentUser;
+            var nameDisplay = ins.name + (isMe ? ' <span class="mc-user-badge is-me">您</span>' : '');
+
+            // 填写人：自动已同意，不显示操作
+            var isFillerPerson = (ins.name === signState.filler);
+            var statusText, statusClass;
+            if (isFillerPerson && ins.status === 'pending') {
+              // 填写人提交后自动同意，不用等手动点击
+              statusText = '已自动同意';
+              statusClass = 'mc-status-tag status-done';
+              ins.status = 'agreed'; // 同步状态
+              ins.time = ins.time || new Date().toISOString().slice(0, 16).replace('T', ' ');
+            } else {
+              statusClass = getInspectorStatusClass(ins.status);
+              statusText = getInspectorStatusText(ins.status);
+            }
+            var timeDisplay = ins.time || '<span style="color:#bfbfbf;">—</span>';
+            var opinionDisplay = ins.opinion || '<span style="color:#bfbfbf;">—</span>';
+
+            html += '<tr>' +
+              '<td>' + nameDisplay + '</td>' +
+              '<td style="text-align:center;"><span class="' + statusClass + '">' + statusText + '</span></td>' +
+              '<td>' + timeDisplay + '</td>' +
+              '<td>' + opinionDisplay + '</td>' +
+              '</tr>';
+          }
+
+          html += '</tbody></table></div>';
+
+          // 确认意见输入区
+          if (showButtons) {
+            var myStatusObj = getMyInspectorStatus(code);
+            if (myStatusObj && myStatusObj.status === 'pending') {
+              html += '<div class="mc-countersign-opinion">';
+              html += '<label>确认意见：</label>';
+              html += '<textarea id="mc-cs-opinion" placeholder="请输入确认意见。同意时非必填，驳回时必填。"></textarea>';
+              html += '</div>';
+            }
+          }
+
+          // 底部确认按钮（放在确认Card内）
+          if (showButtons) {
+            var myStatusObj = getMyInspectorStatus(code);
+            if (myStatusObj && myStatusObj.status === 'pending') {
+              html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">';
+              html += '<button class="mc-cs-btn-reject" id="mc-btn-cs-reject" data-cs-action="reject" style="padding:6px 20px;">不同意</button>';
+              html += '<button class="mc-cs-btn-agree" id="mc-btn-cs-agree" data-cs-action="agree" style="padding:6px 20px;">同意</button>';
+              html += '</div>';
+            }
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染操作记录区 ----
+        function renderOperationLog(code) {
+          var signState = getInspectors(code);
+          var ops = signState.operations;
+
+          var html = '<div class="mc-operation-card">';
+          html += '<div class="mc-operation-title">操作记录</div>';
+
+          if (ops.length === 0) {
+            html += '<div class="mc-operation-empty">暂无操作记录</div>';
+          } else {
+            html += '<div class="mc-operation-timeline">';
+            for (var i = ops.length - 1; i >= 0; i--) {
+              var op = ops[i];
+              var isLatest = (i === ops.length - 1);
+              html += '<div class="mc-operation-item' + (isLatest ? ' op-active' : '') + '">';
+              html += '<span class="mc-operation-type">' + op.type + '</span>';
+              html += '<span class="mc-operation-time">' + op.time + '</span>';
+              html += '<div class="mc-operation-desc">' + op.operator + '：' + op.desc + '</div>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染底部操作栏 ----
+        function renderBottomBar(site) {
+          if (!site) return '';
+          var code = site.code;
+          var status = getChecklistStatus(code);
+          var isFiller = isCurrentUserFiller(code);
+          var btns = '<button class="mc-btn" onclick="history.back()">返回</button>';
+
+          if (status === 'pending_fill') {
+            btns += '<button class="mc-btn-success mc-btn" id="mc-btn-start-check">开始填写</button>';
+          } else if (status === 'filling') {
+            if (isFiller) {
+              btns += '<button class="mc-btn" id="mc-btn-draft-checklist">暂存</button>';
+              btns += '<button class="mc-btn-success mc-btn" id="mc-btn-submit-checklist">提交</button>';
+            }
+          } else if (status === 'countersigning' || status === 'submitted') {
+            // 确认中不展示底部操作按钮（确认按钮在确认Card内）
+          } else if (status === 'rejected') {
+            if (isFiller) {
+              btns += '<button class="mc-btn" id="mc-btn-edit-checklist">修改检查记录单</button>';
+              btns += '<button class="mc-btn-success mc-btn" id="mc-btn-submit-checklist">重新提交确认</button>';
+            }
+          } else if (status === 'completed') {
+            // 只展示返回
+          }
+
+          return '<div class="mc-start-check-bar">' + btns + '</div>';
+        }
+
+        // ---- 渲染用户切换器 ----
+        function renderUserSwitcherHtml() {
+          var html = '<div class="mc-user-switcher">';
+          html += '<span>当前用户：</span>';
+          html += '<select id="mc-user-select">';
+          for (var i = 0; i < mockCheckData.users.length; i++) {
+            var sel = mockCheckData.users[i] === mockCheckData.currentUser ? ' selected' : '';
+            html += '<option value="' + mockCheckData.users[i] + '"' + sel + '>' + mockCheckData.users[i] + '</option>';
+          }
+          html += '</select>';
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染检查记录单弹窗内容 ----
+        function renderChecklistModalContent(site) {
+          var itemsHtml = '';
+          for (var i = 0; i < checkRecordItems.length; i++) {
+            var item = checkRecordItems[i];
+            var radioOptions = '';
+            if (item.values) {
+              radioOptions = item.values.map(function(v) {
+                return '<label><input type="radio" name="mc-check-' + item.id + '" value="' + v + '" /> ' + v + '</label>';
+              }).join('');
+            } else {
+              var opts = ['<label><input type="radio" name="mc-check-' + item.id + '" value="是" /> 是</label>',
+                          '<label><input type="radio" name="mc-check-' + item.id + '" value="否" /> 否</label>'];
+              if (item.hasNa) {
+                opts.push('<label><input type="radio" name="mc-check-' + item.id + '" value="不适用" /> 不适用</label>');
+              }
+              radioOptions = opts.join('');
+            }
+
+            var subHtml = '';
+            if (item.hasSub) {
+              var checkboxes = item.subItems.map(function(s) {
+                return '<label class="mc-check-sub-item"><input type="checkbox" class="mc-check-sub-box" data-parent="' + item.id + '" /> ' + s + '</label>';
+              }).join('');
+              var otherInput = item.hasOther ? '<label class="mc-check-sub-item">其他问题' + (item.otherLabel ? '（' + item.otherLabel + '）' : '') + '：<input class="mc-check-other-input" data-parent="' + item.id + '" placeholder="请填写" /></label>' : '';
+              subHtml = '\
+                <div class="mc-check-sub-items" id="mc-sub-' + item.id + '">\
+                  <div class="mc-check-sub-title">如选"否"，请勾选不合格内容：</div>\
+                  <div class="mc-check-sub-grid">' + checkboxes + '</div>\
+                  ' + (otherInput ? '<div style="margin-top:6px;padding-left:4px;">' + otherInput + '</div>' : '') + '\
+                </div>';
+            }
+
+            itemsHtml += '\
+              <div class="mc-check-item">\
+                <div class="mc-check-item-title"><span class="mc-check-index">' + item.id + '.</span>' + item.text + '</div>\
+                <div class="mc-check-radio-group">' + radioOptions + '</div>\
+                ' + subHtml + '\
+              </div>';
+          }
+
+          return '\
+            <div class="mc-check-modal-card">\
+              <div class="mc-record-main-title">面积检查检查记录单</div>\
+              <div class="mc-record-sub-title">' + site.name + ' (' + site.code + ')</div>\
+              ' + itemsHtml + '\
+              <div class="mc-record-form-group" style="margin-top:16px;">\
+                <div class="mc-record-form-label">系统判定结果</div>\
+                <div class="mc-record-radio-group">\
+                  <div id="mc-system-conclusion" style="font-size:14px;font-weight:600;padding:6px 0;color:#999;">待生成</div>\
+                </div>\
+              </div>\
+              <div id="mc-system-conclusion-hint" style="margin:0 0 10px 0;padding:8px 12px;border-radius:6px;font-size:12px;line-height:1.5;background:#f5f5f5;color:#999;display:none;">\
+                提示信息\
+              </div>\
+              <div class="mc-record-form-group">\
+                <div class="mc-record-form-label">问题描述</div>\
+                <textarea class="mc-record-textarea" id="mc-modal-problem-desc" placeholder="请输入发现的问题描述…" maxlength="500" style="min-height:60px;"></textarea>\
+                <div class="mc-record-char-count"><span id="mc-modal-problem-count">0</span>/500</div>\
+              </div>\
+              <div class="mc-record-form-group">\
+                <div class="mc-record-form-label">现场说明</div>\
+                <textarea class="mc-record-textarea" id="mc-modal-site-note" placeholder="请输入现场说明…" maxlength="500" style="min-height:60px;"></textarea>\
+                <div class="mc-record-char-count"><span id="mc-modal-site-note-count">0</span>/500</div>\
+              </div>\
+              <div class="mc-check-actions">\
+                <button class="mc-btn" id="mc-modal-checklist-draft">暂存</button>\
+                <button class="mc-btn-primary mc-btn" id="mc-modal-checklist-submit">提交</button>\
+              </div>\
+            </div>';
+        }
+
+        // ---- 辅助函数 ----
+        function fmt(n) {
+          return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function statusTagClass(status) {
+          if (status === '已完成') return 'done';
+          if (status === '检查中' || status === '进行中') return 'progress';
+          if (status === '不合格') return 'fail';
+          return 'pending';
+        }
+
+        function stationStatusClass(status) {
+          var map = {
+            '已检查': 'status-done',
+            '检查中': 'status-doing',
+            '待整改': 'status-pending-rectify',
+            '已发送/待整改': 'status-sent-rectify',
+            '待检查': 'status-todo'
+          };
+          return map[status] || 'status-todo';
+        }
+
+        // 计算站点统计
+        function calcSiteStats(sites) {
+          var stats = { total: sites.length, done: 0, doing: 0, pendingRectify: 0, sentRectify: 0, todo: 0 };
+          for (var i = 0; i < sites.length; i++) {
+            var s = sites[i].checkStatus;
+            if (s === '已检查') stats.done++;
+            else if (s === '检查中') stats.doing++;
+            else if (s === '待整改') stats.pendingRectify++;
+            else if (s === '已发送/待整改') stats.sentRectify++;
+            else if (s === '待检查') stats.todo++;
+          }
+          return stats;
+        }
+
+        // ---- 渲染站点详情信息面板 ----
+        function renderSiteInfoPanel(site) {
+          var detail = siteDetailMap[site.code] || {};
+          return '\
+            <div class="mc-station-info-panel" id="mc-station-info-panel">\
+              <div class="mc-station-info-title">站点信息</div>\
+              <div class="mc-station-info-grid">\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">站点名称：</span><span class="mc-station-info-value">' + (detail.name || site.name) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">用户编码：</span><span class="mc-station-info-value">' + (detail.code || site.code) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">简称：</span><span class="mc-station-info-value">' + (detail.shortName || '—') + '</span></div>\
+                <div class="mc-station-info-item" style="grid-column:span 3;"><span class="mc-station-info-label">用热地址：</span><span class="mc-station-info-value">' + (detail.address || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">所属管理部：</span><span class="mc-station-info-value">' + (detail.dept || site.dept) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">所属片区所：</span><span class="mc-station-info-value">' + (detail.officeArea || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">行政区：</span><span class="mc-station-info-value">' + (detail.district || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">办事处：</span><span class="mc-station-info-value">' + (detail.street || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">联系人：</span><span class="mc-station-info-value">' + (detail.contact || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">联系方式：</span><span class="mc-station-info-value">' + (detail.phone || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">普查人员：</span><span class="mc-station-info-value">' + (detail.censusUser || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">普查日期：</span><span class="mc-station-info-value">' + (detail.censusDate || '—') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">未入网建筑物数量：</span><span class="mc-station-info-value">' + (detail.unregisteredBuildings !== undefined ? detail.unregisteredBuildings : '—') + '</span></div>\
+                <div class="mc-station-info-item" style="grid-column:span 3;border-top:1px dashed #f0f0f0;padding-top:8px;margin-top:4px;"><span class="mc-station-info-label">当前站点状态：</span><span class="mc-station-info-value">' + getChecklistStatusTag(getChecklistStatus(site.code)) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">检查记录单状态：</span><span class="mc-station-info-value">' + getChecklistStatusTag(getChecklistStatus(site.code)) + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">当前填写人：</span><span class="mc-station-info-value">' + (getInspectors(site.code).filler || '<span style="color:#bfbfbf;">—</span>') + '</span></div>\
+                <div class="mc-station-info-item"><span class="mc-station-info-label">确认进度：</span><span class="mc-station-info-value">' + getSignProgressHtml(site.code) + '</span></div>\
+              </div>\
+            </div>';
+        }
+
+        // ---- 渲染面积比对卡片 ----
+        function renderAreaCard(areaData) {
+          var orig = areaData.originalArea;
+          var curr = areaData.currentArea;
+          var diff = areaData.areaDiff;
+          var diffSign = diff >= 0 ? '+' : '';
+
+          var origCard = '\
+            <div class="mc-area-card area-original">\
+              <div class="mc-area-number">\
+                <div class="mc-area-value blue">' + fmt(orig.total) + '<span class="mc-area-unit"> ㎡</span></div>\
+                <div class="mc-area-label">原面积</div>\
+              </div>\
+              <div class="mc-area-details">\
+                <div class="mc-area-section">\
+                  <div class="mc-area-section-title">住宅分类<span class="subtotal">小计 ' + fmt(orig.residential.subtotal) + ' ㎡</span></div>\
+                  <div class="mc-area-section-items">多层 ' + fmt(orig.residential.multiLayer) + ' ㎡ | 高层 ' + fmt(orig.residential.highRise) + ' ㎡ | 公寓 ' + fmt(orig.residential.apartment) + ' ㎡</div>\
+                </div>\
+                <div class="mc-area-section">\
+                  <div class="mc-area-section-title">非住宅分类<span class="subtotal">小计 ' + fmt(orig.nonResidential.subtotal) + ' ㎡</span></div>\
+                  <div class="mc-area-section-items">非居 ' + fmt(orig.nonResidential.nonResident) + ' ㎡ | 车库 ' + fmt(orig.nonResidential.carPark) + ' ㎡ | 其他 ' + fmt(orig.nonResidential.other) + ' ㎡</div>\
+                </div>\
+              </div>\
+            </div>';
+
+          var currCard = '\
+            <div class="mc-area-card area-current">\
+              <div class="mc-area-number">\
+                <div class="mc-area-value green">' + fmt(curr.total) + '<span class="mc-area-unit"> ㎡</span></div>\
+                <div class="mc-area-label">现面积</div>\
+                <div class="mc-area-diff">差异：' + diffSign + fmt(diff) + ' ㎡</div>\
+              </div>\
+              <div class="mc-area-details">\
+                <div class="mc-area-section">\
+                  <div class="mc-area-section-title">住宅分类<span class="subtotal">小计 ' + fmt(curr.residential.subtotal) + ' ㎡</span></div>\
+                  <div class="mc-area-section-items">多层 ' + fmt(curr.residential.multiLayer) + ' ㎡ | 高层 ' + fmt(curr.residential.highRise) + ' ㎡ | 公寓 ' + fmt(curr.residential.apartment) + ' ㎡</div>\
+                </div>\
+                <div class="mc-area-section">\
+                  <div class="mc-area-section-title">非住宅分类<span class="subtotal">小计 ' + fmt(curr.nonResidential.subtotal) + ' ㎡</span></div>\
+                  <div class="mc-area-section-items">非居 ' + fmt(curr.nonResidential.nonResident) + ' ㎡ | 车库 ' + fmt(curr.nonResidential.carPark) + ' ㎡ | 其他 ' + fmt(curr.nonResidential.other) + ' ㎡</div>\
+                </div>\
+              </div>\
+            </div>';
+
+          return '<div class="mc-area-grid">' + origCard + currCard + '</div>';
+        }
+
+        // ---- 渲染普查明细表格 ----
+        function renderSurveyTable(details) {
+          var rows = '';
+          for (var i = 0; i < details.length; i++) {
+            var d = details[i];
+            var diffSign = d.diff >= 0 ? '+' : '';
+            var diffClass = d.diff >= 0 ? 'mc-text-green' : 'mc-text-red';
+            rows += '<tr data-id="' + d.id + '" data-building="' + d.building + '" data-floors="' + d.floors + '" data-heat-nature="' + d.heatNature + '" data-charge="' + d.chargeType + '" data-control="' + d.controlMode + '" data-heating="' + d.heatingType + '" data-year="' + d.buildYear + '" data-basis="' + d.basis + '" data-attachment="' + d.attachment + '" data-remark="' + d.remark + '" data-orig-area="' + fmt(d.originalArea) + '" data-curr-area="' + fmt(d.currentArea) + '" data-diff-area="' + diffSign + fmt(d.diff) + '" data-diff-rate="' + d.rate + '">' +
+              '<td class="col-center">' + d.id + '</td>' +
+              '<td>' + d.building + '</td>' +
+              '<td class="col-center">' + d.floors + '</td>' +
+              '<td>' + d.heatNature + '</td>' +
+              '<td>' + d.chargeType + '</td>' +
+              '<td class="col-center"><span class="mc-survey-status">' + d.status + '</span></td>' +
+              '<td class="col-right">' + fmt(d.originalArea) + '</td>' +
+              '<td class="col-right">' + fmt(d.currentArea) + '</td>' +
+              '<td class="col-right"><span class="' + diffClass + '">' + diffSign + fmt(d.diff) + '</span></td>' +
+              '<td class="col-right"><span class="' + diffClass + '">' + d.rate + '</span></td>' +
+              '<td>' + d.controlMode + '</td>' +
+              '<td>' + d.heatingType + '</td>' +
+              '<td>' + d.buildYear + '</td>' +
+              '<td>' + d.basis + '</td>' +
+              '<td>' + d.attachment + '</td>' +
+              '<td>' + d.remark + '</td>' +
+              '<td class="col-center"><a class="mc-action-link" href="javascript:void(0)">详情</a></td>' +
+              '</tr>';
+          }
+
+          return '\
+            <div class="mc-survey-header">\
+              <span class="mc-survey-title">普查明细</span>\
+              <span class="mc-survey-count">共 ' + details.length + ' 条</span>\
+            </div>\
+            <div class="mc-table-wrapper">\
+              <table class="mc-survey-table">\
+                <thead><tr>\
+                  <th class="col-center" style="width:50px;">序号</th>\
+                  <th style="width:120px;">楼号/建筑物名称</th>\
+                  <th class="col-center" style="width:50px;">层数</th>\
+                  <th style="width:70px;">用热性质</th>\
+                  <th style="width:90px;">收费类别</th>\
+                  <th class="col-center" style="width:80px;">普查状态</th>\
+                  <th class="col-right" style="width:110px;">原面积(㎡)</th>\
+                  <th class="col-right" style="width:110px;">现面积(㎡)</th>\
+                  <th class="col-right" style="width:110px;">变化(㎡)</th>\
+                  <th class="col-right" style="width:70px;">变化率</th>\
+                  <th style="width:80px;">控制方式</th>\
+                  <th style="width:80px;">暖气类型</th>\
+                  <th style="width:80px;">建筑年代</th>\
+                  <th style="width:80px;">普查依据</th>\
+                  <th style="width:70px;">附件</th>\
+                  <th style="width:90px;">备注</th>\
+                  <th class="col-center" style="width:60px;">操作</th>\
+                </tr></thead>\
+                <tbody>' + rows + '</tbody>\
+              </table>\
+            </div>\
+            <div class="mc-pagination">\
+              <span>第 1 - ' + details.length + ' 条 / 共 ' + details.length + ' 条</span>\
+              <div class="mc-pagination-btns">\
+                <button class="mc-page-btn" disabled>&lt;</button>\
+                <button class="mc-page-btn active">1</button>\
+                <button class="mc-page-btn">&gt;</button>\
+              </div>\
+            </div>';
+        }
+
+        // ---- 渲染整改通知单（表单/展示双态）----
+        function renderNoticePanel(site) {
+          var code = site.code;
+          var state = taskCheckState[code] && taskCheckState[code].notice;
+          var detail = siteDetailMap[code] || {};
+          var officeArea = detail.officeArea || site.dept || '裕华片区所';
+          var censusUser = detail.censusUser || '王建国';
+          var defaultNoticeNo = 'ZG-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + (code ? code.slice(-3) : '001');
+          var signState = getRectifySignState(code);
+          var status = getRectifyStatus(code);
+          var isFiller = isCurrentUserRectifyFiller(code);
+          var hasSubmitted = state && state.submitted;
+          var isCompleted = state && state.completed;
+
+          // ---- 表单态（待填写 / 填写中）----
+          if (!hasSubmitted) {
+            var formReadonly = isFiller ? '' : ' readonly style="background:#f5f5f5;cursor:not-allowed;"';
+            return '\
+              <div class="mc-record-card">\
+                <div class="mc-checklist-title-row">\
+                  <span class="mc-checklist-title">整改通知书</span>\
+                  ' + getRectifyStatusTag(status) + '\
+                  <div class="mc-checklist-actions">' +
+                    (status === 'pending_fill'
+                      ? '<button class="mc-action-btn primary" id="nr-btn-start-fill">开始填写</button>'
+                      : isFiller
+                        ? '<button class="mc-action-btn" id="nr-btn-draft">暂存</button><button class="mc-action-btn primary" id="nr-btn-submit">提交</button>'
+                        : '')
+                  + '</div>\
+                </div>' +
+                (status === 'filling' && !isFiller
+                  ? '<div class="mc-checklist-alert-info">当前整改通知书正在由 <strong>' + signState.filler + '</strong> 填写，提交后您可进行确认。</div>'
+                  : '<div class="mc-checklist-alert-info">请填写整改通知书内容并提交，提交后进入双人确认环节。</div>')
+              + '\
+                <div class="mc-notice-form" style="background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:24px;margin-top:12px;">\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">编号</div>\
+                      <input class="mc-notice-form-input" id="nf-notice-no" value="' + defaultNoticeNo + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">部门</div>\
+                      <input class="mc-notice-form-input" id="nf-dept" value="' + officeArea + '" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
+                  </div>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>整改事项</div>\
+                      <textarea class="mc-notice-form-textarea" id="nf-content" placeholder="例如：现场建筑物 1#楼为 3 层建筑物与核查表 2 层不一致" style="min-height:80px;"' + formReadonly + '></textarea>\
+                    </div>\
+                  </div>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">整改期限（工作日）</div>\
+                      <input class="mc-notice-form-input" id="nf-deadline-days" type="number" min="1" placeholder="请输入工作日数"' + formReadonly + '>\
+                    </div>\
+                  </div>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>整改意见</div>\
+                      <textarea class="mc-notice-form-textarea" id="nf-opinion" placeholder="例如：重新核实层数面积，重新编制面积核查表。" style="min-height:80px;"' + formReadonly + '></textarea>\
+                    </div>\
+                  </div>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>被检查单位人员</div>\
+                      <input class="mc-notice-form-input" id="nf-signature" value="' + censusUser + '" placeholder="面积普查的任务完成人员"' + formReadonly + '>\
+                    </div>\
+                    <div class="mc-notice-form-item">\
+                      <div class="mc-notice-form-label">检查人员</div>\
+                      <input class="mc-notice-form-input" id="nf-inspector" value="赵立成" readonly style="background:#f5f5f5;cursor:not-allowed;">\
+                    </div>\
+                  </div>\
+                  <div class="mc-notice-form-row">\
+                    <div class="mc-notice-form-item full-row">\
+                      <div class="mc-notice-form-label"><span class="mc-required">*</span>检查人员联系方式</div>\
+                      <input class="mc-notice-form-input" id="nf-phone" placeholder="请输入检查人员联系方式"' + formReadonly + '>\
+                    </div>\
+                  </div>' +
+                  (isFiller ? '\
+                  <div class="mc-notice-actions">\
+                    <button class="mc-btn mc-btn-default" id="nr-btn-draft" style="margin-right:8px;">暂存</button>\
+                    <button class="mc-btn mc-btn-primary" id="nr-btn-submit">提交整改通知</button>\
+                  </div>' : '') + '\
+                </div>\
+              </div>';
+          }
+
+          // ---- 已提交：展示态（对齐检查记录单模式）----
+          var html = '';
+
+          // 1. 标题行 + 状态Tag + 操作按钮
+          var statusTag = isCompleted
+            ? '<span class="mc-status-tag status-done">已完成</span>'
+            : '<span class="mc-status-tag status-doing">确认中</span>';
+
+          html += '<div class="mc-record-card">';
+          html += '<div class="mc-checklist-title-row">';
+          html += '<span class="mc-checklist-title">整改通知书</span>';
+          html += statusTag;
+          html += '<div class="mc-checklist-actions">';
+          if (!isCompleted) {
+            html += '<button class="mc-action-btn" id="nr-btn-edit">编辑</button>';
+          } else {
+            html += '<button class="mc-action-btn" id="nr-btn-view">查看</button>';
+          }
+          html += '<button class="mc-action-btn" id="nr-btn-export">导出通知单</button>';
+          html += '</div></div>';
+
+          // 2. 状态提示
+          if (isCompleted) {
+            html += '<div class="mc-checklist-alert-info">✅ 该整改通知书已完成确认。</div>';
+          } else {
+            html += '<div class="mc-checklist-alert-info">⏳ 整改通知书已提交，等待双人确认。</div>';
+          }
+
+          // 3. 整改通知书内容展示
+          html += '\
+            <div class="mc-notice-display-card" style="margin-top:12px;">\
+              <div class="mc-notice-display-grid">\
+                <div class="mc-notice-display-item"><span>编号</span>' + (state.noticeNo || '—') + '</div>\
+                <div class="mc-notice-display-item"><span>部门</span>' + (state.dept || detail.officeArea || site.dept) + '</div>\
+              </div>\
+              <div class="mc-notice-display-section">\
+                <div class="mc-notice-display-section-title">整改事项</div>\
+                <div class="mc-notice-display-section-body">' + (state.content || '—') + '</div>\
+              </div>\
+              <div class="mc-notice-display-section">\
+                <div class="mc-notice-display-section-title">整改意见</div>\
+                <div class="mc-notice-display-section-body">' + (state.opinion ? state.opinion.replace(/\n/g, '<br>') : '—') + '</div>\
+              </div>\
+              <div class="mc-notice-display-footer-grid">\
+                <div class="mc-notice-display-item"><span>整改期限（工作日）</span>' + (state.deadlineDays || '—') + '天</div>\
+                <div class="mc-notice-display-item"><span>被检查单位人员</span>' + (state.inspectedPerson || '—') + '</div>\
+                <div class="mc-notice-display-item"><span>检查人员</span>' + (state.inspector || '赵立成') + '</div>\
+                <div class="mc-notice-display-item"><span>检查人员联系方式</span>' + (state.phone || '—') + '</div>\
+              </div>\
+            </div>';
+
+          html += '</div>'; // mc-record-card
+
+          // 4. 确认区（对齐检查记录单模式）
+          html += renderRectifyCountersignArea(code, status, signState, isFiller, state);
+
+          // 5. 操作记录
+          html += renderRectifyOperationLog(code);
+
+          return html;
+        }
+
+        // ---- 渲染整改通知书确认区 ----
+        function renderRectifyCountersignArea(code, status, signState, isFiller, noticeState) {
+          if (status === 'pending_fill' || status === 'filling') {
+            if (status === 'filling' && !isFiller) {
+              // 非填写人可见确认区预览
+            } else {
+              return '';
+            }
+          }
+
+          var isReadonly = (status === 'completed');
+          var isCountersigning = (status === 'countersigning' || status === 'submitted');
+          var showButtons = !isReadonly && isCountersigning;
+
+          // 检查当前用户是否还有待确认
+          var myStatus = null;
+          if (showButtons) {
+            myStatus = getMyRectifyStatus(code);
+          }
+
+          var html = '';
+          html += '<div class="mc-notice-countersign-card">';
+          html += '<div class="mc-notice-countersign-title">整改通知书确认</div>';
+          html += '<div class="mc-notice-countersign-alert">' +
+            '1. 填写人提交后自动视为已同意。<br>' +
+            '2. 另一名检查人确认同意后，整改通知书确认完成。<br>' +
+            '3. 确认意见为选填。' +
+            '</div>';
+
+          // 确认表格
+          html += '<div class="mc-table-wrapper"><table class="mc-countersign-table" style="min-width:440px;"><thead><tr>' +
+            '<th style="width:100px;">检查人</th>' +
+            '<th style="width:90px;text-align:center;">状态</th>' +
+            '<th style="width:120px;">确认时间</th>' +
+            '<th style="width:auto;">意见</th>' +
+            '</tr></thead><tbody>';
+
+          for (var i = 0; i < signState.inspectors.length; i++) {
+            var ins = signState.inspectors[i];
+            var isMe = ins.name === mockRectifyData.currentUser;
+            var nameDisplay = ins.name + (isMe ? ' <span class="mc-user-badge is-me">您</span>' : '');
+
+            // 填写人：自动已同意
+            var isFillerPerson = (ins.name === signState.filler);
+            var statusClass, statusText;
+            if (isFillerPerson && ins.status === 'pending') {
+              statusText = '已自动同意';
+              statusClass = 'mc-status-tag status-done';
+              ins.status = 'agreed';
+              ins.time = ins.time || new Date().toISOString().slice(0, 16).replace('T', ' ');
+            } else {
+              statusClass = 'mc-status-tag ' + (ins.status === 'agreed' ? 'status-done' : ins.status === 'disagreed' ? 'status-fail' : 'status-pending');
+              statusText = ins.status === 'agreed' ? '已同意' : ins.status === 'disagreed' ? '不同意' : '待确认';
+            }
+            var timeDisplay = ins.time || '<span style="color:#bfbfbf;">—</span>';
+            var opinionDisplay = ins.opinion || '<span style="color:#bfbfbf;">—</span>';
+
+            html += '<tr>' +
+              '<td>' + nameDisplay + '</td>' +
+              '<td style="text-align:center;"><span class="' + statusClass + '">' + statusText + '</span></td>' +
+              '<td>' + timeDisplay + '</td>' +
+              '<td>' + opinionDisplay + '</td>' +
+              '</tr>';
+          }
+
+          html += '</tbody></table></div>';
+
+          // 确认意见输入区（仅非填写人）
+          if (showButtons && myStatus && myStatus.status === 'pending' && myStatus.name !== signState.filler) {
+            html += '<div class="mc-countersign-opinion">';
+            html += '<label>确认意见：</label>';
+            html += '<textarea id="nr-cs-opinion" placeholder="请输入确认意见（选填）。"></textarea>';
+            html += '</div>';
+          }
+
+          // 底部确认按钮（仅非填写人）
+          if (showButtons && myStatus && myStatus.status === 'pending' && myStatus.name !== signState.filler) {
+            html += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">';
+            html += '<button class="mc-cs-btn-reject" id="nr-btn-cs-disagree" style="padding:6px 20px;">不同意</button>';
+            html += '<button class="mc-cs-btn-agree" id="nr-btn-cs-agree" style="padding:6px 20px;">同意</button>';
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 渲染整改通知书操作记录 ----
+        function renderRectifyOperationLog(code) {
+          var signState = getRectifySignState(code);
+          var ops = signState.operations;
+
+          var html = '<div class="mc-operation-card">';
+          html += '<div class="mc-operation-title">操作记录</div>';
+
+          if (ops.length === 0) {
+            html += '<div class="mc-operation-empty">暂无操作记录</div>';
+          } else {
+            html += '<div class="mc-operation-timeline">';
+            for (var i = ops.length - 1; i >= 0; i--) {
+              var op = ops[i];
+              var isLatest = (i === ops.length - 1);
+              html += '<div class="mc-operation-item' + (isLatest ? ' op-active' : '') + '">';
+              html += '<span class="mc-operation-type">' + op.type + '</span>';
+              html += '<span class="mc-operation-time">' + op.time + '</span>';
+              html += '<div class="mc-operation-desc">' + op.operator + '：' + op.desc + '</div>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+
+          html += '</div>';
+          return html;
+        }
+
+        // ---- 双专家确认辅助函数 ----
+        // 从Store读取签名状态渲染标签
+        function renderSignTags(siteCode) {
+          var cr = window.PrototypeStore ? window.PrototypeStore.getCheckRecord(siteCode) : null;
+          var sigs = (cr && cr.signatures) || [];
+          if (sigs.length === 0) return '<span class="mc-status-tag pending" style="margin-left:4px;">待确认</span>';
+          var allAgreed = sigs.every(function(s){return s.status==='已同意'});
+          if (allAgreed) return '<span class="mc-status-tag done" style="margin-left:4px;">已确认</span>';
+          return sigs.map(function(s){
+            var sc = s.status==='已同意'?'done':s.status==='不同意'?'fail':'pending';
+            return '<span class="mc-status-tag ' + sc + '" style="margin-left:4px;">' + s.expertName + '：' + s.status + '</span>';
+          }).join('');
+        }
+
+        function renderConfirmTags(type, confirmState) {
+          if (!confirmState) return '';
+          var tags = '';
+          if (confirmState.confirmed) {
+            tags += '<span class="mc-status-tag done" style="margin-left:4px;">已生效</span>';
+          } else {
+            if (confirmState.expert1) {
+              tags += '<span class="mc-status-tag progress">第一专家已确认</span>';
+            } else {
+              tags += '<span class="mc-status-tag pending">待第一专家确认</span>';
+            }
+            if (confirmState.expert2) {
+              tags += '<span class="mc-status-tag progress" style="margin-left:4px;">第二专家已确认</span>';
+            } else {
+              tags += '<span class="mc-status-tag pending" style="margin-left:4px;">待第二专家确认</span>';
+            }
+          }
+          return tags;
+        }
+
+        function renderConfirmSection(type, confirmState, site) {
+          if (!confirmState) return '';
+          if (confirmState.confirmed) {
+            return '\
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;font-size:13px;color:#52c41a;">\
+                <span>✅ 双专家已确认，已生效</span>\
+              </div>';
+          }
+          var expert1Done = confirmState.expert1;
+          var expert2Done = confirmState.expert2;
+          var canConfirm1 = !expert1Done;
+          var canConfirm2 = expert1Done && !expert2Done;
+
+          var btns = '';
+          if (canConfirm1) {
+            btns += '<button class="mc-btn mc-btn-primary" id="mc-confirm-' + type + '-1" style="padding:4px 16px;font-size:13px;">第一专家确认</button>';
+          }
+          if (canConfirm2) {
+            btns += '<button class="mc-btn mc-btn-primary" id="mc-confirm-' + type + '-2" style="padding:4px 16px;font-size:13px;margin-left:8px;">第二专家确认</button>';
+          }
+
+          var info = '';
+          if (expert1Done) {
+            info = '<span style="color:#1890ff;">✅ 第一专家（赵立成）已确认</span>';
+          }
+
+          return '\
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:#595959;">\
+              <span style="font-weight:500;">双专家确认：</span>' + info + btns + '\
+            </div>';
+        }
+
+        // ---- 动态Tab系统渲染 ----
+        function renderTabSystem(site, areaData, surveyData) {
+          var siteState = taskCheckState[site.code] || {};
+          var clState = siteState.checklist || {};
+          var noticeState = siteState.notice || {};
+
+          // 判断是否显示整改通知单Tab
+          var showNotice = clState.submitted && clState.conclusion === '不合格' || noticeState.submitted;
+
+          // 判断是否显示实测复核Tab（普查依据包含"实测"）
+          var surveyDetails = surveyDataMap[site.code] || [];
+          var hasMeasured = false;
+          for (var mi = 0; mi < surveyDetails.length; mi++) {
+            if (surveyDetails[mi].basis && surveyDetails[mi].basis.indexOf('实测') !== -1) {
+              hasMeasured = true;
+              break;
+            }
+          }
+
+          var tabsHtml = '<div class="mc-tab-item active" data-tab="census">普查信息</div>';
+          tabsHtml += '<div class="mc-tab-item" data-tab="checklist">检查记录单</div>';
+          if (showNotice) {
+            tabsHtml += '<div class="mc-tab-item" data-tab="notice">整改通知单</div>';
+          }
+          if (hasMeasured) {
+            tabsHtml += '<div class="mc-tab-item" data-tab="verification">实测复核</div>';
+          }
+
+          // 面板
+          var censusPanel = '\
+                <div class="mc-tab-panel active" id="mc-tab-census">\
+                  <div class="mc-subtab-header">\
+                    <div class="mc-subtab-item active" data-subtab="summary">汇总表</div>\
+                    <div class="mc-subtab-item" data-subtab="floorplan">平面图</div>\
+                    <div class="mc-subtab-item" data-subtab="facade">门头图片</div>\
+                  </div>\
+                  <div class="mc-subtab-panel active" id="mc-subtab-summary">\
+                    ' + (areaData ? renderAreaCard(areaData) : '') + '\
+                    ' + renderSurveyTable(surveyData) + '\
+                  </div>\
+                  <div class="mc-subtab-panel" id="mc-subtab-floorplan">\
+                    <div class="mc-placeholder-box">\
+                      <div class="mc-placeholder-icon">📐</div>\
+                      <div class="mc-placeholder-title">' + site.name + ' 平面图预览</div>\
+                      <div class="mc-placeholder-desc">用热范围平面图当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>\
+                      <div class="mc-placeholder-card-group">\
+                        <div class="mc-placeholder-card">平面图-1F</div>\
+                        <div class="mc-placeholder-card">平面图-2F</div>\
+                        <div class="mc-placeholder-card">平面图-3F</div>\
+                      </div>\
+                    </div>\
+                  </div>\
+                  <div class="mc-subtab-panel" id="mc-subtab-facade">\
+                    <div class="mc-placeholder-box">\
+                      <div class="mc-placeholder-icon">📷</div>\
+                      <div class="mc-placeholder-title">' + site.name + ' 门头图片预览</div>\
+                      <div class="mc-placeholder-desc">商业门头图片当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>\
+                      <div class="mc-placeholder-card-group">\
+                        <div class="mc-placeholder-card">门头-东侧</div>\
+                        <div class="mc-placeholder-card">门头-南侧</div>\
+                        <div class="mc-placeholder-card">门头-西侧</div>\
+                      </div>\
+                    </div>\
+                  </div>\
+                </div>';
+
+          var checklistPanel = '<div class="mc-tab-panel" id="mc-tab-checklist">' + renderChecklistPanel(site) + '</div>';
+          var noticePanel = showNotice ? '<div class="mc-tab-panel" id="mc-tab-notice">' + renderNoticePanel(site) + '</div>' : '';
+          var verificationPanel = hasMeasured ? '<div class="mc-tab-panel" id="mc-tab-verification">' + renderVerificationPanel(site) + '</div>' : '';
+
+          return '\
+            <div class="mc-tab-card">\
+              <div class="mc-tab-header">' + tabsHtml + '</div>\
+              <div class="mc-tab-body">' + censusPanel + checklistPanel + noticePanel + verificationPanel + '</div>\
+            </div>';
+        }
+
+        // ---- 渲染实测复核面板 ----
+        function renderVerificationPanel(site) {
+          var surveyDetails = surveyDataMap[site.code] || [];
+          var measuredBuildings = [];
+          for (var i = 0; i < surveyDetails.length; i++) {
+            var d = surveyDetails[i];
+            if (d.basis && d.basis.indexOf('实测') !== -1) {
+              measuredBuildings.push(d);
+            }
+          }
+          if (measuredBuildings.length === 0) {
+            return '<div class="mc-record-card" style="text-align:center;padding:60px 20px;"><div style="font-size:14px;color:#8c8c8c;">该站点无建筑物需实测复核</div></div>';
+          }
+
+          // 从状态读取已有数据
+          var verState = taskCheckState[site.code] && taskCheckState[site.code].verification;
+          if (!verState) verState = {};
+
+          var rows = '';
+          for (var j = 0; j < measuredBuildings.length; j++) {
+            var b = measuredBuildings[j];
+            var saved = verState[b.id] || {};
+            var photoName = saved.photoName || '';
+            var recheckArea = saved.recheckArea || '';
+            // 计算已有数据的误差状态（使用calcRecheckTolerance）
+            var tolHtml = '<span style="color:#8c8c8c;font-size:11px;">输入后自动计算</span>';
+            if (recheckArea) {
+              var tol = calcRecheckTolerance(b.currentArea, parseFloat(recheckArea));
+              if (tol && tol.valid) {
+                tolHtml = renderToleranceResult(tol);
+              }
+            }
+            rows += '\
+              <tr>\
+                <td style="text-align:center;">' + (j + 1) + '</td>\
+                <td>' + b.building + '</td>\
+                <td style="text-align:center;">' + b.floors + '</td>\
+                <td>' + b.heatNature + '</td>\
+                <td style="text-align:right;">' + fmt(b.currentArea) + '</td>\
+                <td style="text-align:center;">' + b.basis + '</td>\
+                <td>\
+                  <div class="mc-ver-upload-wrap">\
+                    <input type="file" accept="image/*" class="mc-ver-file-input" data-building="' + b.id + '" id="mc-ver-file-' + b.id + '" style="display:none;">\
+                    <button class="mc-btn mc-btn-default mc-ver-upload-btn" data-building="' + b.id + '" style="padding:2px 10px;font-size:12px;">选择照片</button>\
+                    <span class="mc-ver-file-name" id="mc-ver-name-' + b.id + '" style="margin-left:6px;font-size:12px;color:#8c8c8c;">' + (photoName || '未选择') + '</span>\
+                  </div>\
+                </td>\
+                <td style="text-align:center;">\
+                  <input class="mc-ver-area-input" id="mc-ver-area-' + b.id + '" type="text" inputmode="decimal" placeholder="请输入复查面积" value="' + recheckArea + '" style="width:100px;padding:4px 6px;border:1px solid #1890ff;border-radius:4px;font-size:13px;background:#f0f8ff;">\
+                </td>\
+                <td style="text-align:center;min-width:160px;" id="mc-ver-tol-' + b.id + '">' + tolHtml + '</td>\
+              </tr>';
+          }
+
+          return '\
+            <div class="mc-record-card">\
+              <div style="font-size:16px;font-weight:600;color:#262626;margin-bottom:12px;">实测复核</div>\
+              <div style="font-size:13px;color:#8c8c8c;margin-bottom:16px;">以下建筑物普查依据为"实测核实"，需上传实测复核照片并填写复查面积</div>\
+              <div class="mc-table-wrapper">\
+              <table class="mc-survey-table" style="min-width:840px;table-layout:fixed;">\
+                <thead><tr>\
+                  <th style="width:40px;text-align:center;">序号</th>\
+                  <th style="width:140px;">建筑物名称</th>\
+                  <th style="width:40px;text-align:center;">层数</th>\
+                  <th style="width:60px;">用热性质</th>\
+                  <th style="width:90px;text-align:right;">普查面积(㎡)</th>\
+                  <th style="width:70px;text-align:center;">普查依据</th>\
+                  <th style="width:180px;">实测复核照片</th>\
+                  <th style="width:120px;text-align:center;">复核面积(㎡)</th>\
+                  <th style="width:100px;text-align:center;">误差</th>\
+                </tr></thead>\
+                <tbody>' + rows + '</tbody>\
+              </table>\
+              </div>\
+              <div style="margin-top:10px;padding:8px 12px;background:#fafafa;border-radius:6px;font-size:12px;color:#666;display:flex;gap:16px;">\
+                <span style="font-weight:600;">误差标准：</span>\
+                <span>≤500㎡: ±3%</span>\
+                <span>500~2000㎡: ±2%</span>\
+                <span>&gt;2000㎡: ±60㎡</span>\
+              </div>\
+              </div>\
+            </div>';
+        }
+
+        // ---- Tab切换工具函数 ----
+        function switchMainTab(tabId) {
+          var tabs = document.querySelectorAll('.mc-tab-item');
+          var panels = document.querySelectorAll('.mc-tab-panel');
+          tabs.forEach(function (t) {
+            t.classList.toggle('active', t.getAttribute('data-tab') === tabId);
+          });
+          panels.forEach(function (p) {
+            p.classList.toggle('active', p.id === 'mc-tab-' + tabId);
+          });
+        }
+
+        // ---- 主渲染函数 ----
+        function renderMyTaskCheckPage() {
+          var task = myCheckTask;
+          var sites = myCheckSites;
+          var currentSite = sites[0]; // 默认选中第一个站点
+          var stats = calcSiteStats(sites);
+
+          // 任务基本信息卡片（含标题、状态标签、返回按钮）
+          var infoCard = '\
+            <div class="mc-info-card">\
+              <div class="mc-info-header">\
+                <div class="mc-info-title-wrap">\
+                  <span class="mc-info-title">' + task.name + '</span>\
+                  <span class="mc-status-tag ' + statusTagClass(task.status) + '">' + task.status + '</span>\
+                </div>\
+                <div style="display:flex;align-items:center;gap:12px;">' + renderUserSwitcherHtml() + '<a class="mc-btn" href="./my-task-list.html">返回我的任务</a></div>\
+              </div>\
+              <div class="mc-info-grid">\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">所属专家：</span>\
+                  <span class="mc-info-value">' + task.expert + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">所属年度：</span>\
+                  <span class="mc-info-value">' + task.year + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">任务状态：</span>\
+                  <span class="mc-info-value"><span class="mc-status-tag ' + statusTagClass(task.status) + '">' + task.status + '</span></span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">任务周期：</span>\
+                  <span class="mc-info-value">' + task.start + ' 至 ' + task.end + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">下发时间：</span>\
+                  <span class="mc-info-value">' + task.issuedAt + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">当前进度：</span>\
+                  <span class="mc-info-value mc-font-highlight">' + task.progress + '</span>\
+                </div>\
+                <div class="mc-info-item">\
+                  <span class="mc-info-label">任务执行状态：</span>\
+                  <span class="mc-info-value">' + (task.executionStatus || '正常') + '</span>\
+                </div>\
+              </div>\
+            </div>';
+
+          // 站点切换卡片（独立卡片）
+          var stationTabs = '<div class="mc-station-card">';
+          stationTabs += '\
+            <div class="mc-station-card-header">\
+              <span class="mc-station-card-title">检查站点</span>\
+              <div class="mc-station-card-stats">\
+                <span class="mc-stat-item">当前进度：<strong>' + task.progress + '</strong></span>\
+                <span class="mc-stat-item mc-stat-done">已检查：<strong>' + stats.done + '</strong></span>\
+                <span class="mc-stat-item mc-stat-doing">检查中：<strong>' + stats.doing + '</strong></span>\
+                <span class="mc-stat-item mc-stat-pending">待整改：<strong>' + (stats.pendingRectify + stats.sentRectify) + '</strong></span>\
+                <span class="mc-stat-item mc-stat-todo">待检查：<strong>' + stats.todo + '</strong></span>\
+              </div>\
+            </div>';
+          stationTabs += '<div class="mc-station-card-tabs">';
+          for (var i = 0; i < sites.length; i++) {
+            var s = sites[i];
+            var activeClass = i === 0 ? ' active' : '';
+            stationTabs += '<div class="mc-station-tab' + activeClass + '" data-site-code="' + s.code + '">' + s.name + '<span class="mc-station-status ' + stationStatusClass(s.checkStatus) + '">' + s.checkStatus + '</span></div>';
+          }
+          stationTabs += '</div>';
+          stationTabs += renderSiteInfoPanel(currentSite);
+          stationTabs += '</div>';
+
+          // 内容Tab系统 + 面板
+          var areaData = areaDataMap[currentSite.code];
+          var surveyData = surveyDataMap[currentSite.code] || [];
+
+          var tabSystem = renderTabSystem(currentSite, areaData, surveyData);
+          var detailModal = '\
+            <div class="mc-modal-overlay" id="mc-detail-modal">\
+              <div class="mc-modal-container">\
+                <div class="mc-modal-header">\
+                  <span class="mc-modal-title" id="mc-modal-building-title">楼栋详情</span>\
+                  <span class="mc-modal-close" id="mc-modal-close-btn">×</span>\
+                </div>\
+                <div class="mc-modal-content">\
+                  <div class="mc-modal-grid">\
+                    <div class="mc-modal-item"><span class="mc-modal-label">楼号名称：</span><span class="mc-modal-value" id="mc-modal-field-name">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">层数：</span><span class="mc-modal-value" id="mc-modal-field-floors">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">建筑年代：</span><span class="mc-modal-value" id="mc-modal-field-year">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">用热性质：</span><span class="mc-modal-value" id="mc-modal-field-type">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">收费类别：</span><span class="mc-modal-value" id="mc-modal-field-charge">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">控制方式：</span><span class="mc-modal-value" id="mc-modal-field-control">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">普查依据：</span><span class="mc-modal-value-text" id="mc-modal-field-basis">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">暖气类型：</span><span class="mc-modal-value" id="mc-modal-field-heating">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">原面积(㎡)：</span><span class="mc-modal-value" id="mc-modal-field-prev-area">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">现面积(㎡)：</span><span class="mc-modal-value" id="mc-modal-field-curr-area">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">面积变化(㎡)：</span><span class="mc-modal-value" id="mc-modal-field-diff-area">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">变化率：</span><span class="mc-modal-value" id="mc-modal-field-diff-rate">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">依据附件：</span><span class="mc-modal-value-text" id="mc-modal-field-attachments">—</span></div>\
+                    <div class="mc-modal-item"><span class="mc-modal-label">备注：</span><span class="mc-modal-value-text" id="mc-modal-field-remark">—</span></div>\
+                  </div>\
+                  <div class="mc-modal-divider">\
+                    <div style="font-size:15px;font-weight:500;margin-bottom:12px;">变更详情</div>\
+                    <table class="mc-modal-table">\
+                      <thead><tr>\
+                        <th style="width:60px;">序号</th>\
+                        <th>热费卡号</th>\
+                        <th>普查面积</th>\
+                        <th>普查依据</th>\
+                        <th>附件</th>\
+                        <th>备注</th>\
+                      </tr></thead>\
+                      <tbody id="mc-modal-change-body">\
+                        <tr id="mc-modal-change-row">\
+                          <td>1</td>\
+                          <td id="mc-modal-table-card-no">—</td>\
+                          <td id="mc-modal-table-area">—</td>\
+                          <td id="mc-modal-table-basis">—</td>\
+                          <td id="mc-modal-table-attachment">—</td>\
+                          <td id="mc-modal-table-remark">—</td>\
+                        </tr>\
+                      </tbody>\
+                    </table>\
+                  </div>\
+                </div>\
+                <div class="mc-modal-footer">\
+                  <button class="mc-btn" id="mc-modal-cancel-btn">取消</button>\
+                </div>\
+              </div>\
+            </div>';
+
+          // 底部操作栏（动态渲染）
+          var actionBar = renderBottomBar(currentSite);
+
+          // Toast容器
+          var toast = '<div class="mc-toast" id="mc-toast"><span class="mc-toast-icon"></span><span id="mc-toast-text"></span></div>';
+
+          // 检查记录单弹窗（隐藏）
+          var checklistModal = '\
+            <div class="mc-modal-overlay" id="mc-checklist-modal" style="display:none;z-index:1000;">\
+              <div class="mc-modal-container" style="width:820px;max-height:90vh;overflow-y:auto;">\
+                <div class="mc-modal-header">\
+                  <span class="mc-modal-title">检查记录单</span>\
+                  <span class="mc-modal-close" id="mc-modal-checklist-close">×</span>\
+                </div>\
+                <div class="mc-modal-content" id="mc-checklist-modal-content">\
+                  ' + renderChecklistModalContent(currentSite) + '\
+                </div>\
+              </div>\
+            </div>';
+
+          return infoCard + stationTabs + tabSystem + detailModal + actionBar + toast + checklistModal;
+        }
+
+        // ---- 打开检查记录单弹窗 ----
+        function openChecklistModal(siteCode, readOnly) {
+          var modal = document.getElementById('mc-checklist-modal');
+          var content = document.getElementById('mc-checklist-modal-content');
+          if (!modal || !content) return;
+          // 查找站点数据
+          var site = null;
+          for (var i = 0; i < myCheckSites.length; i++) {
+            if (myCheckSites[i].code === siteCode) { site = myCheckSites[i]; break; }
+          }
+          if (!site) return;
+          // 渲染弹窗内容（复用原有 renderChecklistModalContent）
+          content.innerHTML = renderChecklistModalContent(site);
+          modal.style.display = 'flex';
+          // 绑定radio事件
+          if (typeof bindChecklistRadioEvents === 'function') bindChecklistRadioEvents();
+          // 只读模式
+          if (readOnly) {
+            content.querySelectorAll('input,textarea,button').forEach(function(el) {
+              if (el.id !== 'mc-modal-checklist-close') el.disabled = true;
+            });
+          }
+        }
+
+        // ---- 事件绑定 ----
+        function bindMyTaskCheckEvents() {
+          // ---- 用户切换 ----
+          var userSelect = document.getElementById('mc-user-select');
+          if (userSelect) {
+            userSelect.addEventListener('change', function () {
+              mockCheckData.currentUser = this.value;
+              // 重新渲染当前站点
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              if (activeTab) activeTab.click();
+            });
+          }
+
+          // ---- 检查记录单按钮事件委托 ----
+          document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[id^="mc-btn-"]');
+            if (!btn) return;
+            var id = btn.id;
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            if (!siteCode) return;
+
+            if (id === 'mc-btn-start-fill') {
+              // 开始填写
+              var signState = getInspectors(siteCode);
+              if (signState.filler && signState.filler !== mockCheckData.currentUser) {
+                showToast('warning', '⚠', '当前检查记录单正在由 ' + signState.filler + ' 填写');
+                return;
+              }
+              signState.filler = mockCheckData.currentUser;
+              addOperation(siteCode, mockCheckData.currentUser, '开始填写', mockCheckData.currentUser + ' 开始填写检查记录单');
+              // 打开填表弹窗
+              openChecklistModal(siteCode);
+            } else if (id === 'mc-btn-edit-checklist' || id === 'mc-btn-submit-checklist') {
+              openChecklistModal(siteCode);
+            } else if (id === 'mc-btn-view-checklist') {
+              var cl = taskCheckState[siteCode] && taskCheckState[siteCode].checklist;
+              if (cl && cl.submitted) {
+                openChecklistModal(siteCode, true);
+              }
+            } else if (id === 'mc-btn-draft-checklist') {
+              showToast('info', '•', '已暂存');
+              addOperation(siteCode, mockCheckData.currentUser, '暂存', mockCheckData.currentUser + ' 暂存了检查记录单');
+            }
+          });
+
+          // ---- 确认按钮事件委托 ----
+          document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-cs-action]');
+            if (!btn) return;
+            var action = btn.getAttribute('data-cs-action');
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            if (!siteCode) return;
+
+            var signState = getInspectors(siteCode);
+            var myStatus = getMyInspectorStatus(siteCode);
+            if (!myStatus) return;
+
+            // 填写人不需要确认，跳过
+            if (myStatus.name === signState.filler) {
+              showToast('warning', '⚠', '您作为填写人已自动同意');
+              return;
+            }
+
+            if (action === 'agree') {
+              myStatus.status = 'agreed';
+              myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              var opinion = document.getElementById('mc-cs-opinion');
+              myStatus.opinion = opinion ? opinion.value.trim() : '';
+              addOperation(siteCode, mockCheckData.currentUser, '同意', mockCheckData.currentUser + ' 同意了确认' + (myStatus.opinion ? '，意见：' + myStatus.opinion : ''));
+
+              // 填写人已自动同意，另一人同意后即完成
+              if (!taskCheckState[siteCode].checklist) taskCheckState[siteCode].checklist = {};
+              taskCheckState[siteCode].checklist.completed = true;
+              addOperation(siteCode, '系统', '任务完成', '全部同意，当前站点已完成');
+              showToast('success', '✓', '确认完成，当前站点已完成');
+              // 刷新
+              var activeTabEl = document.querySelector('.mc-station-tab.active');
+              if (activeTabEl) activeTabEl.click();
+            } else if (action === 'reject') {
+              var opinion = document.getElementById('mc-cs-opinion');
+              var reason = opinion ? opinion.value.trim() : '';
+              myStatus.status = 'disagreed';
+              myStatus.time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+              myStatus.opinion = reason;
+              addOperation(siteCode, mockCheckData.currentUser, '不同意', mockCheckData.currentUser + ' 不同意确认' + (reason ? '，意见：' + reason : ''));
+              showToast('success', '✓', mockCheckData.currentUser + ' 已操作');
+              // 刷新
+              var activeTabEl = document.querySelector('.mc-station-tab.active');
+              if (activeTabEl) activeTabEl.click();
+            }
+          });
+
+          // 站点Tab切换
+          // 站点Tab切换
+          var stationTabs = document.querySelectorAll('.mc-station-tab');
+          stationTabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+              stationTabs.forEach(function (t) { t.classList.remove('active'); });
+              tab.classList.add('active');
+
+              var siteCode = tab.getAttribute('data-site-code');
+              var site = null;
+              for (var i = 0; i < myCheckSites.length; i++) {
+                if (myCheckSites[i].code === siteCode) {
+                  site = myCheckSites[i];
+                  break;
+                }
+              }
+              if (!site) return;
+
+              // 重新渲染内容区
+              var areaData = areaDataMap[siteCode];
+              var surveyData = surveyDataMap[siteCode] || [];
+
+              var censusPanel = document.getElementById('mc-tab-census');
+              var checklistPanel = document.getElementById('mc-tab-checklist');
+              var noticePanel = document.getElementById('mc-tab-notice');
+              var siteInfoPanel = document.getElementById('mc-station-info-panel');
+
+              if (siteInfoPanel) {
+                siteInfoPanel.outerHTML = renderSiteInfoPanel(site);
+              }
+              if (censusPanel) {
+                censusPanel.innerHTML = '\
+                  <div class="mc-subtab-header">\
+                    <div class="mc-subtab-item active" data-subtab="summary">汇总表</div>\
+                    <div class="mc-subtab-item" data-subtab="floorplan">平面图</div>\
+                    <div class="mc-subtab-item" data-subtab="facade">门头图片</div>\
+                  </div>\
+                  <div class="mc-subtab-panel active" id="mc-subtab-summary">\
+                    ' + (areaData ? renderAreaCard(areaData) : '') + '\
+                    ' + renderSurveyTable(surveyData) + '\
+                  </div>\
+                  <div class="mc-subtab-panel" id="mc-subtab-floorplan">\
+                    <div class="mc-placeholder-box">\
+                      <div class="mc-placeholder-icon">📐</div>\
+                      <div class="mc-placeholder-title">' + site.name + ' 平面图预览</div>\
+                      <div class="mc-placeholder-desc">用热范围平面图当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>\
+                      <div class="mc-placeholder-card-group">\
+                        <div class="mc-placeholder-card">平面图-1F</div>\
+                        <div class="mc-placeholder-card">平面图-2F</div>\
+                        <div class="mc-placeholder-card">平面图-3F</div>\
+                      </div>\
+                    </div>\
+                  </div>\
+                  <div class="mc-subtab-panel" id="mc-subtab-facade">\
+                    <div class="mc-placeholder-box">\
+                      <div class="mc-placeholder-icon">📷</div>\
+                      <div class="mc-placeholder-title">' + site.name + ' 门头图片预览</div>\
+                      <div class="mc-placeholder-desc">商业门头图片当前以静态占位展示，后续可替换为真实图片、附件列表或轮播查看</div>\
+                      <div class="mc-placeholder-card-group">\
+                        <div class="mc-placeholder-card">门头-东侧</div>\
+                        <div class="mc-placeholder-card">门头-南侧</div>\
+                        <div class="mc-placeholder-card">门头-西侧</div>\
+                      </div>\
+                    </div>\
+                  </div>';
+              }
+              if (checklistPanel) {
+                checklistPanel.innerHTML = renderChecklistPanel(site);
+              }
+              if (noticePanel) {
+                noticePanel.innerHTML = renderNoticePanel(site);
+              }
+
+              // 更新弹窗内容
+              var checklistModalContent = document.getElementById('mc-checklist-modal-content');
+              if (checklistModalContent) {
+                checklistModalContent.innerHTML = renderChecklistModalContent(site);
+              }
+
+              // 重新绑定子事件
+              bindSubTabEvents();
+              bindModalEvents();
+              bindChecklistEvents();
+              bindNoticeEvents();
+              bindConfirmEvents();
+              bindVerificationEvents();
+            });
+          });
+
+          // 内容Tab切换
+          var tabItems = document.querySelectorAll('.mc-tab-item');
+          var tabPanels = document.querySelectorAll('.mc-tab-panel');
+          tabItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+              tabItems.forEach(function (t) { t.classList.remove('active'); });
+              tabPanels.forEach(function (p) { p.classList.remove('active'); });
+              item.classList.add('active');
+              var targetPanel = document.getElementById('mc-tab-' + item.dataset.tab);
+              if (targetPanel) targetPanel.classList.add('active');
+            });
+          });
+
+          // 子Tab切换
+          bindSubTabEvents();
+
+          // 详情弹窗
+          bindModalEvents();
+
+          // 检查记录单事件
+          bindChecklistEvents();
+
+          // 整改通知单事件
+          bindNoticeEvents();
+
+          // 确认事件
+          bindConfirmEvents();
+
+          // 实测复核事件
+          bindVerificationEvents();
+
+          // 开始检查按钮
+          var startBtn = document.getElementById('mc-btn-start-check');
+          if (startBtn) {
+            startBtn.addEventListener('click', function () {
+              showToast('success', '✓', '已开始检查，请逐项填写检查记录单');
+            });
+          }
+
+          // 返回按钮
+          var backBtn = document.getElementById('mc-btn-back');
+          if (backBtn) {
+            backBtn.addEventListener('click', function () {
+              window.location.href = './my-task-list.html';
+            });
+          }
+        }
+
+        // ---- 子Tab切换 ----
+        function bindSubTabEvents() {
+          var subtabItems = document.querySelectorAll('.mc-subtab-item');
+          var subtabPanels = document.querySelectorAll('.mc-subtab-panel');
+          subtabItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+              subtabItems.forEach(function (t) { t.classList.remove('active'); });
+              subtabPanels.forEach(function (p) { p.classList.remove('active'); });
+              item.classList.add('active');
+              var targetPanel = document.getElementById('mc-subtab-' + item.dataset.subtab);
+              if (targetPanel) targetPanel.classList.add('active');
+            });
+          });
+        }
+
+        // ---- 详情弹窗 ----
+        function bindModalEvents() {
+          var modal = document.getElementById('mc-detail-modal');
+          var closeBtn = document.getElementById('mc-modal-close-btn');
+          var cancelBtn = document.getElementById('mc-modal-cancel-btn');
+
+          function closeModal() {
+            if (modal) modal.style.display = 'none';
+          }
+
+          if (closeBtn) closeBtn.addEventListener('click', closeModal);
+          if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+          if (modal) modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+          });
+
+          // 详情链接
+          document.querySelectorAll('.mc-action-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+              var row = this.closest('tr');
+              if (!row || !modal) return;
+
+              var getAttr = function (name) {
+                return row.getAttribute('data-' + name) || '—';
+              };
+
+              var setVal = function (id, val) {
+                var el = document.getElementById(id);
+                if (el) el.textContent = val;
+              };
+              var setStyle = function (id, prop, val) {
+                var el = document.getElementById(id);
+                if (el) el.style[prop] = val;
+              };
+
+              setVal('mc-modal-building-title', getAttr('building'));
+              setVal('mc-modal-field-name', getAttr('building'));
+              setVal('mc-modal-field-floors', getAttr('floors'));
+              setVal('mc-modal-field-year', getAttr('year'));
+              setVal('mc-modal-field-type', getAttr('heat-nature'));
+              setVal('mc-modal-field-charge', getAttr('charge'));
+              setVal('mc-modal-field-control', getAttr('control'));
+              setVal('mc-modal-field-basis', getAttr('basis'));
+              setVal('mc-modal-field-heating', getAttr('heating'));
+              setVal('mc-modal-field-prev-area', getAttr('orig-area'));
+              setVal('mc-modal-field-curr-area', getAttr('curr-area'));
+              setVal('mc-modal-field-diff-area', getAttr('diff-area'));
+              setVal('mc-modal-field-diff-rate', getAttr('diff-rate'));
+              setVal('mc-modal-field-attachments', getAttr('attachment'));
+              setVal('mc-modal-field-remark', getAttr('remark'));
+
+              var diffArea = getAttr('diff-area');
+              var diffColor = diffArea.indexOf('-') >= 0 ? '#f5222d' : '#52c41a';
+              setStyle('mc-modal-field-diff-area', 'color', diffColor);
+              setStyle('mc-modal-field-diff-rate', 'color', diffColor);
+
+              setVal('mc-modal-table-card-no', getAttr('id'));
+              setVal('mc-modal-table-area', getAttr('floors') + 'F');
+              setVal('mc-modal-table-basis', getAttr('basis'));
+              setVal('mc-modal-table-attachment', getAttr('attachment'));
+              setVal('mc-modal-table-remark', getAttr('remark'));
+
+              modal.style.display = 'flex';
+            });
+          });
+        }
+
+        function bindChecklistEvents() {
+          // 打开检查记录单弹窗（未填写态）
+          var openBtn = document.getElementById('mc-btn-open-checklist');
+          var clModal = document.getElementById('mc-checklist-modal');
+          var clClose = document.getElementById('mc-modal-checklist-close');
+
+          if (openBtn && clModal) {
+            openBtn.addEventListener('click', function () {
+              clModal.style.display = 'flex';
+              bindChecklistRadioEvents();
+            });
+          }
+
+          // 查看整改通知书（已填写态）
+          var viewNoticeBtn = document.getElementById('mc-btn-view-notice');
+          if (viewNoticeBtn) {
+            viewNoticeBtn.addEventListener('click', function () {
+              switchMainTab('notice');
+            });
+          }
+
+          // 编辑检查记录单（已填写态）
+          var editChecklistBtn = document.getElementById('mc-btn-edit-checklist');
+          if (editChecklistBtn && clModal) {
+            editChecklistBtn.addEventListener('click', function () {
+              clModal.style.display = 'flex';
+              bindChecklistRadioEvents();
+            });
+          }
+
+          if (clClose && clModal) {
+            clClose.addEventListener('click', function () {
+              clModal.style.display = 'none';
+            });
+          }
+
+          if (clModal) {
+            clModal.addEventListener('click', function (e) {
+              if (e.target === clModal) clModal.style.display = 'none';
+            });
+          }
+
+          // 弹窗内字数统计
+          var modalProblemDesc = document.getElementById('mc-modal-problem-desc');
+          var modalProblemCount = document.getElementById('mc-modal-problem-count');
+          if (modalProblemDesc && modalProblemCount) {
+            modalProblemDesc.addEventListener('input', function () {
+              modalProblemCount.textContent = this.value.length;
+            });
+          }
+          var modalSiteNote = document.getElementById('mc-modal-site-note');
+          var modalSiteNoteCount = document.getElementById('mc-modal-site-note-count');
+          if (modalSiteNote && modalSiteNoteCount) {
+            modalSiteNote.addEventListener('input', function () {
+              modalSiteNoteCount.textContent = this.value.length;
+            });
+          }
+
+          // 弹窗内暂存按钮
+          var draftBtn = document.getElementById('mc-modal-checklist-draft');
+          if (draftBtn) {
+            draftBtn.addEventListener('click', function () {
+              showToast('success', '✓', '检查记录已暂存');
+            });
+          }
+
+          // 弹窗内提交按钮
+          var submitBtn = document.getElementById('mc-modal-checklist-submit');
+          if (submitBtn) {
+            submitBtn.addEventListener('click', function () {
+              // 校验所有检查项的radio
+              var allChecked = true;
+              var items = document.querySelectorAll('.mc-check-item');
+              items.forEach(function (item) {
+                var radios = item.querySelectorAll('input[type="radio"]');
+                var checked = false;
+                radios.forEach(function (r) {
+                  if (r.checked) checked = true;
+                });
+                if (!checked) allChecked = false;
+              });
+              if (!allChecked) {
+                showToast('warning', '⚠', '请完成所有检查项的选择');
+                return;
+              }
+
+              // 获取当前站点
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+              var site = null;
+              for (var k = 0; k < myCheckSites.length; k++) {
+                if (myCheckSites[k].code === siteCode) {
+                  site = myCheckSites[k];
+                  break;
+                }
+              }
+
+              // 收集检查项数据
+              var storedItems = [];
+              var hasRejected = false;
+              var rejectedItems = [];
+              items.forEach(function (item) {
+                var itemId = parseInt(item.querySelector('.mc-check-index').textContent, 10);
+                var checkedRadio = item.querySelector('input[type="radio"]:checked');
+                var value = checkedRadio ? checkedRadio.value : '-';
+                var reason = '-';
+
+                if (value === '否') {
+                  hasRejected = true;
+                  var checkedBoxes = item.querySelectorAll('.mc-check-sub-box:checked');
+                  var reasons = [];
+                  checkedBoxes.forEach(function (cb) {
+                    var label = cb.closest('.mc-check-sub-item');
+                    if (label) {
+                      // 提取 label 文本（去掉 input）
+                      var text = label.childNodes[1] ? label.childNodes[1].textContent.trim() : '';
+                      if (text) reasons.push(text);
+                    }
+                  });
+                  var otherInput = item.querySelector('.mc-check-other-input');
+                  if (otherInput && otherInput.value.trim()) {
+                    reasons.push(otherInput.value.trim());
+                  }
+                  if (reasons.length > 0) reason = reasons.join('，');
+
+                  var itemLabel = item.querySelector('.mc-check-item-title');
+                  if (itemLabel) rejectedItems.push({ text: itemLabel.textContent.trim().replace(/^\d+\./, '').trim(), reason: reason });
+                }
+
+                storedItems.push({ id: itemId, value: value, reason: reason });
+              });
+
+              // 保存到状态 - 结论由系统根据检查项自动生成
+              var systemConclusion = window.PrototypeStore && window.PrototypeStore.deriveCheckConclusion
+                ? window.PrototypeStore.deriveCheckConclusion(storedItems)
+                : (function(items){return items.some(function(i){return i.value==='否'})?'不合格':'合格';})(storedItems);
+              var problemDesc = document.getElementById('mc-modal-problem-desc');
+              var siteNote = document.getElementById('mc-modal-site-note');
+              if (!taskCheckState[siteCode]) taskCheckState[siteCode] = {};
+              var checklistRecord = {
+                submitted: true,
+                conclusion: systemConclusion,
+                problemDesc: problemDesc ? problemDesc.value : '',
+                siteNote: siteNote ? siteNote.value : '',
+                items: storedItems,
+                inspector: '赵立成',
+                checkDate: new Date().toISOString().slice(0, 10),
+                taskId: parseInt(taskId)
+              };
+              taskCheckState[siteCode].checklist = checklistRecord;
+
+              // 填写人自动标记为已同意
+              var signState = getInspectors(siteCode);
+              signState.filler = mockCheckData.currentUser;
+              for (var csi = 0; csi < signState.inspectors.length; csi++) {
+                if (signState.inspectors[csi].name === mockCheckData.currentUser) {
+                  signState.inspectors[csi].status = 'agreed';
+                  signState.inspectors[csi].time = new Date().toISOString().slice(0, 16).replace('T', ' ');
+                  break;
+                }
+              }
+              addOperation(siteCode, mockCheckData.currentUser, '提交', mockCheckData.currentUser + ' 提交了检查记录单（自动已同意）');
+
+              // === PrototypeStore: 持久化检查记录 ===
+              try {
+                window.PrototypeStore.saveCheckRecord(siteCode, checklistRecord);
+              } catch(e) {}
+
+              // 刷新检查记录单面板
+              var checklistPanel = document.getElementById('mc-tab-checklist');
+              if (checklistPanel && site) {
+                checklistPanel.innerHTML = renderChecklistPanel(site);
+              }
+
+              if (hasRejected || systemConclusion === '不合格') {
+                showToast('success', '✓', '检查记录已提交，将进入双人确认');
+                if (clModal) clModal.style.display = 'none';
+                // 自动切换到整改通知单Tab + 高亮提示
+                switchMainTab('notice');
+                var noticeForm = document.querySelector('.mc-notice-form');
+                if (noticeForm) {
+                  noticeForm.style.border = '2px solid #ff4d4f';
+                  noticeForm.style.transition = 'border-color 0.3s';
+                  setTimeout(function () {
+                    noticeForm.style.border = '1px solid #f0f0f0';
+                  }, 5000);
+                }
+                // 用问题描述预填整改内容
+                var nfContent = document.getElementById('nf-content');
+                if (nfContent && !nfContent.value.trim() && problemDesc && problemDesc.value.trim()) {
+                  nfContent.value = problemDesc.value.trim();
+                }
+                // 重新绑定事件
+                bindChecklistEvents();
+                bindNoticeEvents();
+                return;
+              }
+
+              showToast('success', '✓', '检查记录已提交');
+              if (clModal) clModal.style.display = 'none';
+              bindChecklistEvents();
+            });
+          }
+        }
+
+        function bindChecklistRadioEvents() {
+          // 所有检查项radio change → 控制子项显示 + 更新系统判定
+          document.querySelectorAll('.mc-check-item input[type="radio"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+              // 找到所属的check-item容器
+              var item = this.closest('.mc-check-item');
+              if (!item) return;
+              var subDiv = item.querySelector('.mc-check-sub-items');
+              if (!subDiv) return;
+
+              if (this.value === '否') {
+                subDiv.classList.add('show');
+              } else {
+                subDiv.classList.remove('show');
+                // 清空子项checkbox和其他输入
+                item.querySelectorAll('.mc-check-sub-box').forEach(function (cb) {
+                  cb.checked = false;
+                });
+                var otherInput = item.querySelector('.mc-check-other-input');
+                if (otherInput) otherInput.value = '';
+              }
+              // 实时更新系统判定结果
+              updateSystemConclusion();
+            });
+          });
+          // 子项checkbox change也更新判定
+          document.querySelectorAll('.mc-check-sub-box').forEach(function (cb) {
+            cb.addEventListener('change', updateSystemConclusion);
+          });
+        }
+
+        // 实时更新系统判定结果
+        function updateSystemConclusion() {
+          var allRadios = document.querySelectorAll('.mc-check-item input[type="radio"]');
+          var allChecked = true;
+          var hasNo = false;
+          allRadios.forEach(function (r) {
+            if (r.checked) {
+              if (r.value === '否') hasNo = true;
+            } else {
+              allChecked = false;
+            }
+          });
+          var el = document.getElementById('mc-system-conclusion');
+          var hint = document.getElementById('mc-system-conclusion-hint');
+          if (!el) return;
+          if (!allChecked) {
+            el.textContent = '待生成';
+            el.style.color = '#999';
+            if (hint) { hint.style.display = 'none'; }
+            return;
+          }
+          if (hasNo) {
+            el.textContent = '不合格';
+            el.style.color = '#ff4d4f';
+            if (hint) {
+              hint.style.display = 'block';
+              hint.style.background = '#fff2f0';
+              hint.style.color = '#ff4d4f';
+              hint.textContent = '存在不合格检查项，系统将自动判定为"不合格"。';
+            }
+          } else {
+            el.textContent = '合格';
+            el.style.color = '#52c41a';
+            if (hint) {
+              hint.style.display = 'block';
+              hint.style.background = '#f6ffed';
+              hint.style.color = '#52c41a';
+              hint.textContent = '当前检查项均未发现问题，系统将自动判定为"合格"。';
+            }
+          }
+        }
+
+        // ---- 整改通知单事件绑定 ----
+        function bindNoticeEvents() {
+          // ---- 整改通知书表单/操作事件 ----
+          var siteCode = getActiveSiteCode();
+          var site = getSiteByCode(siteCode);
+
+          // 开始填写（待填写态）
+          var startFillBtn = document.getElementById('nr-btn-start-fill');
+          if (startFillBtn) {
+            startFillBtn.addEventListener('click', function () {
+              if (!siteCode || !site) return;
+              var signState = getRectifySignState(siteCode);
+              if (signState.filler && signState.filler !== mockRectifyData.currentUser) {
+                showToast('warning', '⚠', '该整改通知书正在由 ' + signState.filler + ' 填写');
+                return;
+              }
+              signState.filler = mockRectifyData.currentUser;
+              addRectifyOperation(siteCode, mockRectifyData.currentUser, '开始填写', mockRectifyData.currentUser + ' 开始填写整改通知书');
+              var panel = document.getElementById('mc-tab-notice');
+              if (panel && site) { panel.innerHTML = renderNoticePanel(site); }
+              bindNoticeEvents();
+            });
+          }
+
+          // 暂存按钮（表单态）
+          var draftBtn = document.getElementById('nr-btn-draft');
+          if (draftBtn) {
+            draftBtn.addEventListener('click', function () {
+              showToast('success', '✓', '整改通知单已暂存');
+            });
+          }
+
+          // 提交按钮（表单态）
+          var submitBtn = document.getElementById('nr-btn-submit');
+          if (submitBtn) {
+            submitBtn.addEventListener('click', function () {
+              // 校验必填字段
+              var content = document.getElementById('nf-content');
+              var opinion = document.getElementById('nf-opinion');
+              var signature = document.getElementById('nf-signature');
+              var phone = document.getElementById('nf-phone');
+              var deadlineDays = document.getElementById('nf-deadline-days');
+              var noticeNo = document.getElementById('nf-notice-no');
+              var dept = document.getElementById('nf-dept');
+              var inspector = document.getElementById('nf-inspector');
+
+              if (!content || !content.value.trim()) {
+                showToast('warning', '⚠', '请填写整改事项');
+                if (content) content.focus();
+                return;
+              }
+              if (!opinion || !opinion.value.trim()) {
+                showToast('warning', '⚠', '请填写整改意见');
+                if (opinion) opinion.focus();
+                return;
+              }
+              if (!signature || !signature.value.trim()) {
+                showToast('warning', '⚠', '请填写被检查单位人员');
+                if (signature) signature.focus();
+                return;
+              }
+              if (!phone || !phone.value.trim()) {
+                showToast('warning', '⚠', '请填写检查人员联系方式');
+                if (phone) phone.focus();
+                return;
+              }
+
+              // 校验整改期限
+              var deadlineVal = deadlineDays ? deadlineDays.value.trim() : '';
+              if (!deadlineVal) {
+                showToast('warning', '⚠', '请填写整改期限（工作日）');
+                if (deadlineDays) deadlineDays.focus();
+                return;
+              }
+              var days = parseInt(deadlineVal, 10);
+              if (isNaN(days) || days < 1 || !/^\d+$/.test(deadlineVal)) {
+                showToast('warning', '⚠', '整改期限必须为正整数');
+                if (deadlineDays) { deadlineDays.value = ''; deadlineDays.focus(); }
+                return;
+              }
+
+              // 保存到状态
+              if (!taskCheckState[siteCode]) taskCheckState[siteCode] = {};
+              var noticeRecord = {
+                submitted: true,
+                noticeNo: noticeNo ? noticeNo.value : ('ZG-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + (siteCode ? siteCode.slice(-3) : '001')),
+                dept: dept ? dept.value : (site ? site.dept : ''),
+                content: content ? content.value : '',
+                opinion: opinion ? opinion.value : '',
+                deadlineDays: days,
+                inspectedPerson: signature ? signature.value : '',
+                inspector: inspector ? inspector.value : '赵立成',
+                phone: phone ? phone.value : '',
+                status: '已发送',
+                taskId: parseInt(taskId),
+                siteCode: siteCode
+              };
+              taskCheckState[siteCode].notice = noticeRecord;
+
+              // 操作记录：提交
+              addRectifyOperation(siteCode, mockRectifyData.currentUser, '提交', mockRectifyData.currentUser + ' 提交了整改通知书');
+
+              // 填写人自动标记为已同意
+              var signState = getRectifySignState(siteCode);
+              signState.filler = mockRectifyData.currentUser;
+              for (var ri = 0; ri < signState.inspectors.length; ri++) {
+                if (signState.inspectors[ri].name === mockRectifyData.currentUser) {
+                  signState.inspectors[ri].status = 'agreed';
+                  var now = new Date();
+                  signState.inspectors[ri].time = now.toISOString().slice(0, 16).replace('T', ' ');
+                  break;
+                }
+              }
+
+              // === PrototypeStore: 将整改通知书内容写入 Store ===
+              try {
+                var ps = window.PrototypeStore;
+                var allNotices = ps.getRectificationNotices({ siteCode: siteCode });
+                var targetNotice = allNotices && allNotices.length ? allNotices[0] : null;
+                if (targetNotice && ps.updateRectificationNotice) {
+                  ps.updateRectificationNotice(targetNotice.id, {
+                    content: noticeRecord.content || '—',
+                    opinion: noticeRecord.opinion || '',
+                    deadlineDays: days,
+                    deadlineUnit: '工作日',
+                    inspectedPerson: noticeRecord.inspectedPerson || '—',
+                    phone: noticeRecord.phone || '—',
+                    inspector: noticeRecord.inspector || '赵立成'
+                  });
+                }
+              } catch(e) { console.warn('notice save error', e); }
+
+              // 刷新面板
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel && site) {
+                noticePanel.innerHTML = renderNoticePanel(site);
+              }
+              showToast('success', '✓', '整改通知单已提交');
+              bindNoticeEvents();
+            });
+          }
+
+          // 编辑按钮（展示态）
+          var editBtn = document.getElementById('nr-btn-edit');
+          if (editBtn) {
+            editBtn.addEventListener('click', function () {
+              if (taskCheckState[siteCode] && taskCheckState[siteCode].notice) {
+                taskCheckState[siteCode].notice.submitted = false;
+                // 重置填写状态为编辑中
+                var signState = getRectifySignState(siteCode);
+                signState.filler = mockRectifyData.currentUser;
+                addRectifyOperation(siteCode, mockRectifyData.currentUser, '编辑', mockRectifyData.currentUser + ' 开始编辑整改通知书');
+              }
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel && site) {
+                noticePanel.innerHTML = renderNoticePanel(site);
+              }
+              bindNoticeEvents();
+            });
+          }
+
+          // 导出按钮（展示态）
+          var exportBtn = document.getElementById('nr-btn-export');
+          if (exportBtn) {
+            exportBtn.addEventListener('click', function () {
+              showToast('success', '✓', '整改通知单导出中…');
+            });
+          }
+
+          // ---- 整改通知书确认区事件 ----
+          // 确认区同意按钮
+          var csAgreeBtn = document.getElementById('nr-btn-cs-agree');
+          if (csAgreeBtn) {
+            csAgreeBtn.addEventListener('click', function () {
+              handleRectifyCountersign(siteCode, site, 'agree');
+            });
+          }
+
+          // 确认区不同意按钮
+          var csDisagreeBtn = document.getElementById('nr-btn-cs-disagree');
+          if (csDisagreeBtn) {
+            csDisagreeBtn.addEventListener('click', function () {
+              handleRectifyCountersign(siteCode, site, 'disagree');
+            });
+          }
+
+          // 行内同意/不同意按钮（data-nr-action）
+          var rowBtns = document.querySelectorAll('[data-nr-action]');
+          rowBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var action = this.getAttribute('data-nr-action');
+              handleRectifyCountersign(siteCode, site, action);
+            });
+          });
+        }
+
+        // ---- 整改通知书确认处理 ----
+        function handleRectifyCountersign(siteCode, site, action) {
+          if (!siteCode || !site) {
+            showToast('warning', '⚠', '站点信息异常');
+            return;
+          }
+
+          var signState = getRectifySignState(siteCode);
+          var myStatus = getMyRectifyStatus(siteCode);
+          if (!myStatus || myStatus.status !== 'pending') {
+            showToast('warning', '⚠', '您已确认过，无需重复操作');
+            return;
+          }
+
+          // 填写人不需要确认
+          if (myStatus.name === signState.filler) {
+            showToast('warning', '⚠', '您作为填写人已自动同意');
+            return;
+          }
+
+          // 获取确认意见
+          var opinionInput = document.getElementById('nr-cs-opinion');
+          var opinion = opinionInput ? opinionInput.value.trim() : '';
+
+          if (action === 'agree') {
+            myStatus.status = 'agreed';
+            myStatus.opinion = opinion;
+            var now = new Date();
+            myStatus.time = now.toISOString().slice(0, 16).replace('T', ' ');
+            addRectifyOperation(siteCode, mockRectifyData.currentUser, '同意', mockRectifyData.currentUser + ' 同意了整改通知书' + (opinion ? '，意见：' + opinion : ''));
+          } else if (action === 'disagree') {
+            myStatus.status = 'disagreed';
+            myStatus.opinion = opinion;
+            var now = new Date();
+            myStatus.time = now.toISOString().slice(0, 16).replace('T', ' ');
+            addRectifyOperation(siteCode, mockRectifyData.currentUser, '不同意', mockRectifyData.currentUser + ' 不同意整改通知书' + (opinion ? '，意见：' + opinion : ''));
+          }
+
+          // 检查是否全部已同意 → 已完成
+          var allAgreed = true;
+          for (var ri = 0; ri < signState.inspectors.length; ri++) {
+            if (signState.inspectors[ri].status !== 'agreed') {
+              allAgreed = false;
+              break;
+            }
+          }
+          if (allAgreed) {
+            if (taskCheckState[siteCode] && taskCheckState[siteCode].notice) {
+              taskCheckState[siteCode].notice.completed = true;
+            }
+            addRectifyOperation(siteCode, '系统', '完成', '双人确认完成，整改通知书已生效');
+            showToast('success', '✓', '双人确认完成，整改通知书已生效');
+          } else {
+            var disagreeCount = 0;
+            for (var ri = 0; ri < signState.inspectors.length; ri++) {
+              if (signState.inspectors[ri].status === 'disagreed') disagreeCount++;
+            }
+            if (disagreeCount > 0) {
+              showToast('success', '✓', mockRectifyData.currentUser + ' 已操作，等待另一人确认');
+            } else {
+              showToast('success', '✓', mockRectifyData.currentUser + ' 已同意');
+            }
+          }
+
+          // 刷新面板
+          var noticePanel = document.getElementById('mc-tab-notice');
+          if (noticePanel && site) {
+            noticePanel.innerHTML = renderNoticePanel(site);
+          }
+          bindNoticeEvents();
+        }
+
+        // ---- 获取当前活动站点辅助函数 ----
+        function getActiveSiteCode() {
+          var activeTab = document.querySelector('.mc-station-tab.active');
+          return activeTab ? activeTab.getAttribute('data-site-code') : null;
+        }
+
+        function getSiteByCode(code) {
+          if (!code) return null;
+          for (var k = 0; k < myCheckSites.length; k++) {
+            if (myCheckSites[k].code === code) return myCheckSites[k];
+          }
+          return null;
+        }
+
+        // ---- 双专家确认事件绑定（调用 Store 真实确认） ----
+        function bindConfirmEvents() {
+          var confirmBtns = document.querySelectorAll('[id^="mc-confirm-"]');
+          confirmBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var id = this.id;
+              var parts = id.split('-');
+              var type = parts[2]; // "checklist" or "notice"
+              var expertNum = parseInt(parts[3], 10); // 1 or 2
+
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+              if (!siteCode) {
+                showToast('warning', '⚠', '站点状态异常');
+                return;
+              }
+
+              var ps = window.PrototypeStore;
+              if (!ps) { showToast('warning', '⚠', 'Store未就绪'); return; }
+
+              var expertName = expertNum === 1 ? '张建国' : '李建华';
+
+              if (type === 'checklist') {
+                // 检查记录单确认 — 调用 Store.signCheckRecord
+                try {
+                  var result = ps.signCheckRecord(siteCode, expertName, true);
+                  if (result.status === 'rejected') {
+                    showToast('warning', '⚠', result.message);
+                  } else if (result.status === 'completed') {
+                    showToast('success', '✓', '双人确认完成，站点检查' +
+                      (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
+                  } else {
+                    showToast('success', '✓', expertName + ' 已同意');
+                  }
+                } catch(e) {
+                  showToast('warning', '⚠', '确认失败: ' + e.message);
+                }
+              } else if (type === 'notice') {
+                // 整改通知书确认 — 调用 Store.signRectificationNotice
+                try {
+                  var notices = ps.getRectificationNotices({ siteCode: siteCode });
+                  var targetNotice = notices && notices.length ? notices[0] : null;
+                  if (!targetNotice) {
+                    showToast('warning', '⚠', '未找到当前站点的整改通知书');
+                    return;
+                  }
+                  var result = ps.signRectificationNotice(targetNotice.id, expertName, true);
+                  if (result.status === 'rejected') {
+                    showToast('warning', '⚠', result.message);
+                  } else if (result.status === 'auto_approved') {
+                    showToast('success', '✓', '双人确认通过，系统自动审核通过并已生成整改任务');
+                  } else if (result.status === 'pending_review') {
+                    showToast('success', '✓', '双人确认通过，已进入业务管理员审核');
+                  } else {
+                    showToast('success', '✓', expertName + ' 已同意');
+                  }
+                } catch(e) {
+                  showToast('warning', '⚠', '确认失败: ' + e.message);
+                }
+              }
+
+              // 刷新当前面板
+              var site = null;
+              for (var k = 0; k < myCheckSites.length; k++) {
+                if (myCheckSites[k].code === siteCode) { site = myCheckSites[k]; break; }
+              }
+              if (type === 'checklist') {
+                var cp = document.getElementById('mc-tab-checklist');
+                if (cp && site) cp.innerHTML = renderChecklistPanel(site);
+                bindChecklistEvents();
+              } else if (type === 'notice') {
+                var np = document.getElementById('mc-tab-notice');
+                if (np && site) np.innerHTML = renderNoticePanel(site);
+                bindNoticeEvents();
+              }
+              bindConfirmEvents();
+            });
+          });
+        }
+
+        // ============================================================
+        // 实测复核误差计算函数
+        // ============================================================
+        function calcRecheckTolerance(baseArea, recheckArea) {
+          var base = parseFloat(baseArea);
+          var recheck = parseFloat(recheckArea);
+
+          if (isNaN(base) || base <= 0 || isNaN(recheck)) {
+            return {
+              valid: false,
+              level: 'unknown',
+              message: '无法计算',
+              absDiff: null,
+              relDiff: null,
+              absDiffDisplay: '—',
+              relDiffDisplay: '—',
+              limitText: '无法计算',
+              isOverLimit: false
+            };
+          }
+
+          var absDiff = recheck - base;
+          var absDiffValue = Math.abs(absDiff);
+          var relDiff = absDiff / base * 100;
+          var relDiffValue = Math.abs(relDiff);
+
+          var limitText = '';
+          var isOverLimit = false;
+
+          if (base <= 500) {
+            limitText = '≤500㎡，误差≤±3%';
+            isOverLimit = relDiffValue > 3;
+          } else if (base <= 2000) {
+            limitText = '500㎡—2000㎡，误差≤±2%';
+            isOverLimit = relDiffValue > 2;
+          } else {
+            limitText = '>2000㎡，面积差异≤±60㎡';
+            isOverLimit = absDiffValue > 60;
+          }
+
+          return {
+            valid: true,
+            level: isOverLimit ? 'over' : 'normal',
+            message: isOverLimit ? '超过允许误差，请重点核查' : '误差正常',
+            absDiff: absDiff,
+            relDiff: relDiff,
+            absDiffDisplay: (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2) + '㎡',
+            relDiffDisplay: (relDiff >= 0 ? '+' : '') + relDiff.toFixed(2) + '%',
+            limitText: limitText,
+            isOverLimit: isOverLimit
+          };
+        }
+
+        function renderToleranceResult(tol) {
+          if (!tol || !tol.valid) {
+            return '<span style="color:#8c8c8c;font-size:11px;">无法计算</span>';
+          }
+          if (tol.isOverLimit) {
+            return '\
+              <div style="background:#fff2f0;border:1px solid #ffccc7;border-radius:6px;padding:6px 8px;font-size:11px;text-align:left;">\
+                <div style="color:#ff4d4f;font-weight:600;margin-bottom:4px;">⚠ 超过允许误差，请重点核查</div>\
+                <div style="color:#595959;"><span style="color:#888;">误差：</span>' + tol.relDiffDisplay + '</div>\
+                <div style="color:#595959;"><span style="color:#888;">面积差异：</span>' + tol.absDiffDisplay + '</div>\
+                <div style="color:#bbb;font-size:10px;margin-top:2px;">适用标准：' + tol.limitText + '</div>\
+              </div>';
+          }
+          return '\
+            <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;padding:6px 8px;font-size:11px;text-align:left;">\
+              <div style="color:#52c41a;font-weight:600;margin-bottom:4px;">误差正常</div>\
+              <div style="color:#595959;"><span style="color:#888;">相对误差：</span>' + tol.relDiffDisplay + '</div>\
+              <div style="color:#595959;"><span style="color:#888;">绝对误差：</span>' + tol.absDiffDisplay + '</div>\
+              <div style="color:#bbb;font-size:10px;margin-top:2px;">适用标准：' + tol.limitText + '</div>\
+            </div>';
+        }
+
+        // ---- 实测复核事件绑定 ----
+        function bindVerificationEvents() {
+          // 选择照片按钮
+          document.querySelectorAll('.mc-ver-upload-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var buildingId = this.getAttribute('data-building');
+              var fileInput = document.getElementById('mc-ver-file-' + buildingId);
+              if (fileInput) fileInput.click();
+            });
+          });
+
+          // 文件选择后显示文件名
+          document.querySelectorAll('.mc-ver-file-input').forEach(function (input) {
+            input.addEventListener('change', function () {
+              var buildingId = this.getAttribute('data-building');
+              var nameSpan = document.getElementById('mc-ver-name-' + buildingId);
+              if (this.files && this.files.length > 0) {
+                nameSpan.textContent = this.files[0].name;
+                nameSpan.style.color = '#52c41a';
+              }
+            });
+          });
+
+          // 保存单条复核数据（失焦自动保存）
+          function saveSingleRecheck(siteCode, buildingId) {
+            if (!siteCode || !taskCheckState[siteCode]) return;
+            var surveyDetails = surveyDataMap[siteCode] || [];
+            var b = null;
+            for (var si = 0; si < surveyDetails.length; si++) {
+              if (surveyDetails[si].id == buildingId) { b = surveyDetails[si]; break; }
+            }
+            if (!b) return;
+
+            var fileInput = document.getElementById('mc-ver-file-' + buildingId);
+            var areaInput = document.getElementById('mc-ver-area-' + buildingId);
+            var photoName = (fileInput && fileInput.files && fileInput.files.length > 0) ? fileInput.files[0].name : '';
+            var recheckArea = (areaInput && areaInput.value) ? areaInput.value : '';
+
+            var tolResult = recheckArea ? calcRecheckTolerance(b.currentArea, parseFloat(recheckArea)) : null;
+            var data = {
+              photoName: photoName,
+              recheckArea: recheckArea,
+              baseArea: b.currentArea,
+              absDiff: tolResult && tolResult.valid ? tolResult.absDiff : null,
+              relDiff: tolResult && tolResult.valid ? tolResult.relDiff : null,
+              absDiffDisplay: tolResult && tolResult.valid ? tolResult.absDiffDisplay : '—',
+              relDiffDisplay: tolResult && tolResult.valid ? tolResult.relDiffDisplay : '—',
+              isOverLimit: tolResult && tolResult.valid ? tolResult.isOverLimit : false,
+              limitText: tolResult && tolResult.valid ? tolResult.limitText : '—',
+              reviewStatus: tolResult && tolResult.valid ? (tolResult.isOverLimit ? '重点核查' : '正常') : '未复核'
+            };
+
+            if (!taskCheckState[siteCode].verification) taskCheckState[siteCode].verification = {};
+            taskCheckState[siteCode].verification[buildingId] = data;
+
+            // 静默保存，不弹提示（仅在超限时提示）
+            if (data.isOverLimit) {
+              showToast('warning', '⚠', b.building + ' 复核误差超过允许范围，请重点核查');
+            }
+          }
+
+          // 复查面积实时计算误差 + 失焦保存
+          document.querySelectorAll('.mc-ver-area-input').forEach(function (input) {
+            input.addEventListener('input', function () {
+              var areaVal = this.value.trim();
+              var buildingId = this.id.replace('mc-ver-area-', '');
+              var tolCell = document.getElementById('mc-ver-tol-' + buildingId);
+              if (!areaVal || !tolCell) {
+                if (tolCell) tolCell.innerHTML = '<span style="color:#8c8c8c;font-size:11px;">输入后自动计算</span>';
+                return;
+              }
+              var surveyDetails = [];
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+              if (siteCode) surveyDetails = surveyDataMap[siteCode] || [];
+              var b = null;
+              for (var si = 0; si < surveyDetails.length; si++) {
+                if (surveyDetails[si].id == buildingId) { b = surveyDetails[si]; break; }
+              }
+              if (!b) return;
+              var tol = calcRecheckTolerance(b.currentArea, parseFloat(areaVal));
+              if (!tol || !tol.valid) return;
+              tolCell.innerHTML = renderToleranceResult(tol);
+            });
+
+            input.addEventListener('blur', function () {
+              var buildingId = this.id.replace('mc-ver-area-', '');
+              var activeTab = document.querySelector('.mc-station-tab.active');
+              var siteCode = activeTab ? activeTab.getAttribute('data-site-code') : null;
+              saveSingleRecheck(siteCode, buildingId);
+            });
+          });
+        }
+
+        // ---- Toast提示 ----
+        function showToast(type, icon, message) {
+          var toast = document.getElementById('mc-toast');
+          var toastText = document.getElementById('mc-toast-text');
+          var toastIcon = toast ? toast.querySelector('.mc-toast-icon') : null;
+          if (!toast || !toastText) return;
+
+          toast.className = 'mc-toast ' + type;
+          if (toastIcon) toastIcon.textContent = icon;
+          toastText.textContent = message;
+
+          toast.classList.add('show');
+          setTimeout(function () {
+            toast.classList.remove('show');
+          }, 2500);
+        }
+
+        // ---- 注册到全局 ----
+        window.PageMyTaskCheck = { render: renderMyTaskCheckPage, bindEvents: bindMyTaskCheckEvents };
+
+        // 普查明细分页原型提示（事件委托）
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest('.mc-page-btn');
+          if (btn) {
+            e.preventDefault();
+            showToast('info', '•', '当前为原型预览，分页未实现');
+          }
+        });
+
+        // ============================================================
+        // 双人确认全局函数
+        // ============================================================
+        window.signCheckRecord = function(siteCode, expertName, agree) {
+          try {
+            var ps = window.PrototypeStore;
+            if (!ps || !ps.signCheckRecord) { showToast('warning', '⚠', 'Store未就绪'); return; }
+            var result = ps.signCheckRecord(siteCode, expertName, agree);
+            if (result.status === 'rejected') {
+              showToast('warning', '⚠', result.message);
+            } else if (result.status === 'completed') {
+              showToast('success', '✓', '双人确认完成，站点检查' + (result.conclusion === '不合格' ? '不合格，已进入整改通知书流程' : '完成'));
+            } else {
+              showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
+            }
+            // 刷新当前站点面板
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var sc = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            var site = null;
+            for (var k = 0; k < myCheckSites.length; k++) {
+              if (myCheckSites[k].code === sc) { site = myCheckSites[k]; break; }
+            }
+            if (site) {
+              var checklistPanel = document.getElementById('mc-tab-checklist');
+              if (checklistPanel) checklistPanel.innerHTML = renderChecklistPanel(site);
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
+            }
+          } catch(e) { showToast('warning', '⚠', '确认操作失败: ' + e.message); }
+        };
+
+        window.signNoticeSign = function(noticeId, expertName, agree) {
+          try {
+            var ps = window.PrototypeStore;
+            if (!ps || !ps.signRectificationNotice) { showToast('warning', '⚠', 'Store未就绪'); return; }
+            var result = ps.signRectificationNotice(parseInt(noticeId), expertName, agree);
+            if (result.status === 'rejected') {
+              showToast('warning', '⚠', result.message);
+            } else if (result.status === 'auto_approved') {
+              showToast('success', '✓', '双人确认通过，系统自动审核通过并已生成整改任务');
+            } else if (result.status === 'pending_review') {
+              showToast('success', '✓', '双人确认通过，已进入业务管理员审核');
+            } else {
+              showToast('success', '✓', expertName + ' 已' + (agree ? '同意' : '不同意'));
+            }
+            // 刷新
+            var activeTab = document.querySelector('.mc-station-tab.active');
+            var sc = activeTab ? activeTab.getAttribute('data-site-code') : null;
+            var site = null;
+            for (var k = 0; k < myCheckSites.length; k++) {
+              if (myCheckSites[k].code === sc) { site = myCheckSites[k]; break; }
+            }
+            if (site) {
+              var noticePanel = document.getElementById('mc-tab-notice');
+              if (noticePanel) noticePanel.innerHTML = renderNoticePanel(site);
+            }
+          } catch(e) { showToast('warning', '⚠', '确认操作失败: ' + e.message); }
+        };
+      })();
+    </script>
+    <script src="./app.js"></script>
+  <script src="./annotations/all-pages.annotations.js"></script>
+  <script src="./annotations/annotation.js"></script>
+</body>
+</html>

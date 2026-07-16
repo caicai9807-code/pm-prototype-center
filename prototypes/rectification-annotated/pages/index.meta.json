@@ -1,0 +1,49 @@
+{
+  "name": "整改任务模块首页",
+  "pageKey": "index",
+  "business": "展示整改任务模块的导航入口，提供模块概览统计和快捷跳转到各功能页面",
+  "domain": "rectification",
+  "inputs": [],
+  "outputs": [
+    {
+      "name": "navLinks",
+      "type": "array",
+      "target": "ui-render",
+      "description": "导航卡片链接列表，包含面积检查任务管理和面积检查任务详情两个入口"
+    }
+  ],
+  "stateMachine": {
+    "initial": "displayed",
+    "states": {
+      "displayed": {
+        "description": "静态展示模块概览和页面导航卡片",
+        "transitions": [
+          {
+            "trigger": "click-nav-card",
+            "target": "navigating",
+            "action": "跳转到对应功能页面"
+          }
+        ]
+      },
+      "navigating": {
+        "description": "用户点击导航卡片后跳转到目标页面",
+        "transitions": []
+      }
+    }
+  },
+  "dependencies": {
+    "components": [
+      "AppComponents.renderShell",
+      "AppComponents.statusClass"
+    ],
+    "services": [],
+    "mockData": []
+  },
+  "navigation": {
+    "entryPoints": [],
+    "exitPoints": [
+      "task-list",
+      "task-detail"
+    ]
+  }
+}

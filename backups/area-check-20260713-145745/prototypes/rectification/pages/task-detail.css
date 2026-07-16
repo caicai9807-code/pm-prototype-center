@@ -1,0 +1,502 @@
+/**
+ * task-detail.css — 任务详情页专属样式
+ * 包含：页面头部、信息卡片栅格、Tab系统、站点列表表格横向滚动
+ */
+
+/* ---- 页面头部 ---- */
+.detail-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.detail-header-right {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---- 任务基本信息卡片 ---- */
+.task-detail-info-card {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.task-detail-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.task-detail-info-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.task-detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 24px;
+}
+
+.info-item.full-width {
+  grid-column: span 4;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.info-label {
+  color: #8c8c8c;
+  flex-shrink: 0;
+}
+
+.info-value {
+  color: #262626;
+  font-weight: 400;
+}
+
+.info-value.task-name {
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.font-highlight {
+  font-weight: 500;
+  color: #1890ff;
+}
+
+@media (max-width: 992px) {
+  .task-detail-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .info-item.full-width {
+    grid-column: span 2;
+  }
+}
+
+/* ---- Tab系统 ---- */
+.detail-tab-card {
+  margin-bottom: 16px;
+}
+
+.detail-tab-header {
+  display: flex;
+  border-bottom: 1px solid #e8ecf1;
+  padding: 0 20px;
+}
+
+.detail-tab-item {
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #8c95a6;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+  user-select: none;
+}
+
+.detail-tab-item:hover {
+  color: #4c78f5;
+}
+
+.detail-tab-item.active {
+  color: #4c78f5;
+  font-weight: 500;
+  border-bottom-color: #4c78f5;
+}
+
+.detail-tab-body {
+  padding: 20px;
+}
+
+.detail-tab-panel {
+  display: none;
+}
+
+.detail-tab-panel.active {
+  display: block;
+}
+
+.tab-placeholder {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8c95a6;
+  font-size: 14px;
+}
+
+/* ---- 站点列表表格（横向滚动 + 14列固定宽度） ---- */
+.task-detail-table-wrapper {
+  overflow-x: auto !important;
+  width: 100% !important;
+}
+
+.task-detail-table {
+  table-layout: fixed !important;
+  width: 1700px !important;
+  min-width: 1700px !important;
+  border-collapse: collapse;
+}
+
+.task-detail-table th,
+.task-detail-table td {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 10px 12px !important;
+  height: 48px !important;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.task-detail-table th {
+  background: #fafbfc;
+  font-weight: 500;
+  color: #5a5f6d;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.task-detail-table tbody tr:hover {
+  background: #f5f8ff;
+}
+
+.task-detail-table .action-link {
+  color: #4c78f5;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.task-detail-table .action-link:hover {
+  text-decoration: underline;
+}
+
+/* ---- 操作列固定右侧 ---- */
+.task-detail-table th:last-child,
+.task-detail-table td:last-child {
+  position: sticky !important;
+  right: 0 !important;
+  z-index: 2 !important;
+  background: inherit;
+}
+
+.task-detail-table th:last-child {
+  background: #fafbfc !important;
+  z-index: 3 !important;
+}
+
+.task-detail-table tbody tr td:last-child {
+  background: #fff;
+}
+
+.task-detail-table tbody tr:hover td:last-child {
+  background: #f5f8ff;
+}
+
+/* ---- Tab2：专家信息 ---- */
+.expert-dept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.expert-dept-card {
+  border: 1px solid #e8ecf1;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.expert-dept-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f8faff;
+  border-bottom: 1px solid #e8ecf1;
+}
+
+.expert-dept-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.expert-dept-count {
+  font-size: 12px;
+  color: #8c95a6;
+}
+
+.expert-dept-body {
+  padding: 16px;
+}
+
+.expert-site-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.expert-site-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f0f2f5;
+  color: #5a6b85;
+  border: 1px solid #e0e4ea;
+}
+
+.expert-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  min-width: 0;
+}
+
+.expert-table th,
+.expert-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+  height: 40px;
+}
+
+.expert-table th {
+  background: #fafbfc;
+  font-weight: 500;
+  color: #5a5f6d;
+}
+
+.expert-table tbody tr:hover {
+  background: #f5f8ff;
+}
+
+.expert-alert {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 4px;
+  color: #1890ff;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* ---- Tab3：检查结果汇总 ---- */
+.result-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.result-stat-card {
+  border-radius: 6px;
+  padding: 16px 20px;
+  text-align: center;
+  border: 1px solid;
+}
+
+.result-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.result-stat-label {
+  font-size: 12px;
+  color: #8c95a6;
+}
+
+.result-stat-blue {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+}
+.result-stat-blue .result-stat-value {
+  color: #1890ff;
+}
+
+.result-stat-green {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+.result-stat-green .result-stat-value {
+  color: #52c41a;
+}
+
+.result-stat-gray {
+  background: #fafafa;
+  border-color: #d9d9d9;
+}
+.result-stat-gray .result-stat-value {
+  color: #595959;
+}
+
+.result-stat-red {
+  background: #fff1f0;
+  border-color: #ffa39e;
+}
+.result-stat-red .result-stat-value {
+  color: #f5222d;
+}
+
+.result-stat-orange {
+  background: #fff7e6;
+  border-color: #ffd591;
+}
+.result-stat-orange .result-stat-value {
+  color: #fa8c16;
+}
+
+.result-dept-section {
+  margin-top: 8px;
+}
+
+.result-dept-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d2129;
+  margin-bottom: 12px;
+}
+
+.result-dept-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  min-width: 0;
+}
+
+.result-dept-table th,
+.result-dept-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+  vertical-align: middle;
+  height: 44px;
+}
+
+.result-dept-table th {
+  background: #fafbfc;
+  font-weight: 500;
+  color: #5a5f6d;
+}
+
+.result-dept-table tbody tr:hover {
+  background: #f5f8ff;
+}
+
+.text-green {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.text-red {
+  color: #f5222d;
+  font-weight: 500;
+}
+
+.progress-bar {
+  display: inline-block;
+  width: 100px;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.progress-green {
+  background: #52c41a;
+}
+
+.progress-blue {
+  background: #1890ff;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #5a5f6d;
+  vertical-align: middle;
+}
+
+/* ---- Tab4：操作记录 ---- */
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  min-width: 0;
+}
+
+.log-table th,
+.log-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  text-align: left;
+  vertical-align: middle;
+  height: 48px;
+  font-weight: 400;
+}
+
+.log-table th {
+  background: #fafbfc;
+  font-weight: 500;
+  color: #5a5f6d;
+}
+
+.log-table tbody tr:hover {
+  background: #f5f8ff;
+}
+
+.log-type-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+}

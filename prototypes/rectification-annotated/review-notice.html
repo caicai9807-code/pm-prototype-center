@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>整改通知书审核</title>
+  <link rel="stylesheet" href="../../shared/styles/shared.css" />
+  <link rel="stylesheet" href="./styles/pc-system-template.css" />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    /* ===== 整改通知书审核专用样式（rn- 前缀隔离） ===== */
+
+    /* ── 主容器 ── */
+    .rn-page {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── 筛选卡片 ── */
+    .rn-filter-card {
+      margin-bottom: 20px;
+    }
+    .rn-filter-card .card-body {
+      padding: 20px;
+    }
+    .rn-filter-grid {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .rn-filter-item {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      white-space: nowrap;
+    }
+    .rn-filter-item label {
+      display: inline-flex;
+      align-items: center;
+      width: 72px;
+      min-width: 72px;
+      margin-right: 8px;
+      font-size: 13px;
+      color: var(--pc-color-text-3);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .rn-filter-item .control,
+    .rn-filter-item select.control {
+      width: 180px;
+    }
+    .rn-filter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      padding-bottom: 0;
+    }
+
+    /* 覆盖全局 table 样式 */
+    .table-scroll .rn-table {
+      min-width: 1200px !important;
+      width: 100% !important;
+    }
+    .rn-table-wrap {
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid #ebeef5;
+    }
+    .rn-table {
+      min-width: 1200px;
+      table-layout: fixed;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .rn-table th, .rn-table td {
+      padding: 8px 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .rn-table th {
+      font-size: 12px;
+      font-weight: 600;
+      color: #606266;
+      background: #fafbfc;
+    }
+    .rn-table td {
+      color: #333;
+      border-bottom: 1px solid #ebeef5;
+    }
+    .rn-table .col-seq { width: 48px; }
+    .rn-table .col-task-name { width: 260px; }
+    .rn-table .col-station-code { width: 100px; }
+    .rn-table .col-station-name { width: 110px; }
+    .rn-table .col-dept { width: 90px; }
+    .rn-table .col-deadline { width: 80px; }
+    .rn-table .col-status { width: 80px; }
+    .rn-table .col-reviewer { width: 70px; }
+    .rn-table .col-review-time { width: 130px; }
+    .rn-table .col-review-opinion { width: 140px; }
+    .rn-table .col-ops { width: 90px; }
+
+    /* 操作列 sticky 固定 */
+    .rn-table th:last-child,
+    .rn-table td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.08);
+      width: 90px;
+      min-width: 90px;
+    }
+    .rn-table th:last-child {
+      background: #fafbfc;
+    }
+    .rn-table td:last-child {
+      background: #fff;
+    }
+    .rn-table tbody tr:hover td:last-child {
+      background: #f5f7fa;
+    }
+
+    /* 操作列文字按钮 */
+    .rn-action-link {
+      color: var(--pc-color-primary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color .2s;
+      white-space: nowrap;
+    }
+    .rn-action-link:hover {
+      color: var(--pc-color-primary-hover);
+    }
+    /* 操作列分隔符 */
+    .rn-action-divider {
+      color: #e8e8e8;
+      margin: 0 6px;
+      user-select: none;
+    }
+
+    /* ── 列表标题 ── */
+    .rn-list-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 0;
+    }
+    .rn-list-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--pc-color-text);
+    }
+    .rn-count-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 10px;
+      background: #f0f2f5;
+      color: var(--pc-color-text-3);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ── 页面标题 ── */
+    .rn-page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .rn-page-title {
+      color: var(--pc-color-text);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* ── 表格居中列 ── */
+    .rn-col-center {
+      text-align: center;
+    }
+
+    /* ── 分页信息 ── */
+    .rn-pagination-info {
+      color: var(--pc-color-text-3);
+      font-size: 13px;
+    }
+    /* ── 审核弹窗 ── */
+    .rn-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .rn-modal-overlay.active {
+      display: flex;
+    }
+    .rn-modal-card {
+      background: #fff;
+      border-radius: 8px;
+      width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .rn-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--pc-color-border);
+    }
+    .rn-modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--pc-color-text);
+    }
+    .rn-modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--pc-color-text-3);
+      line-height: 1;
+    }
+    .rn-modal-close:hover {
+      color: var(--pc-color-text);
+    }
+    .rn-modal-body {
+      padding: 20px;
+    }
+    /* 整改通知书详情区域 */
+    .rn-modal-section {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--pc-color-border);
+    }
+    .rn-modal-section:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .rn-modal-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--pc-color-text);
+      margin-bottom: 12px;
+    }
+    .rn-modal-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+    .rn-modal-info-item {
+      display: flex;
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .rn-modal-info-label {
+      color: var(--pc-color-text-3);
+      white-space: nowrap;
+      margin-right: 6px;
+    }
+    .rn-modal-info-value {
+      color: var(--pc-color-text);
+      font-weight: 500;
+    }
+    /* 审核结果 radio */
+    .rn-modal-radio-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .rn-modal-radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--pc-color-text);
+      cursor: pointer;
+    }
+    .rn-modal-radio-item input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--pc-color-primary);
+      cursor: pointer;
+    }
+    /* 审核意见 textarea */
+    .rn-modal-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px 12px;
+      border: 1px solid var(--pc-color-border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--pc-color-text);
+      resize: vertical;
+      margin-top: 8px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .rn-modal-textarea:focus {
+      outline: none;
+      border-color: var(--pc-color-primary);
+      box-shadow: 0 0 0 3px rgba(76,120,245,0.1);
+    }
+    .rn-modal-textarea::placeholder {
+      color: var(--pc-color-text-4);
+    }
+    /* 必填星号 */
+    .rn-modal-required {
+      color: #ff4d4f;
+      margin-right: 2px;
+    }
+    /* 弹窗底部 */
+    .rn-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--pc-color-border-2);
+    }
+
+    /* ── 整改通知书展示卡片（参考 my-task-check.html 的 mc-notice-display-*）── */
+    .rn-notice-card {
+      background: #ffffff;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 20px;
+    }
+    .rn-notice-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1d2129;
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #4c78f5;
+      padding-bottom: 12px;
+    }
+    .rn-notice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+      margin-bottom: 16px;
+    }
+    .rn-notice-footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .rn-notice-item {
+      display: flex;
+      font-size: 14px;
+      line-height: 22px;
+      color: #262626;
+    }
+    .rn-notice-item .rn-notice-label {
+      color: #8c8c8c;
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+    .rn-notice-section {
+      margin-bottom: 14px;
+    }
+    .rn-notice-section:last-of-type {
+      margin-bottom: 0;
+    }
+    .rn-notice-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #262626;
+      margin-bottom: 8px;
+    }
+    .rn-notice-section-body {
+      background: #f7f8fa;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #595959;
+      white-space: pre-wrap;
+    }
+    .rn-notice-status-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 20px;
+      background: #e8f0fe;
+      color: #4c78f5;
+    }
+    .rn-notice-status-tag.sent {
+      background: #fff7e6;
+      color: #d48806;
+    }
+  </style>
+  <link rel="stylesheet" href="./annotations/annotation.css" />
+</head>
+<body data-page="review-notice" data-menu="review-notice">
+  <div id="app"></div>
+  <script src="../../shared/utils/helpers.js"></script>
+  <script src="../../shared/components/Layout/layout.js"></script>
+  <script src="./config.js"></script>
+  <script src="./components.js"></script>
+  <script src="./store/PrototypeStore.js"></script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ============================================================
+      // 原型数据（从 PrototypeStore 读取 + 本地fallback）
+      // ============================================================
+      var Store = window.PrototypeStore;
+      var mockData = [];
+      // 本地fallback（store为空时展示，不作为持久化源）
+      var fallbackData = [
+        {
+          id: 1,
+          taskName: '2026 第27周 裕华片区异常转派补查任务',
+          stationCode: '60218B004',
+          stationName: '裕华区万达站',
+          dept: '裕华管理部',
+          deadlineDays: 45,
+          noticeNo: 'ZG-20260705-004',
+          content: '地下室新增用热面积约160㎡未同步到普查台账，需补录并更新核查表。\n现场建筑物 1#楼为 3 层建筑物与核查表 2 层不一致。',
+          opinion: '1. 重新核实层数面积\n2. 补录新增用热面积\n3. 更新台账及附件',
+          inspectedPerson: '王志强',
+          inspector: '赵立成',
+          phone: '138-0001-1001'
+        },
+        {
+          id: 2,
+          taskName: '2026 第27周 裕华片区常规面积核查任务',
+          stationCode: '60218B007',
+          stationName: '裕华区东南站',
+          dept: '裕华管理部',
+          deadlineDays: 15,
+          noticeNo: 'ZG-20260705-007',
+          content: '经现场复查，东南站锅炉房设备布局与图纸基本一致，无重大差异。',
+          opinion: '现场确认无误，建议按现有数据归档。',
+          inspectedPerson: '李建国',
+          inspector: '赵立成',
+          phone: '138-0001-1001'
+        }
+      ];
+
+      /** 加载数据：优先 Store，fallback 本地 */
+      function loadData() {
+        try {
+          var storeNotices = Store.getRectificationNotices();
+          if (storeNotices && storeNotices.length) {
+            mockData = storeNotices.map(function (n) {
+              return {
+                id: n.id,
+                taskName: n.taskName || n.stationName || '—',
+                stationCode: n.stationCode || n.siteCode || '',
+                stationName: n.stationName || n.siteCode || '—',
+                dept: n.dept || '—',
+                deadlineDays: n.deadlineDays || 30,
+                noticeNo: n.noticeNo || 'ZG-' + String(n.id).padStart(3,'0'),
+                content: n.content || '—',
+                opinion: n.opinion || '—',
+                inspectedPerson: n.inspectedPerson || '—',
+                inspector: n.inspector || '赵立成',
+                phone: n.phone || '—',
+                status: n.status || '待审核',
+                reviewer: n.reviewer || '—',
+                reviewTime: n.reviewTime || '—',
+                reviewOpinion: n.reviewOpinion || '—'
+              };
+            });
+            return;
+          }
+        } catch(e) {}
+        mockData = fallbackData;
+      }
+
+      // ============================================================
+      // 根据整改期限自动推导审核状态
+      // 规则：deadlineDays > 30 → 待审核；≤ 30 → 审核通过
+      // ============================================================
+      function deriveStatus(days) {
+        return days > 30 ? '待审核' : '审核通过';
+      }
+
+      // 为每条数据补充推导字段
+      function enrichRow(r) {
+        // store数据已含status字段，优先使用；fallback用deriveStatus
+        var st = r.status || deriveStatus(r.deadlineDays);
+        var now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        return {
+          id: r.id,
+          taskName: r.taskName,
+          stationCode: r.stationCode,
+          stationName: r.stationName,
+          dept: r.dept,
+          deadline: r.deadlineDays + '工作日',
+          deadlineDays: r.deadlineDays,
+          status: st,
+          reviewer: r.reviewer || (st === '审核通过' ? '恩泽' : '—'),
+          reviewTime: r.reviewTime || (st === '审核通过' ? now : '—'),
+          reviewOpinion: r.reviewOpinion || (st === '审核通过' ? '材料齐全，可进入接收环节' : '—'),
+          // 整改通知书详情字段
+          noticeNo: r.noticeNo || 'ZG-' + r.stationCode,
+          content: r.content || '',
+          opinion: r.opinion || '',
+          inspectedPerson: r.inspectedPerson || '—',
+          inspector: r.inspector || '赵立成',
+          phone: r.phone || '—'
+        };
+      }
+
+      // 缓存已 enrich 的数据
+      loadData();
+      var enrichedData = mockData.map(enrichRow);
+      var currentData = enrichedData; // 当前表格数据（初始=全部）
+      var currentNoticeId = null; // 当前审核弹窗的noticeId
+
+      // ============================================================
+      // 状态 Tag 渲染（使用 pc-system-template.css 的 pc-tag 体系）
+      // ============================================================
+      function renderStatusTag(status) {
+        var cls = 'pc-tag';
+        if (status === '待审核') {
+          cls += ' pc-tag-warning';
+        } else if (status === '审核通过') {
+          cls += ' pc-tag-success';
+        } else if (status === '审核驳回') {
+          cls += ' pc-tag-danger';
+        } else {
+          cls += ' pc-tag-default';
+        }
+        return '<span class="' + cls + '">' + status + '</span>';
+      }
+
+      // ============================================================
+      // 操作列文本渲染
+      // ============================================================
+      function renderAction(row) {
+        // 详情：始终显示，点击跳转站点详情页（新标签页打开，保留审核列表）
+        var html = '<a class="rn-action-link" href="./site-detail.html?code=' + (row.stationCode || '') + '" target="_blank">详情</a>';
+        // 审核：仅待审核行显示，点击打开现有审核弹窗
+        if (row.status === '待审核') {
+          html += '<span class="rn-action-divider">|</span><span class="rn-action-link" data-action="review">审核</span>';
+        }
+        return html;
+      }
+
+      // ============================================================
+      // 渲染页面主体内容
+      // ============================================================
+      function renderPageContent() {
+        var total = enrichedData.length;
+        var rowsHtml = '';
+        for (var i = 0; i < total; i++) {
+          var r = enrichedData[i];
+          rowsHtml += '\
+            <tr data-i="' + i + '">\
+              <td class="rn-col-center">' + r.id + '</td>\
+              <td>' + r.taskName + '</td>\
+              <td>' + r.stationCode + '</td>\
+              <td>' + r.stationName + '</td>\
+              <td>' + r.dept + '</td>\
+              <td>' + r.deadline + '</td>\
+              <td class="rn-col-center">' + renderStatusTag(r.status) + '</td>\
+              <td>' + r.reviewer + '</td>\
+              <td>' + r.reviewTime + '</td>\
+              <td>' + r.reviewOpinion + '</td>\
+              <td>' + renderAction(r) + '</td>\
+            </tr>';
+        }
+
+        return '\
+          <div class="rn-page">\
+            <!-- 页面主标题 -->\
+            <div class="rn-page-header">\
+              <div class="rn-page-title">整改通知书审核</div>\
+            </div>\
+            <!-- 筛选条件卡片 -->\
+            <section class="card rn-filter-card">\
+              <div class="card-body">\
+                <div class="rn-filter-grid">\
+                  <div class="rn-filter-item">\
+                    <label>任务/站点：</label>\
+                    <input class="control" id="rn-input-keyword" placeholder="请输入任务名称或站点名" />\
+                  </div>\
+                  <div class="rn-filter-item">\
+                    <label>审核状态：</label>\
+                    <select class="control" id="rn-select-status">\
+                      <option value="">全部</option>\
+                      <option value="待审核">待审核</option>\
+                      <option value="审核通过">审核通过</option>\
+                      <option value="审核驳回">审核驳回</option>\
+                    </select>\
+                  </div>\
+                  <div class="rn-filter-actions">\
+                    <button class="btn" id="rn-btn-reset">重置</button>\
+                    <button class="btn primary" id="rn-btn-query">查询</button>\
+                  </div>\
+                </div>\
+              </div>\
+            </section>\
+            <!-- 数据列表卡片 -->\
+            <section class="card">\
+              <div class="card-body">\
+                <!-- 列表标题 + 计数徽标 -->\
+                <div class="rn-list-header">\
+                  <span class="rn-list-title">整改通知书审核列表</span>\
+                  <span class="rn-count-badge">共 ' + total + ' 条记录</span>\
+                </div>\
+                <!-- 表格区域 -->\
+                <div class="table-scroll">\
+                  <table class="rn-table">\
+                    <thead>\
+                      <tr>\
+                        <th class="rn-col-center col-seq">序号</th>\
+                        <th class="col-task-name">主任务名称</th>\
+                        <th class="col-station-code">换热站编码</th>\
+                        <th class="col-station-name">站点名称</th>\
+                        <th class="col-dept">管理部</th>\
+                        <th class="col-deadline">整改期限</th>\
+                        <th class="rn-col-center col-status">审核状态</th>\
+                        <th class="col-reviewer">审核人</th>\
+                        <th class="col-review-time">审核时间</th>\
+                        <th class="col-review-opinion">审核意见</th>\
+                        <th class="col-ops">操作</th>\
+                      </tr>\
+                    </thead>\
+                    <tbody id="rn-table-body">' + rowsHtml + '</tbody>\
+                  </table>\
+                </div>\
+                <!-- 分页栏 -->\
+                <div class="pagination">\
+                  <span class="rn-pagination-info">第 1 - ' + total + ' 条 / 共 ' + total + ' 条</span>\
+                  <div class="page-box">\
+                    <div class="page-btn disabled">&lt;</div>\
+                    <div class="page-number active">1</div>\
+                    <div class="page-btn disabled">&gt;</div>\
+                  </div>\
+                </div>\
+              </div>\
+            </section>\
+            <!-- 审核弹窗 -->\
+            <div class="rn-modal-overlay" id="rn-review-modal">\
+              <div class="rn-modal-card">\
+                <div class="rn-modal-header">\
+                  <span class="rn-modal-title">整改通知书审核</span>\
+                  <span class="rn-modal-close" id="rn-modal-close">&times;</span>\
+                </div>\
+                <div class="rn-modal-body">\
+                  <div class="rn-notice-card" id="rn-notice-card">\
+                    <div class="rn-notice-title">整改通知书</div>\
+                    <div class="rn-notice-grid" id="rn-notice-row1"></div>\
+                    <div class="rn-notice-section">\
+                      <div class="rn-notice-section-title">整改事项</div>\
+                      <div class="rn-notice-section-body" id="rn-notice-content"></div>\
+                    </div>\
+                    <div class="rn-notice-section">\
+                      <div class="rn-notice-section-title">整改意见</div>\
+                      <div class="rn-notice-section-body" id="rn-notice-opinion"></div>\
+                    </div>\
+                    <div class="rn-notice-footer-grid" id="rn-notice-footer"></div>\
+                  </div>\
+                  <div class="rn-modal-section" style="margin-top:16px;">\
+                    <div class="rn-modal-section-title"><span class="rn-modal-required">*</span>审核结果</div>\
+                    <div class="rn-modal-radio-group">\
+                      <label class="rn-modal-radio-item">\
+                        <input type="radio" name="rn-review-result" value="通过" />\
+                        <span>通过</span>\
+                      </label>\
+                      <label class="rn-modal-radio-item">\
+                        <input type="radio" name="rn-review-result" value="驳回" />\
+                        <span>驳回</span>\
+                      </label>\
+                    </div>\
+                  </div>\
+                  <div class="rn-modal-section">\
+                    <div class="rn-modal-section-title">审核意见</div>\
+                    <textarea class="rn-modal-textarea" id="rn-modal-opinion" placeholder="请输入审核意见"></textarea>\
+                  </div>\
+                </div>\
+                <div class="rn-modal-footer">\
+                  <button class="btn" id="rn-modal-cancel">取消</button>\
+                  <button class="btn primary" id="rn-modal-confirm">确认</button>\
+                </div>\
+              </div>\
+            </div>\
+          </div>';
+      }
+
+      // ============================================================
+      // 渲染完整页面（含 shell）
+      // ============================================================
+      function renderPage() {
+        var content = renderPageContent();
+        document.getElementById('app').innerHTML = AppComponents.renderShell(content);
+        bindEvents();
+      }
+
+      // ============================================================
+      // 事件绑定
+      // ============================================================
+      function bindEvents() {
+        // 查询
+        var queryBtn = document.getElementById('rn-btn-query');
+        if (queryBtn) {
+          queryBtn.addEventListener('click', function () {
+            var keyword = (document.getElementById('rn-input-keyword').value || '').trim();
+            var status = document.getElementById('rn-select-status').value;
+            var filtered = enrichedData.filter(function (r) {
+              if (keyword && r.taskName.indexOf(keyword) === -1 && r.stationName.indexOf(keyword) === -1) {
+                return false;
+              }
+              if (status && r.status !== status) {
+                return false;
+              }
+              return true;
+            });
+            renderTable(filtered);
+          });
+        }
+
+        // 重置
+        var resetBtn = document.getElementById('rn-btn-reset');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', function () {
+            document.getElementById('rn-input-keyword').value = '';
+            document.getElementById('rn-select-status').value = '';
+            renderTable(enrichedData);
+          });
+        }
+
+        // 操作列点击（详情为锚点链接，浏览器自然跳转；审核按钮绑定弹窗）
+        document.querySelectorAll('.rn-action-link').forEach(function (el) {
+          // 详情：<a> 锚点链接，浏览器自然跳转站点详情页，不绑定 JS
+          if (el.tagName === 'A') return;
+          el.addEventListener('click', function () {
+            var row = this.closest('tr');
+            if (!row) return;
+            var idx = parseInt(row.getAttribute('data-i'), 10);
+            var data = currentData[idx];
+            if (!data) return;
+            openReviewModal(data, true); // 审核模式打开弹窗
+          });
+        });
+
+        // 分页按钮原型提示
+        document.querySelectorAll('.page-btn.disabled, .page-number').forEach(function (el) {
+          el.addEventListener('click', function () {
+            showToast('当前为原型预览，分页未实现');
+          });
+        });
+
+        // 弹窗关闭
+        var modalClose = document.getElementById('rn-modal-close');
+        var modalCancel = document.getElementById('rn-modal-cancel');
+        var modalOverlay = document.getElementById('rn-review-modal');
+
+        function closeModal() {
+          if (modalOverlay) modalOverlay.classList.remove('active');
+          // 重置表单
+          var radios = document.querySelectorAll('input[name="rn-review-result"]');
+          radios.forEach(function (r) { r.checked = false; });
+          var opinion = document.getElementById('rn-modal-opinion');
+          if (opinion) opinion.value = '';
+        }
+
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modalCancel) modalCancel.addEventListener('click', closeModal);
+        if (modalOverlay) {
+          modalOverlay.addEventListener('click', function (e) {
+            if (e.target === modalOverlay) closeModal();
+          });
+        }
+
+        // 弹窗确认
+        var modalConfirm = document.getElementById('rn-modal-confirm');
+        if (modalConfirm) {
+          modalConfirm.addEventListener('click', function () {
+            var checked = document.querySelector('input[name="rn-review-result"]:checked');
+            if (!checked) {
+              showToast('请先选择审核结果', 'warning');
+              return;
+            }
+            var result = checked.value;
+            var opinion = document.getElementById('rn-modal-opinion').value.trim();
+            // 持久化到 Store
+            if (typeof currentNoticeId !== 'undefined' && currentNoticeId) {
+              try { Store.reviewNotice(currentNoticeId, result, opinion); } catch(e) {}
+            }
+            // 刷新列表：从 Store 重载数据，重新 enrich，仅更新表格区域
+            loadData();
+            enrichedData = mockData.map(enrichRow);
+            renderTable(enrichedData);
+            showToast('审核' + result + '：' + (opinion || '无意见'), 'success');
+            closeModal();
+          });
+        }
+      }
+
+      // ============================================================
+      // 弹窗打开与填充
+      // ============================================================
+      function openReviewModal(data, isEdit) {
+        var modal = document.getElementById('rn-review-modal');
+        if (!modal) return;
+        currentNoticeId = data && data.id ? data.id : null;
+
+        // 填充整改通知书展示卡片（参考 my-task-check.html 的展示态）
+        var row1 = document.getElementById('rn-notice-row1');
+        if (row1) {
+          row1.innerHTML = '\
+            <div class="rn-notice-item"><span class="rn-notice-label">编号</span>' + (data.noticeNo || '—') + '</div>\
+            <div class="rn-notice-item"><span class="rn-notice-label">部门</span>' + (data.dept || data.stationCode) + '</div>';
+        }
+        var contentEl = document.getElementById('rn-notice-content');
+        if (contentEl) {
+          contentEl.textContent = data.content || '—';
+        }
+        var opinionEl = document.getElementById('rn-notice-opinion');
+        if (opinionEl) {
+          opinionEl.textContent = data.opinion || '—';
+        }
+        var footer = document.getElementById('rn-notice-footer');
+        if (footer) {
+          var statusTag = data.status === '待审核' ? '<span class="rn-notice-status-tag sent">已发送</span>' :
+                          data.status === '审核通过' ? '<span class="rn-notice-status-tag" style="background:#f0fff4;color:#389e0d;">已通过</span>' :
+                          '<span class="rn-notice-status-tag">' + data.status + '</span>';
+          footer.innerHTML = '\
+            <div class="rn-notice-item"><span class="rn-notice-label">整改期限（工作日）</span>' + data.deadline + '</div>\
+            <div class="rn-notice-item"><span class="rn-notice-label">被检查单位人员</span>' + (data.inspectedPerson || '—') + '</div>\
+            <div class="rn-notice-item"><span class="rn-notice-label">检查人员</span>' + (data.inspector || '赵立成') + '</div>\
+            <div class="rn-notice-item"><span class="rn-notice-label">检查人员联系方式</span>' + (data.phone || '—') + '</div>\
+            <div class="rn-notice-item"><span class="rn-notice-label">状态</span>' + statusTag + '</div>';
+        }
+
+        // 详情模式：禁用审核区域
+        var radios = document.querySelectorAll('input[name="rn-review-result"]');
+        var opinion = document.getElementById('rn-modal-opinion');
+        var confirmBtn = document.getElementById('rn-modal-confirm');
+        var sections = modal.querySelectorAll('.rn-modal-section');
+
+        if (!isEdit) {
+          // 详情模式：隐藏审核区域，标题改为详情
+          var title = modal.querySelector('.rn-modal-title');
+          if (title) title.textContent = '整改通知书详情';
+          if (confirmBtn) confirmBtn.style.display = 'none';
+          sections.forEach(function (s) { s.style.display = 'none'; });
+        } else {
+          // 审核模式：显示审核区域
+          var title = modal.querySelector('.rn-modal-title');
+          if (title) title.textContent = '整改通知书审核';
+          if (confirmBtn) confirmBtn.style.display = '';
+          sections.forEach(function (s) { s.style.display = ''; });
+          radios.forEach(function (r) { r.checked = false; });
+          if (opinion) opinion.value = '';
+        }
+
+        modal.classList.add('active');
+      }
+
+      // ============================================================
+      // Toast 提示
+      // ============================================================
+      function showToast(message, type) {
+        var existing = document.querySelector('.rn-toast');
+        if (existing) existing.remove();
+        var toast = document.createElement('div');
+        toast.className = 'rn-toast';
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:6px;font-size:14px;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+        if (type === 'warning') {
+          toast.style.background = '#fffbe6';
+          toast.style.color = '#d48806';
+          toast.style.border = '1px solid #ffe58f';
+        } else if (type === 'success') {
+          toast.style.background = '#f0fff4';
+          toast.style.color = '#389e0d';
+          toast.style.border = '1px solid #b7eb8f';
+        } else {
+          toast.style.background = '#fff';
+          toast.style.color = '#262626';
+          toast.style.border = '1px solid #d9d9d9';
+        }
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2500);
+      }
+
+      // ============================================================
+      // 表格重新渲染（筛选后）
+      // ============================================================
+      function renderTable(data) {
+        currentData = data;
+        var total = data.length;
+        var rowsHtml = '';
+        for (var i = 0; i < total; i++) {
+          var r = data[i];
+          rowsHtml += '\
+            <tr data-i="' + i + '">\
+              <td class="rn-col-center">' + r.id + '</td>\
+              <td>' + r.taskName + '</td>\
+              <td>' + r.stationCode + '</td>\
+              <td>' + r.stationName + '</td>\
+              <td>' + r.dept + '</td>\
+              <td>' + r.deadline + '</td>\
+              <td class="rn-col-center">' + renderStatusTag(r.status) + '</td>\
+              <td>' + r.reviewer + '</td>\
+              <td>' + r.reviewTime + '</td>\
+              <td>' + r.reviewOpinion + '</td>\
+              <td>' + renderAction(r) + '</td>\
+            </tr>';
+        }
+
+        var tbody = document.getElementById('rn-table-body');
+        if (tbody) tbody.innerHTML = rowsHtml;
+
+        // 更新计数和分页信息
+        var badge = document.querySelector('.rn-count-badge');
+        if (badge) badge.textContent = '共 ' + total + ' 条记录';
+        var info = document.querySelector('.rn-pagination-info');
+        if (info) info.textContent = '第 1 - ' + total + ' 条 / 共 ' + total + ' 条';
+
+        // 重新绑定操作列事件（详情为锚点链接自然跳转；审核按钮绑定弹窗）
+        document.querySelectorAll('.rn-action-link').forEach(function (el) {
+          // 详情：<a> 锚点链接，浏览器自然跳转站点详情页，不绑定 JS
+          if (el.tagName === 'A') return;
+          el.addEventListener('click', function () {
+            var row = this.closest('tr');
+            if (!row) return;
+            var idx = parseInt(row.getAttribute('data-i'), 10);
+            var data = currentData[idx];
+            if (!data) return;
+            openReviewModal(data, true); // 审核模式打开弹窗
+          });
+        });
+
+        // 分页按钮原型提示（筛选后重新绑定）
+        document.querySelectorAll('.page-btn.disabled, .page-number').forEach(function (el) {
+          el.addEventListener('click', function () {
+            showToast('当前为原型预览，分页未实现');
+          });
+        });
+      }
+
+      // ============================================================
+      // 启动
+      // ============================================================
+      renderPage();
+    })();
+  </script>
+  <script src="./annotations/all-pages.annotations.js"></script>
+  <script src="./annotations/annotation.js"></script>
+</body>
+</html>

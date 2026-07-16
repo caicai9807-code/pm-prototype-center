@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>电子签名</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f6f8; color: #333; font-size: 14px;
+      min-height: 100vh; -webkit-tap-highlight-color: transparent;
+    }
+
+    .cf-nav-bar {
+      position: sticky; top: 0; z-index: 5;
+      background: #fff; display: flex; align-items: center;
+      height: 36px; padding: 0 12px; border-bottom: 1px solid #edf0f2;
+    }
+    .cf-back-btn {
+      width: 28px; height: 28px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: #4b7cf4;
+      font-size: 20px; border-radius: 14px; flex-shrink: 0;
+    }
+    .cf-nav-title {
+      flex: 1; text-align: center; font-size: 16px; font-weight: 600;
+      color: #111827; margin-right: 28px;
+    }
+
+    .sig-content { padding: 12px; display: flex; flex-direction: column; height: calc(100vh - 36px); }
+
+    .sig-hint {
+      font-size: 14px; color: #999; margin-bottom: 12px;
+    }
+
+    .sig-canvas-wrap {
+      flex: 1; background: #fff; border-radius: 8px;
+      position: relative; overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+    .sig-canvas {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; touch-action: none;
+    }
+
+    .sig-actions {
+      display: flex; gap: 10px; margin-top: 12px;
+    }
+    .sig-btn {
+      flex: 1; height: 42px; border-radius: 8px;
+      font-size: 15px; font-weight: 600; border: none;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; transition: opacity 0.15s;
+    }
+    .sig-btn:active { opacity: 0.8; }
+    .sig-btn-clear {
+      background: #fff; color: #ff3141;
+      border: 1px solid #ffe8e8;
+    }
+    .sig-btn-submit {
+      background: #1677ff; color: #fff;
+    }
+    .sig-btn-submit:disabled {
+      background: #bae0ff; cursor: not-allowed;
+    }
+
+    /* Toast */
+    .adm-toast {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%); z-index: 1000;
+      padding: 10px 20px; border-radius: 8px;
+      background: rgba(0,0,0,0.75); color: #fff;
+      font-size: 14px; font-weight: 500; white-space: nowrap;
+      pointer-events: none; opacity: 1; transition: opacity 0.3s ease;
+    }
+    .adm-toast.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="cf-nav-bar">
+    <a href="javascript:history.back()" class="cf-back-btn">&lsaquo;</a>
+    <div class="cf-nav-title">电子签名</div>
+  </div>
+
+  <div class="sig-content">
+    <div class="sig-hint">请签署：<strong style="color:#1a1a1a;">张建国</strong></div>
+    <div class="sig-canvas-wrap" id="canvasWrap">
+      <canvas class="sig-canvas" id="sigCanvas"></canvas>
+    </div>
+    <div class="sig-actions">
+      <button class="sig-btn sig-btn-clear" onclick="clearCanvas()">清除重写</button>
+      <button class="sig-btn sig-btn-submit" id="submitBtn" onclick="submitSignature()">提交签字</button>
+    </div>
+  </div>
+
+  <script>
+    var canvas = document.getElementById('sigCanvas');
+    var ctx = canvas.getContext('2d');
+    var wrap = document.getElementById('canvasWrap');
+    var isDrawing = false;
+    var hasDrawn = false;
+
+    function resizeCanvas() {
+      var rect = wrap.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#1a1a1a';
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // 绘制签名示例水印
+    function drawPlaceholder() {
+      var rect = wrap.getBoundingClientRect();
+      ctx.font = '24px "KaiTi", "STKaiti", "楷体", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#e5e7eb';
+      ctx.fillText('张建国', rect.width / 2, rect.height / 2);
+    }
+    drawPlaceholder();
+
+    function getPos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      if (!hasDrawn) { clearCanvas(false); }
+      isDrawing = true;
+      hasDrawn = true;
+      var pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function moveDraw(e) {
+      e.preventDefault();
+      if (!isDrawing) return;
+      var pos = getPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function endDraw(e) {
+      e.preventDefault();
+      isDrawing = false;
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mouseleave', endDraw);
+    canvas.addEventListener('touchstart', startDraw, { passive: false });
+    canvas.addEventListener('touchmove', moveDraw, { passive: false });
+    canvas.addEventListener('touchend', endDraw, { passive: false });
+
+    function clearCanvas(showToastMsg) {
+      var rect = wrap.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      hasDrawn = false;
+      drawPlaceholder();
+      if (showToastMsg !== false) showToast('已清除');
+    }
+
+    function submitSignature() {
+      if (!hasDrawn) {
+        showToast('请先书写签名');
+        return;
+      }
+      showToast('签名提交成功');
+      setTimeout(function() {
+        history.back();
+      }, 1000);
+    }
+
+    function showToast(msg) {
+      var existing = document.querySelector('.adm-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('div');
+      toast.className = 'adm-toast';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('hide'); }, 1800);
+      setTimeout(function() { toast.remove(); }, 2200);
+    }
+  </script>
+</body>
+</html>

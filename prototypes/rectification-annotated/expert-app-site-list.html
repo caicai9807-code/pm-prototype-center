@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>站点列表</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===== 导航栏 ===== */
+    .adm-nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 40px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .adm-nav-bar .back {
+      font-size: 20px;
+      color: #333;
+      padding: 2px 6px 2px 0;
+      cursor: pointer;
+      font-weight: 300;
+    }
+    .adm-nav-bar .title {
+      flex: 1;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      margin-right: 32px;
+    }
+
+    /* ===== 内容区 ===== */
+    .adm-content {
+      padding: 8px 12px 16px;
+    }
+
+    /* ===== 站点卡片 ===== */
+    .site-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px 14px 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .site-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .site-card-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    .site-card-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .tag-green { background: #ebfaf3; color: #00b578; }
+    .tag-gray { background: #f5f5f5; color: #999; }
+    .tag-blue { background: #e7f1ff; color: #1677ff; }
+    .tag-orange { background: #fff7e6; color: #d48806; }
+    .tag-red { background: #ffeeee; color: #ff3141; }
+
+    .site-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 4px 0;
+    }
+    .site-info-label {
+      font-size: 13px;
+      color: #999;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+    .site-info-value {
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .site-card-btn {
+      margin-top: 10px;
+      height: 36px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      transition: opacity 0.15s;
+    }
+    .site-card-btn:active { opacity: 0.8; }
+
+    .btn-green {
+      background: #fff;
+      color: #00b578;
+      border: 1px solid #b7eb8f;
+    }
+    .btn-blue {
+      background: #1677ff;
+      color: #fff;
+    }
+    .btn-gray {
+      background: #f5f5f5;
+      color: #999;
+      border: 1px solid #e8e8e8;
+    }
+
+    .safe-area { height: 12px; }
+  </style>
+</head>
+<body>
+  <div class="adm-nav-bar">
+    <a href="javascript:history.back()" class="back">‹</a>
+    <span class="title">站点列表</span>
+  </div>
+
+  <div class="adm-content" id="siteList"></div>
+
+  <div class="safe-area"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const taskId = params.get('id') || 'T20250615001';
+    const taskType = params.get('type') || 'area-check';
+
+    // 模拟数据：按任务ID分组站点列表（3-5个/组）
+    const siteData = {
+      'T20250615001': [
+        { code: '60218B003', name: '桥西区南站', status: 'unchecked', statusText: '待检查', userCode: '60218B003', address: '桥西区中华南大街与槐安路交叉口南行150米路东', office: '东里街道', districtOffice: '桥西片区所' },
+        { code: '60218B006', name: '桥西区北站', status: 'doing', statusText: '检查中', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
+        { code: '60218B009', name: '桥西区东站', status: 'rectify', statusText: '待整改', userCode: '60218B009', address: '桥西区南长街与槐安路交叉口东行100米', office: '汇通街道', districtOffice: '桥西片区所' },
+        { code: '60218B012', name: '桥西区西站', status: 'checked', statusText: '已检查', userCode: '60218B012', address: '桥西区友谊南大街与建国路交叉口西行80米', office: '中山街道', districtOffice: '桥西片区所' },
+      ],
+      'T20250615002': [
+        { code: '60218D001', name: '开发区南站', status: 'checked', statusText: '已检查', userCode: '60218D001', address: '开发区长江大道与天山大街交口东100米', office: '长江街道', districtOffice: '开发区片区所' },
+        { code: '60218D002', name: '开发区北站', status: 'rectified', statusText: '已整改', userCode: '60218D002', address: '开发区湘江道与阿里山大街交口北50米', office: '太行街道', districtOffice: '开发区片区所' },
+        { code: '60218D003', name: '开发区东站', status: 'unchecked', statusText: '待检查', userCode: '60218D003', address: '开发区珠江大道与兴安大街交口西200米', office: '宋营镇', districtOffice: '开发区片区所' },
+        { code: '60218D004', name: '开发区西站', status: 'unchecked', statusText: '待检查', userCode: '60218D004', address: '开发区淮河道与祁连街交口南150米', office: '长江街道', districtOffice: '开发区片区所' },
+      ],
+      'default': [
+        { code: '60218B003', name: '桥西区南站', status: 'checked', statusText: '已检查', userCode: '60218B003', address: '桥西区中华南大街…', office: '东里街道', districtOffice: '桥西片区所' },
+        { code: '60218B006', name: '桥西区北站', status: 'unchecked', statusText: '待检查', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
+        { code: '60218B009', name: '桥西区东站', status: 'unchecked', statusText: '待检查', userCode: '60218B009', address: '桥西区南长街与槐安路交叉口东行100米', office: '汇通街道', districtOffice: '桥西片区所' },
+      ]
+    };
+
+    const sites = siteData[taskId] || siteData['T20250615001'];
+    const listEl = document.getElementById('siteList');
+
+    function getTagClass(status) {
+      switch(status) {
+        case 'rectified': return 'tag-green';
+        case 'checked': return 'tag-green';
+        case 'unchecked': return 'tag-gray';
+        case 'doing': return 'tag-blue';
+        case 'rectify': return 'tag-red';
+        default: return 'tag-gray';
+      }
+    }
+
+    function getBtnHtml(site) {
+      const detailUrl = `./expert-app-site-detail.html?code=${site.code}&task=${taskId}`;
+      if (site.status === 'rectified' || site.status === 'checked') {
+        return `<button class="site-card-btn btn-green" onclick="location.href='${detailUrl}'">查看详情</button>`;
+      } else if (site.status === 'unchecked') {
+        return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}'">开始检查</button>`;
+      } else if (site.status === 'doing') {
+        return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}'">继续检查</button>`;
+      } else {
+        return `<button class="site-card-btn btn-gray" onclick="location.href='${detailUrl}'">查看详情</button>`;
+      }
+    }
+
+    listEl.innerHTML = sites.map(s => `
+      <div class="site-card">
+        <div class="site-card-header">
+          <span class="site-card-name">${s.name}</span>
+          <span class="site-card-tag ${getTagClass(s.status)}">${s.statusText}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">用户编码</span>
+          <span class="site-info-value">${s.userCode}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">用热地址</span>
+          <span class="site-info-value">${s.address}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">办事处</span>
+          <span class="site-info-value">${s.office}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">片区所</span>
+          <span class="site-info-value">${s.districtOffice}</span>
+        </div>
+        ${getBtnHtml(s)}
+      </div>
+    `).join('');
+  </script>
+</body>
+</html>
