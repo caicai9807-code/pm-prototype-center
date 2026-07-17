@@ -32,6 +32,9 @@
 .dl-btn-primary:active{background:#3a6be0}
 .dl-btn-default{background:#f0f2f6;color:#52607a;border:1px solid #e2e6ed}
 .dl-btn-default:active{background:#e5e8ef}
+.dl-year-filter{display:flex;gap:8px;padding:8px 12px 0;background:#fff}
+.dl-year-filter input{flex:1;min-width:0;height:36px;border:none;border-radius:18px;background:#eef0f6;padding:0 14px;color:#52607a;font-size:13px;outline:none}
+.dl-year-select{width:82px;height:36px;border:none;border-radius:18px;background:#eef0f6;padding:0 9px;color:#52607a;font-size:13px;outline:none}
 
 /* ===== 审核弹窗 ===== */
 .dl-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -137,8 +140,13 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'P
           <div class="back-btn" onclick="navTo('home')">‹</div>
           <div class="nav-title">整改任务</div>
         </div>
-        <div class="app-search-bar">
+        <div class="dl-year-filter">
           <input type="text" placeholder="搜索站点名称" id="dlRectifySearch" oninput="renderRectifyList()">
+          <select class="dl-year-select" id="dlRectifyYear" onchange="renderRectifyList()" aria-label="整改任务年度">
+            <option value="all">全部</option>
+            <option value="2026">2026年</option>
+            <option value="2027">2027年</option>
+          </select>
         </div>
         <div class="app-segment" id="dlRectifySegment"></div>
         <div id="dlRectifyContent" style="padding-bottom:12px"></div>
@@ -294,10 +302,10 @@ var DL_AVAILABLE_EXPERTS = {
 };
 
 var DL_RECTIFY_TASKS = [
-  { id:'RT-01', siteName:'裕华区中心站', siteCode:'60218B001', dept:'裕华管理部', address:'裕华区槐安路与翟营大街交叉口东行200米路北', status:'pending', lastSaveTime:'2026-07-04 19:25:12' },
-  { id:'RT-02', siteName:'裕华区万达站', siteCode:'60218B004', dept:'裕华管理部', address:'裕华区槐中路与建华东大街交叉口东南角', status:'pending', lastSaveTime:'2026-07-03 16:20:08' },
-  { id:'RT-03', siteName:'桥西区北站', siteCode:'60218B006', dept:'桥西管理部', address:'桥西区中山路与维明大街交叉口北行50米', status:'pending', lastSaveTime:'2026-07-04 08:40:52' },
-  { id:'RT-04', siteName:'桥西区南站', siteCode:'60218B003', dept:'桥西管理部', address:'桥西区中华南大街与槐安路交叉口南行150米路东', status:'done', lastSaveTime:'2026-07-01 17:30:22' },
+  { id:'RT-01', year:'2026', siteName:'裕华区中心站', siteCode:'60218B001', dept:'裕华管理部', address:'裕华区槐安路与翟营大街交叉口东行200米路北', status:'pending', lastSaveTime:'2026-07-04 19:25:12' },
+  { id:'RT-02', year:'2026', siteName:'裕华区万达站', siteCode:'60218B004', dept:'裕华管理部', address:'裕华区槐中路与建华东大街交叉口东南角', status:'pending', lastSaveTime:'2026-07-03 16:20:08' },
+  { id:'RT-03', year:'2026', siteName:'桥西区北站', siteCode:'60218B006', dept:'桥西管理部', address:'桥西区中山路与维明大街交叉口北行50米', status:'pending', lastSaveTime:'2026-07-04 08:40:52' },
+  { id:'RT-04', year:'2026', siteName:'桥西区南站', siteCode:'60218B003', dept:'桥西管理部', address:'桥西区中华南大街与槐安路交叉口南行150米路东', status:'done', lastSaveTime:'2026-07-01 17:30:22' },
 ];
 
 // ===== 站点详情 Mock 数据 =====
@@ -328,6 +336,11 @@ var DL_SITE_DATA = {
 };
 
 var _page = 'home', _rectifyTab = 'pending', _selectedTransferId = null, _transferTab = 'all';
+var _currentYear = String(new Date().getFullYear());
+var _rectifyYearSelect = document.getElementById('dlRectifyYear');
+if (Array.prototype.some.call(_rectifyYearSelect.options, function(option){ return option.value === _currentYear; })) {
+  _rectifyYearSelect.value = _currentYear;
+}
 
 // ===== 导航 =====
 function navTo(page, opts) {
@@ -522,7 +535,9 @@ function confirmAssign() {
 // ===== 整改任务列表 =====
 function renderRectifyList() {
   var kw = (document.getElementById('dlRectifySearch').value || '').trim().toLowerCase();
-  var filtered = kw ? DL_RECTIFY_TASKS.filter(function(t){ return t.siteName.toLowerCase().indexOf(kw) >= 0; }) : DL_RECTIFY_TASKS;
+  var selectedYear = document.getElementById('dlRectifyYear').value;
+  var annualTasks = selectedYear === 'all' ? DL_RECTIFY_TASKS : DL_RECTIFY_TASKS.filter(function(t){ return t.year === selectedYear; });
+  var filtered = kw ? annualTasks.filter(function(t){ return t.siteName.toLowerCase().indexOf(kw) >= 0; }) : annualTasks;
 
   var segmentHtml = ['pending','done'].map(function(k){
     var cnt = filtered.filter(function(t){ return t.status === k; }).length;

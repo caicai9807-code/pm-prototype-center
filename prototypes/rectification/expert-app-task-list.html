@@ -56,6 +56,7 @@
       padding: 8px 12px 0;
       background: #fff;
     }
+    .adm-search-row { display: flex; gap: 8px; }
     .adm-search input {
       width: 100%;
       height: 36px;
@@ -70,6 +71,8 @@
     .adm-search input::placeholder { color: #aab2bf; }
     .adm-search-wrap {
       position: relative;
+      flex: 1;
+      min-width: 0;
     }
     .adm-search-wrap::before {
       content: "⌕";
@@ -81,6 +84,17 @@
       color: #b8bfcb;
       pointer-events: none;
       z-index: 1;
+    }
+    .adm-year-select {
+      width: 82px;
+      height: 36px;
+      border: none;
+      border-radius: 18px;
+      padding: 0 9px;
+      background: #eef0f6;
+      color: #52607a;
+      font-size: 13px;
+      outline: none;
     }
 
     /* ===== 段式切换器 ===== */
@@ -292,8 +306,15 @@
   </div>
 
   <div class="adm-search" id="searchBar">
-    <div class="adm-search-wrap">
-      <input type="text" placeholder="搜索任务名称" id="taskSearch" oninput="renderTasksWithSearch()">
+    <div class="adm-search-row">
+      <div class="adm-search-wrap">
+        <input type="text" placeholder="搜索任务名称" id="taskSearch" oninput="renderTasksWithSearch()">
+      </div>
+      <select class="adm-year-select" id="taskYear" onchange="renderTasks()" aria-label="任务年度">
+        <option value="all">全部</option>
+        <option value="2026">2026年</option>
+        <option value="2027">2027年</option>
+      </select>
     </div>
   </div>
 
@@ -324,27 +345,32 @@
     var pageTitle = document.getElementById('pageTitle');
     var taskSegment = document.getElementById('taskSegment');
     var taskList = document.getElementById('taskList');
+    var taskYear = document.getElementById('taskYear');
     var currentTab = taskType === 'area-check' ? 'pending' : 'all';
+    var currentYear = String(new Date().getFullYear());
+    if (Array.prototype.some.call(taskYear.options, function(option) { return option.value === currentYear; })) {
+      taskYear.value = currentYear;
+    }
 
     var areaCheckTasks = [
-      { id: 'T20250701001', title: '2025年夏季面积普查-裕华区', status: 'confirm', statusText: '待确认', sites: '5个站点', expert: '张建国', date: '2025-07-01', deadline: '2025-07-15' },
-      { id: 'T20250701002', title: '2025年夏季面积普查-长安区', status: 'confirm', statusText: '待确认', sites: '4个站点', expert: '张建国', date: '2025-07-01', deadline: '2025-07-15' },
-      { id: 'T20250620001', title: '2025年夏季面积普查-桥西区', status: 'pending', statusText: '待开始', sites: '5个站点', expert: '张建国', date: '2025-06-20', deadline: '2025-07-10' },
-      { id: 'T20250620002', title: '2025年夏季面积普查-新华区', status: 'pending', statusText: '待开始', sites: '4个站点', expert: '张建国', date: '2025-06-20', deadline: '2025-07-10' },
-      { id: 'T20250615001', title: '2025年夏季面积普查-高新区', status: 'progress', statusText: '进行中', sites: '3/5个站点', expert: '张建国', date: '2025-06-15', deadline: '2025-07-05' },
-      { id: 'T20250615002', title: '2025年夏季面积普查-开发区', status: 'progress', statusText: '进行中', sites: '2/4个站点', expert: '张建国', date: '2025-06-15', deadline: '2025-07-05' },
-      { id: 'T20250601001', title: '2025年春季面积普查-裕华区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
-      { id: 'T20250601002', title: '2025年春季面积普查-长安区', status: 'done', statusText: '已结束', sites: '4个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
-      { id: 'T20250601003', title: '2025年春季面积普查-桥西区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2025-06-01', deadline: '2025-06-15' },
+      { id: 'T20260701001', year: '2026', title: '2026年夏季面积普查-裕华区', status: 'confirm', statusText: '待确认', sites: '5个站点', expert: '张建国', date: '2026-07-01', deadline: '2026-07-15' },
+      { id: 'T20260701002', year: '2026', title: '2026年夏季面积普查-长安区', status: 'confirm', statusText: '待确认', sites: '4个站点', expert: '张建国', date: '2026-07-01', deadline: '2026-07-15' },
+      { id: 'T20260620001', year: '2026', title: '2026年夏季面积普查-桥西区', status: 'pending', statusText: '待开始', sites: '5个站点', expert: '张建国', date: '2026-06-20', deadline: '2026-07-10' },
+      { id: 'T20260620002', year: '2026', title: '2026年夏季面积普查-新华区', status: 'pending', statusText: '待开始', sites: '4个站点', expert: '张建国', date: '2026-06-20', deadline: '2026-07-10' },
+      { id: 'T20260615001', year: '2026', title: '2026年夏季面积普查-高新区', status: 'progress', statusText: '进行中', sites: '3/5个站点', expert: '张建国', date: '2026-06-15', deadline: '2026-07-05' },
+      { id: 'T20260615002', year: '2026', title: '2026年夏季面积普查-开发区', status: 'progress', statusText: '进行中', sites: '2/4个站点', expert: '张建国', date: '2026-06-15', deadline: '2026-07-05' },
+      { id: 'T20260601001', year: '2026', title: '2026年春季面积普查-裕华区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2026-06-01', deadline: '2026-06-15' },
+      { id: 'T20260601002', year: '2026', title: '2026年春季面积普查-长安区', status: 'done', statusText: '已结束', sites: '4个站点', expert: '张建国', date: '2026-06-01', deadline: '2026-06-15' },
+      { id: 'T20260601003', year: '2026', title: '2026年春季面积普查-桥西区', status: 'done', statusText: '已结束', sites: '5个站点', expert: '张建国', date: '2026-06-01', deadline: '2026-06-15' },
     ];
 
     var rectificationTasks = [
-      { id: 'RT-202607-001', siteCode: '60218B001', siteName: '裕华区中心站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐安路与翟营大街交叉口东行200米路北', lastSave: '2026-07-04 19:25:12' },
-      { id: 'RT-202607-002', siteCode: '60218B004', siteName: '裕华区万达站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐中路与建华东大街交叉口东南角', lastSave: '2026-07-03 16:20:08' },
-      { id: 'RT-202607-003', siteCode: '60218B006', siteName: '桥西区北站', status: 'pending-review', statusText: '待审核', dept: '桥西管理部', address: '桥西区中山路与维明大街交叉口北行50米', lastSave: '2026-07-04 08:40:52' },
-      { id: 'RT-202607-004', siteCode: '60218B007', siteName: '长安区北站', status: 'pending-review', statusText: '待审核', dept: '长安管理部', address: '长安区和平路与建设大街交叉口西行100米', lastSave: '2026-07-04 18:18:00' },
-      { id: 'RT-202607-005', siteCode: '60218B008', siteName: '高新区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已同意', dept: '高新管理部', address: '高新区长江大道与珠峰大街交叉口南行200米', lastSave: '2026-07-05 09:40:00' },
-      { id: 'RT-202607-006', siteCode: '60218B003', siteName: '桥西区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已退回整改', dept: '桥西管理部', address: '桥西区中华南大街与槐安路交叉口南行150米', lastSave: '2026-07-01 17:30:00' },
+      { id: 'RT-202607-001', year: '2026', siteCode: '60218B001', siteName: '裕华区中心站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐安路与翟营大街交叉口东行200米路北', lastSave: '2026-07-04 19:25:12' },
+      { id: 'RT-202607-002', year: '2026', siteCode: '60218B004', siteName: '裕华区万达站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐中路与建华东大街交叉口东南角', lastSave: '2026-07-03 16:20:08' },
+      { id: 'RT-202607-003', year: '2026', siteCode: '60218B006', siteName: '桥西区北站', status: 'pending-review', statusText: '待审核', dept: '桥西管理部', address: '桥西区中山路与维明大街交叉口北行50米', lastSave: '2026-07-04 08:40:52' },
+      { id: 'RT-202607-004', year: '2026', siteCode: '60218B007', siteName: '长安区北站', status: 'pending-review', statusText: '待审核', dept: '长安管理部', address: '长安区和平路与建设大街交叉口西行100米', lastSave: '2026-07-04 18:18:00' },
+      { id: 'RT-202607-005', year: '2026', siteCode: '60218B008', siteName: '高新区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已同意', dept: '高新管理部', address: '高新区长江大道与珠峰大街交叉口南行200米', lastSave: '2026-07-05 09:40:00' },
+      { id: 'RT-202607-006', year: '2026', siteCode: '60218B003', siteName: '桥西区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已退回整改', dept: '桥西管理部', address: '桥西区中华南大街与槐安路交叉口南行150米', lastSave: '2026-07-01 17:30:00' },
     ];
 
     var config = taskType === 'area-check'
@@ -355,7 +381,9 @@
 
     // 获取计数
     function getCounts() {
-      var data = config.data;
+      var data = taskYear.value === 'all'
+        ? config.data
+        : config.data.filter(function(t) { return t.year === taskYear.value; });
       var kw = (document.getElementById('taskSearch').value || '').trim().toLowerCase();
       var filtered = kw ? data.filter(function(t) { return (t.title || t.siteName || '').toLowerCase().indexOf(kw) >= 0; }) : data;
       if (taskType === 'area-check') {
