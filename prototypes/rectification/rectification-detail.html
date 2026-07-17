@@ -250,6 +250,9 @@
       // 从 URL 获取站点编码
       var urlParams = new URLSearchParams(window.location.search);
       var siteCodeParam = urlParams.get('code') || '';
+      var siteProfile = siteCodeParam && window.MockData && window.MockData.sitePool
+        ? window.MockData.sitePool.find(function (site) { return site.code === siteCodeParam; })
+        : null;
 
       function normalizeAreaSnapshot(area) {
         area = area || {};
@@ -275,17 +278,16 @@
         var tasks = Store.getRectificationTasks({ siteCode: siteCodeParam });
         if (tasks && tasks.length) {
           var rt = tasks[0];
-          var sp = (window.MockData && window.MockData.sitePool) ? window.MockData.sitePool.find(function(s){return s.code===siteCodeParam}) : null;
           mockDetail = {
             code: rt.siteCode, name: rt.stationName, shortName: rt.stationName.replace(/^(裕华|长安|桥西)(区)?/, '').replace(/站$/, '') || rt.stationName,
-            address: sp ? (sp.address || '—') : '—',
+            address: siteProfile ? (siteProfile.address || '—') : '—',
             district: '—', office: '—', dept: rt.dept || '—',
             areaOffice: rt.area || '—', contact: '—', phone: '—',
             status: rt.status, censusStaff: '—', inspector: (Store.getCheckRecord(rt.siteCode) || {}).inspector || '赵立成',
             assignee: rt.assignee || '—',
             unregisteredInfo: '无',
-            originalArea: normalizeAreaSnapshot(sp && sp.originalArea),
-            currentArea: normalizeAreaSnapshot(sp && sp.currentArea),
+            originalArea: normalizeAreaSnapshot(siteProfile && siteProfile.originalArea),
+            currentArea: normalizeAreaSnapshot(siteProfile && siteProfile.currentArea),
             areaDiff: 0,
             rectificationInfo: rt.rectificationInfo || '',
             rectificationFiles: rt.rectificationFiles || [],
@@ -294,13 +296,17 @@
         }
       }
       if (!mockDetail) {
+        var fallbackCode = siteProfile ? siteProfile.code : '60218B004';
+        var fallbackName = siteProfile ? siteProfile.name : '裕华区万达站';
+        var fallbackArea = siteProfile ? siteProfile.area : '裕华片区所';
+        var fallbackAssigneeMap = { '裕华片区所': '刘建军', '长安片区所': '王海涛', '桥西片区所': '赵国强' };
         mockDetail = {
-          code: '60218B004', name: '裕华区万达站', shortName: '万达',
-          address: '裕华区槐安路与翟营大街交叉口东行200米路北',
-          district: '裕华区', office: '裕华区办事处', dept: '裕华管理部',
-          areaOffice: '裕华片区所', contact: '王工', phone: '138-0001-2001',
-          status: '待专家审核', censusStaff: '王建国', inspector: '赵立成',
-          assignee: '刘建军',
+          code: fallbackCode, name: fallbackName, shortName: fallbackName.replace(/^(裕华|长安|桥西)(区)?/, '').replace(/站$/, '') || fallbackName,
+          address: siteProfile ? (siteProfile.address || '—') : '裕华区槐安路与翟营大街交叉口东行200米路北',
+          district: siteProfile ? (siteProfile.district || '—') : '裕华区', office: siteProfile ? (siteProfile.office || '—') : '裕华区办事处', dept: siteProfile ? (siteProfile.dept || '—') : '裕华管理部',
+          areaOffice: fallbackArea, contact: siteProfile ? '—' : '王工', phone: siteProfile ? '—' : '138-0001-2001',
+          status: siteProfile && siteProfile.checkStatus === '不合格' ? '待整改' : '待专家审核', censusStaff: '王建国', inspector: '赵立成',
+          assignee: fallbackAssigneeMap[fallbackArea] || '—',
           unregisteredInfo: '无',
           originalArea: { total: 35268.19, residential: { subtotal: 29873.52, multiLayer: 15246.80, highRise: 10342.37, apartment: 4284.35 }, nonResidential: { subtotal: 5394.67, nonResident: 3892.50, nonCoop: 1502.17 } },
           currentArea: { total: 35981.44, residential: { subtotal: 30586.77, multiLayer: 15782.10, highRise: 10469.83, apartment: 4334.84 }, nonResidential: { subtotal: 5394.67, nonResident: 3892.50, nonCoop: 1502.17 } },
