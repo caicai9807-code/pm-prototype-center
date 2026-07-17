@@ -217,6 +217,7 @@
     .tag-done { background: #f5f5f5; color: #999; }
     .tag-rectify { background: #ffeeee; color: #ff3141; }
     .tag-review { background: #fff7e6; color: #d48806; }
+    .tag-reviewed { background: #ebfaf3; color: #00a870; }
     .tag-reinspect { background: #e7f1ff; color: #1677ff; }
     .tag-archive { background: #f5f5f5; color: #999; }
 
@@ -323,7 +324,7 @@
     var pageTitle = document.getElementById('pageTitle');
     var taskSegment = document.getElementById('taskSegment');
     var taskList = document.getElementById('taskList');
-    var currentTab = taskType === 'area-check' ? 'pending' : 'pending'; // area-check:待确认, rectify:待复查
+    var currentTab = taskType === 'area-check' ? 'pending' : 'all';
 
     var areaCheckTasks = [
       { id: 'T20250701001', title: '2025年夏季面积普查-裕华区', status: 'confirm', statusText: '待确认', sites: '5个站点', expert: '张建国', date: '2025-07-01', deadline: '2025-07-15' },
@@ -338,17 +339,17 @@
     ];
 
     var rectificationTasks = [
-      { id: 'RT-202607-001', siteCode: '60218B001', siteName: '裕华区中心站', status: 'pending', statusText: '待整改', dept: '裕华管理部', address: '裕华区槐安路与翟营大街交叉口东行200米路北', lastSave: '2026-07-04 19:25:12' },
-      { id: 'RT-202607-002', siteCode: '60218B004', siteName: '裕华区万达站', status: 'pending', statusText: '待整改', dept: '裕华管理部', address: '裕华区槐中路与建华东大街交叉口东南角', lastSave: '2026-07-03 16:20:08' },
-      { id: 'RT-202607-003', siteCode: '60218B006', siteName: '桥西区北站', status: 'pending', statusText: '待整改', dept: '桥西管理部', address: '桥西区中山路与维明大街交叉口北行50米', lastSave: '2026-07-04 08:40:52' },
-      { id: 'RT-202607-004', siteCode: '60218B007', siteName: '长安区北站', status: 'pending', statusText: '待整改', dept: '长安管理部', address: '长安区和平路与建设大街交叉口西行100米', lastSave: '2026-07-04 18:18:00' },
-      { id: 'RT-202607-005', siteCode: '60218B008', siteName: '高新区南站', status: 'pending', statusText: '待整改', dept: '高新管理部', address: '高新区长江大道与珠峰大街交叉口南行200米', lastSave: '2026-07-05 09:40:00' },
-      { id: 'RT-202607-006', siteCode: '60218B003', siteName: '桥西区南站', status: 'archive', statusText: '已归档', dept: '桥西管理部', address: '桥西区中华南大街与槐安路交叉口南行150米路东', lastSave: '2026-07-01 17:30:00' },
+      { id: 'RT-202607-001', siteCode: '60218B001', siteName: '裕华区中心站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐安路与翟营大街交叉口东行200米路北', lastSave: '2026-07-04 19:25:12' },
+      { id: 'RT-202607-002', siteCode: '60218B004', siteName: '裕华区万达站', status: 'pending-review', statusText: '待审核', dept: '裕华管理部', address: '裕华区槐中路与建华东大街交叉口东南角', lastSave: '2026-07-03 16:20:08' },
+      { id: 'RT-202607-003', siteCode: '60218B006', siteName: '桥西区北站', status: 'pending-review', statusText: '待审核', dept: '桥西管理部', address: '桥西区中山路与维明大街交叉口北行50米', lastSave: '2026-07-04 08:40:52' },
+      { id: 'RT-202607-004', siteCode: '60218B007', siteName: '长安区北站', status: 'pending-review', statusText: '待审核', dept: '长安管理部', address: '长安区和平路与建设大街交叉口西行100米', lastSave: '2026-07-04 18:18:00' },
+      { id: 'RT-202607-005', siteCode: '60218B008', siteName: '高新区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已同意', dept: '高新管理部', address: '高新区长江大道与珠峰大街交叉口南行200米', lastSave: '2026-07-05 09:40:00' },
+      { id: 'RT-202607-006', siteCode: '60218B003', siteName: '桥西区南站', status: 'reviewed', statusText: '已审核', reviewResult: '本人已退回整改', dept: '桥西管理部', address: '桥西区中华南大街与槐安路交叉口南行150米', lastSave: '2026-07-01 17:30:00' },
     ];
 
     var config = taskType === 'area-check'
       ? { title: '面积检查任务', data: areaCheckTasks, tagClass: { confirm:'tag-confirm', pending:'tag-pending', progress:'tag-progress', done:'tag-done' } }
-      : { title: '整改任务', data: rectificationTasks, tagClass: { pending:'tag-rectify', archive:'tag-archive' } };
+      : { title: '整改任务', data: rectificationTasks, tagClass: { 'pending-review':'tag-review', reviewed:'tag-reviewed' } };
     pageTitle.textContent = config.title;
     document.getElementById('taskSearch').placeholder = taskType === 'area-check' ? '搜索任务名称' : '搜索站点名称';
 
@@ -363,9 +364,9 @@
         var done = filtered.filter(function(t) { return t.status === 'done'; });
         return { pending: pending, progress: progress, done: done, all: filtered };
       } else {
-        var pending = filtered.filter(function(t) { return t.status === 'pending'; });
-        var done = filtered.filter(function(t) { return t.status === 'archive'; });
-        return { pending: pending, done: done, progress: [], all: filtered };
+        var pendingReview = filtered.filter(function(t) { return t.status === 'pending-review'; });
+        var reviewed = filtered.filter(function(t) { return t.status === 'reviewed'; });
+        return { pendingReview: pendingReview, reviewed: reviewed, all: filtered };
       }
     }
 
@@ -381,8 +382,9 @@
         ];
       } else {
         tabs = [
-          { key: 'pending', label: '待整改', count: counts.pending.length },
-          { key: 'done', label: '已归档', count: counts.done.length }
+          { key: 'all', label: '全部', count: counts.all.length },
+          { key: 'pending-review', label: '待审核', count: counts.pendingReview.length },
+          { key: 'reviewed', label: '已审核', count: counts.reviewed.length }
         ];
       }
       taskSegment.innerHTML = tabs.map(function(tab) {
@@ -410,15 +412,20 @@
     // 渲染整改任务列表（rt-card风格）
     function renderRectifyTasks(list) {
       return list.map(function(t) {
-        var tagClass = t.status === 'pending' ? 'tag-rectify' : 'tag-archive';
+        var tagClass = t.status === 'pending-review' ? 'tag-review' : 'tag-reviewed';
         var tagHtml = '<span class="rt-tag ' + tagClass + '">' + t.statusText + '</span>';
+        var reviewResult = t.reviewResult
+          ? '<div class="rt-row"><span class="rt-label">个人审核结果</span><span class="rt-value">' + t.reviewResult + '</span></div>'
+          : '';
+        var actionLabel = t.status === 'pending-review' ? '去审核' : '查看整改';
         return '<div class="rt-card" onclick="location.href=\'./expert-app-site-detail.html?code=' + t.siteCode + '\'">' +
           '<div class="rt-top"><span class="rt-name">' + t.siteName + '</span>' + tagHtml + '</div>' +
           '<div class="rt-row"><span class="rt-label">用户编码</span><span class="rt-value">' + t.siteCode + '</span></div>' +
           '<div class="rt-row"><span class="rt-label">所属管理部</span><span class="rt-value">' + t.dept + '</span></div>' +
           '<div class="rt-row"><span class="rt-label">用热地址</span><span class="rt-value">' + t.address + '</span></div>' +
           '<div class="rt-row"><span class="rt-label">最近保存</span><span class="rt-value">' + t.lastSave + '</span></div>' +
-          '<div class="rt-btn" onclick="event.stopPropagation();location.href=\'./expert-app-site-detail.html?code=' + t.siteCode + '\'">查看整改</div>' +
+          reviewResult +
+          '<div class="rt-btn" onclick="event.stopPropagation();location.href=\'./expert-app-site-detail.html?code=' + t.siteCode + '\'">' + actionLabel + '</div>' +
         '</div>';
       }).join('');
     }
@@ -433,8 +440,9 @@
         else if (currentTab === 'progress') list = counts.progress;
         else if (currentTab === 'done') list = counts.done;
       } else {
-        if (currentTab === 'pending') list = counts.pending;
-        else if (currentTab === 'done') list = counts.done;
+        if (currentTab === 'all') list = counts.all;
+        else if (currentTab === 'pending-review') list = counts.pendingReview;
+        else if (currentTab === 'reviewed') list = counts.reviewed;
       }
 
       renderSegment();
