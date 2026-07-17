@@ -237,6 +237,7 @@
   <script src="../../shared/components/Layout/layout.js"></script>
   <script src="./config.js"></script>
   <script src="./components.js"></script>
+  <script src="./mock/data.js"></script>
   <script src="./store/PrototypeStore.js"></script>
 
   <script>
@@ -249,6 +250,27 @@
       // 从 URL 获取站点编码
       var urlParams = new URLSearchParams(window.location.search);
       var siteCodeParam = urlParams.get('code') || '';
+
+      function normalizeAreaSnapshot(area) {
+        area = area || {};
+        var residential = area.residential || {};
+        var nonResidential = area.nonResidential || {};
+        return {
+          total: Number(area.total) || 0,
+          residential: {
+            subtotal: Number(residential.subtotal) || 0,
+            multiLayer: Number(residential.multiLayer) || 0,
+            highRise: Number(residential.highRise) || 0,
+            apartment: Number(residential.apartment) || 0
+          },
+          nonResidential: {
+            subtotal: Number(nonResidential.subtotal) || 0,
+            nonResident: Number(nonResidential.nonResident) || 0,
+            nonCoop: Number(nonResidential.nonCoop) || 0
+          }
+        };
+      }
+
       if (siteCodeParam && Store) {
         var tasks = Store.getRectificationTasks({ siteCode: siteCodeParam });
         if (tasks && tasks.length) {
@@ -262,8 +284,8 @@
             status: rt.status, censusStaff: '—', inspector: (Store.getCheckRecord(rt.siteCode) || {}).inspector || '赵立成',
             assignee: rt.assignee || '—',
             unregisteredInfo: '无',
-            originalArea: sp && sp.originalArea ? sp.originalArea : { total: 0, residential: { subtotal: 0, multiLayer: 0, highRise: 0, apartment: 0 }, nonResidential: { subtotal: 0, nonResident: 0, nonCoop: 0 } },
-            currentArea: sp && sp.currentArea ? sp.currentArea : { total: 0, residential: { subtotal: 0 }, nonResidential: { subtotal: 0 } },
+            originalArea: normalizeAreaSnapshot(sp && sp.originalArea),
+            currentArea: normalizeAreaSnapshot(sp && sp.currentArea),
             areaDiff: 0,
             rectificationInfo: rt.rectificationInfo || '',
             rectificationFiles: rt.rectificationFiles || [],
@@ -437,6 +459,22 @@
       // ============================================================
       function renderPageContent() {
         var d = mockDetail;
+        var signatureHtml = '<div style="font-size:13px;color:#999;">待会签</div>';
+
+        if (d.signatures && d.signatures.length) {
+          signatureHtml = d.signatures.map(function (signature) {
+            var signatureColor = signature.status === '已同意'
+              ? 'color:#52c41a;'
+              : signature.status === '不同意'
+                ? 'color:#ff4d4f;'
+                : 'color:#999;';
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px;">' +
+              '<span style="font-weight:500;">' + signature.expertName + '</span>' +
+              '<span style="' + signatureColor + 'font-weight:500;">' + signature.status + '</span>' +
+              '<span style="color:#999;font-size:12px;">' + (signature.signTime || '') + '</span>' +
+              '</div>';
+          }).join('');
+        }
 
         var statusCls = 'rd-status-tag';
         if (d.status === '待整改') statusCls += '';
@@ -474,10 +512,7 @@
             </div>\
             <div class="rd-sign-card" style="background:#fff;border-radius:6px;padding:12px 16px;margin-bottom:12px;border:1px solid #f0f0f0;">\
               <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;">双专家会签状态</div>\
-              ' + (d.signatures && d.signatures.length ? d.signatures.map(function(s){\
-                var sc = s.status === '已同意' ? 'color:#52c41a;' : s.status === '不同意' ? 'color:#ff4d4f;' : 'color:#999;';\
-                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px;"><span style="font-weight:500;">' + s.expertName + '</span><span style="' + sc + 'font-weight:500;">' + s.status + '</span><span style="color:#999;font-size:12px;">' + (s.signTime || '') + '</span></div>';\
-              }).join('') : '<div style="font-size:13px;color:#999;">待会签</div>') + '\
+              ' + signatureHtml + '\
             </div>\
             <div class="rd-tab-card">\
               <div class="rd-tab-header">\
