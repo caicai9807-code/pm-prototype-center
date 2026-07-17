@@ -465,22 +465,6 @@
       // ============================================================
       function renderPageContent() {
         var d = mockDetail;
-        var signatureHtml = '<div style="font-size:13px;color:#999;">待会签</div>';
-
-        if (d.signatures && d.signatures.length) {
-          signatureHtml = d.signatures.map(function (signature) {
-            var signatureColor = signature.status === '已同意'
-              ? 'color:#52c41a;'
-              : signature.status === '不同意'
-                ? 'color:#ff4d4f;'
-                : 'color:#999;';
-            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:13px;">' +
-              '<span style="font-weight:500;">' + signature.expertName + '</span>' +
-              '<span style="' + signatureColor + 'font-weight:500;">' + signature.status + '</span>' +
-              '<span style="color:#999;font-size:12px;">' + (signature.signTime || '') + '</span>' +
-              '</div>';
-          }).join('');
-        }
 
         var statusCls = 'rd-status-tag';
         if (d.status === '待整改') statusCls += '';
@@ -515,10 +499,6 @@
                 <div class="rd-info-item"><span class="rd-info-label">整改负责人：</span><span class="rd-info-value" style="font-weight:500;color:#1677ff;">' + (d.assignee || '—') + '</span></div>\
                 <div class="rd-info-item full-width"><span class="rd-info-label">来源：</span><span class="rd-info-value" style="color:#999;">站点所属片区所所长</span></div>\
               </div>\
-            </div>\
-            <div class="rd-sign-card" style="background:#fff;border-radius:6px;padding:12px 16px;margin-bottom:12px;border:1px solid #f0f0f0;">\
-              <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px;">双专家会签状态</div>\
-              ' + signatureHtml + '\
             </div>\
             <div class="rd-tab-card">\
               <div class="rd-tab-header">\
