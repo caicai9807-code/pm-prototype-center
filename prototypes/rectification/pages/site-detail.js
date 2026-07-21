@@ -221,7 +221,7 @@
           <div class="site-detail-info-item"><span class="site-detail-info-label">站点名称：</span><span class="site-detail-info-value">' + detail.name + '</span></div>\
           <div class="site-detail-info-item"><span class="site-detail-info-label">用户编码：</span><span class="site-detail-info-value">' + detail.code + '</span></div>\
           <div class="site-detail-info-item"><span class="site-detail-info-label">简称：</span><span class="site-detail-info-value">' + detail.shortName + '</span></div>\
-          <div class="site-detail-info-item full-width"><span class="site-detail-info-label">用地地址：</span><span class="site-detail-info-value">' + detail.address + '</span></div>\
+          <div class="site-detail-info-item full-width"><span class="site-detail-info-label">用热地址：</span><span class="site-detail-info-value">' + detail.address + '</span></div>\
           <div class="site-detail-info-item"><span class="site-detail-info-label">行政区：</span><span class="site-detail-info-value">' + detail.district + '</span></div>\
           <div class="site-detail-info-item"><span class="site-detail-info-label">办事处：</span><span class="site-detail-info-value">' + detail.office + '</span></div>\
           <div class="site-detail-info-item"><span class="site-detail-info-label">管理部：</span><span class="site-detail-info-value">' + detail.dept + '</span></div>\
@@ -328,7 +328,7 @@
                 <div class="site-detail-notice-item"><span>站点名称</span>' + detail.name + '</div>\
                 <div class="site-detail-notice-item"><span>用户编码</span>' + detail.code + '</div>\
                 <div class="site-detail-notice-item"><span>管理部/片区所</span>' + detail.dept + ' / ' + detail.areaOffice + '</div>\
-                <div class="site-detail-notice-item"><span>用地地址</span>' + detail.address + '</div>\
+                <div class="site-detail-notice-item"><span>用热地址</span>' + detail.address + '</div>\
               </div>\
               <div class="site-detail-notice-section-title">整改事项</div>\
               <div class="site-detail-notice-content-box">地下室新增用热面积约160㎡未同步到普查台账，需补录并更新核查表。</div>\

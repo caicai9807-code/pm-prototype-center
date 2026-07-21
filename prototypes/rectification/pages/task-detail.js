@@ -333,7 +333,7 @@
               <th style="width:120px;">片区所</th>\
               <th style="width:100px;">站点类型</th>\
               <th style="width:120px;">办事处</th>\
-              <th style="width:260px;">用地地址</th>\
+              <th style="width:260px;">用热地址</th>\
               <th style="width:120px;">完成时间</th>\
               <th style="width:100px;">本轮次是否普查</th>\
               <th style="width:90px;">建筑年代</th>\
