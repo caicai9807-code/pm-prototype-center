@@ -18,7 +18,7 @@
 .cf-label{color:#8a8f99;font-size:12px;white-space:nowrap;flex-shrink:0}
 .cf-value{color:#111827;font-size:12px;text-align:right;overflow:hidden;text-overflow:ellipsis}
 
-/* ===== 转派审核卡片 ===== */
+/* ===== 专家任务调整卡片 ===== */
 .dl-card{background:#fff;border-radius:16px;padding:14px;margin:10px 12px;box-shadow:0 6px 18px rgba(31,41,55,.07)}
 .dl-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
 .dl-card-name{font-size:15px;font-weight:700;color:#23324a;line-height:20px}
@@ -103,8 +103,8 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'P
             <div class="entry-hd">
               <div class="entry-icon check" style="background:#e9f1ff">📋</div>
               <div>
-                <div class="entry-title">转派审核</div>
-                <div class="entry-desc">审核专家拒绝参加的申请并重新指派</div>
+                <div class="entry-title">专家任务调整</div>
+                <div class="entry-desc">审核专家拒绝参加的申请并调整任务安排</div>
               </div>
             </div>
             <div class="entry-stats" id="dlTransferStats"></div>
@@ -116,7 +116,7 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'P
       <div class="app-page hidden" id="appPageTransferReview">
         <div class="app-nav-bar">
           <div class="back-btn" onclick="navTo('home')">‹</div>
-          <div class="nav-title">转派审核</div>
+          <div class="nav-title">专家任务调整</div>
         </div>
         <div class="app-search-bar">
           <input type="text" placeholder="搜索任务名称" id="dlSearchInput" oninput="renderTransferList()">
@@ -125,11 +125,11 @@ body{margin:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'P
         <div id="dlTransferContent" style="padding-bottom:12px"></div>
       </div>
 
-      <!-- ===== 页面3：审核指派弹窗（全屏页） ===== -->
+      <!-- ===== 页面3：审核调整弹窗（全屏页） ===== -->
       <div class="app-page hidden" id="appPageAssignReview">
         <div class="cf-nav-bar">
           <div class="cf-back-btn" onclick="navTo('transferReview')">‹</div>
-          <div class="cf-nav-title">审核指派</div>
+          <div class="cf-nav-title">审核调整</div>
         </div>
         <div id="dlAssignContent" class="cf-content"></div>
       </div>
@@ -223,7 +223,7 @@ var DL_TRANSFER_TASKS = [
     logs: [
       { time: '2026-07-04 07:00', text: '系统创建任务并下发给专家 王秀英' },
       { time: '2026-07-04 08:45', text: '专家 王秀英 拒绝任务，原因：近期身体不适' },
-      { time: '2026-07-04 14:30', text: '部门领导 王主任 转派给 刘建平' }
+      { time: '2026-07-04 14:30', text: '部门领导 王主任 将任务调整至 刘建平' }
     ]
   },
   {
@@ -281,7 +281,7 @@ var DL_TRANSFER_TASKS = [
     logs: [
       { time: '2026-06-24 10:00', text: '系统创建任务并下发给专家 陈晓华' },
       { time: '2026-06-24 14:30', text: '专家 陈晓华 拒绝任务' },
-      { time: '2026-06-25 10:00', text: '部门领导 王主任 转派给 李国强' }
+      { time: '2026-06-25 10:00', text: '部门领导 王主任 将任务调整至 李国强' }
     ]
   }
 ];
@@ -358,8 +358,8 @@ function navTo(page, opts) {
   _page = page;
   var titles = {
     home: '部门领导',
-    transferReview: '转派审核',
-    assignReview: '审核指派',
+    transferReview: '专家任务调整',
+    assignReview: '审核调整',
     rectifyList: '整改任务',
     siteDetail: '站点详情'
   };
@@ -372,10 +372,15 @@ function navTo(page, opts) {
 }
 
 // ===== 首页 =====
+function getLeaderTransferTasks() {
+  return DL_TRANSFER_TASKS.filter(function(t){ return t.status === 'pending' || t.status === 'done'; });
+}
+
 function renderHome() {
-  var allCount = DL_TRANSFER_TASKS.length;
-  var pendingCount = DL_TRANSFER_TASKS.filter(function(t){ return t.status === 'pending'; }).length;
-  var doneCount = DL_TRANSFER_TASKS.filter(function(t){ return t.status === 'done'; }).length;
+  var leaderTasks = getLeaderTransferTasks();
+  var allCount = leaderTasks.length;
+  var pendingCount = leaderTasks.filter(function(t){ return t.status === 'pending'; }).length;
+  var doneCount = leaderTasks.filter(function(t){ return t.status === 'done'; }).length;
   document.getElementById('dlTransferStats').innerHTML =
     '<span class="stat-item"><span class="stat-num">' + allCount + '</span>全部</span>' +
     '<span class="stat-item highlight"><span class="stat-num">' + pendingCount + '</span>待处理</span>' +
@@ -385,9 +390,10 @@ function renderHome() {
 // ===== 面积检查任务列表 =====
 function renderTransferList() {
   var kw = (document.getElementById('dlSearchInput').value || '').trim().toLowerCase();
+  var leaderTasks = getLeaderTransferTasks();
   var filtered = kw
-    ? DL_TRANSFER_TASKS.filter(function(t){ return t.taskName.toLowerCase().indexOf(kw) >= 0 || t.siteName.toLowerCase().indexOf(kw) >= 0; })
-    : DL_TRANSFER_TASKS;
+    ? leaderTasks.filter(function(t){ return t.taskName.toLowerCase().indexOf(kw) >= 0 || t.siteName.toLowerCase().indexOf(kw) >= 0; })
+    : leaderTasks;
 
   // Segment: 全部/待处理/已处理
   var segmentItems = ['all', 'pending', 'done'];
@@ -416,26 +422,25 @@ function renderTransferList() {
       tagText = '待处理';
     } else if (t.status === 'done') {
       tagStyle = 'background:#f6ffed;color:#52c41a';
-      tagText = '已转派';
+      tagText = '已调整';
     } else {
       tagStyle = 'background:#e6f7ff;color:#1890ff';
       tagText = '正常';
     }
     var assignInfo = t.status === 'done' && t.assignedTo
-      ? '<div class="rt-row"><span class="rt-label">已转派给</span><span class="rt-value" style="color:#52c41a">' + t.assignedTo + '</span></div>' +
+      ? '<div class="rt-row"><span class="rt-label">已调整至</span><span class="rt-value" style="color:#52c41a">' + t.assignedTo + '</span></div>' +
         '<div class="rt-row"><span class="rt-label">处理时间</span><span class="rt-value">' + t.assignTime + '</span></div>'
       : '';
     var rejectInfo = t.status === 'pending' && t.rejectReason
       ? '<div class="rt-row"><span class="rt-label" style="color:#d48806">拒绝原因</span><span class="rt-value" style="color:#8a8f99">' + t.rejectReason + '</span></div>'
       : '';
     var btnHtml = t.status === 'pending'
-      ? '<div class="dl-card-btn-area"><button class="dl-btn dl-btn-primary" onclick="event.stopPropagation();openAssignReview(\'' + t.id + '\')">审核指派</button></div>'
+      ? '<div class="dl-card-btn-area"><button class="dl-btn dl-btn-primary" onclick="event.stopPropagation();openAssignReview(\'' + t.id + '\')">转派</button></div>'
       : t.status === 'done'
-        ? '<div class="dl-card-btn-area"><button class="dl-btn dl-btn-default" onclick="event.stopPropagation();openAssignReview(\'' + t.id + '\')">查看转派</button></div>'
+        ? '<div class="dl-card-btn-area"><button class="dl-btn dl-btn-default" onclick="event.stopPropagation();openAssignReview(\'' + t.id + '\')">详情</button></div>'
         : '';
     return '<div class="dl-card">' +
-      '<div class="dl-card-top"><span class="dl-card-name">' + t.siteName + '</span><span class="dl-card-tag" style="' + tagStyle + '">' + tagText + '</span></div>' +
-      '<div class="rt-row"><span class="rt-label">任务名称</span><span class="rt-value">' + t.taskName + '</span></div>' +
+      '<div class="dl-card-top"><span class="dl-card-name">' + t.taskName + '</span><span class="dl-card-tag" style="' + tagStyle + '">' + tagText + '</span></div>' +
       '<div class="rt-row"><span class="rt-label">任务周期</span><span class="rt-value">' + t.period + '</span></div>' +
       '<div class="rt-row"><span class="rt-label">所属管理部</span><span class="rt-value">' + t.dept + '</span></div>' +
       '<div class="rt-row"><span class="rt-label">原专家</span><span class="rt-value" style="color:#d48806">' + t.originalExpert + '</span></div>' +
@@ -453,10 +458,12 @@ function openAssignReview(id) {
   navTo('assignReview');
 }
 
-// ===== 审核指派 =====
+// ===== 审核调整 =====
 function renderAssignReview() {
   var t = DL_TRANSFER_TASKS.filter(function(item){ return item.id === _selectedTransferId; })[0];
-  if (!t) { document.getElementById('dlAssignContent').innerHTML = '<div style="text-align:center;padding:40px;color:#999">未找到转派信息</div>'; return; }
+  if (!t) { document.getElementById('dlAssignContent').innerHTML = '<div style="text-align:center;padding:40px;color:#999">未找到任务调整信息</div>'; return; }
+  var isReadOnly = t.status === 'done';
+  document.querySelector('#appPageAssignReview .cf-nav-title').textContent = isReadOnly ? '任务详情' : '任务转派';
 
   var experts = DL_AVAILABLE_EXPERTS[t.dept] || [];
   var expertsHtml = experts.map(function(e, i){
@@ -469,6 +476,18 @@ function renderAssignReview() {
       '<div class="dl-expert-radio"></div>' +
     '</div>';
   }).join('');
+  var selectionHtml = isReadOnly ? '' :
+    '<div class="cf-card">' +
+      '<div class="cf-card-title">选择新专家 <span style="font-weight:400;font-size:12px;color:#999">（' + t.dept + '）</span></div>' +
+      '<div id="dlExpertList">' + expertsHtml + '</div>' +
+      '<div id="dlSelectedExpert" style="margin-top:10px;display:none;padding:8px;background:#f0f5ff;border-radius:6px;font-size:12px;color:#4b7cf4;text-align:center">已选择：<span id="dlSelectedExpertName"></span></div>' +
+    '</div>';
+  var footerHtml = isReadOnly
+    ? '<div style="display:flex;gap:10px;padding:4px 0"><button class="dl-sheet-btn dl-sheet-btn-confirm" onclick="navTo(\'transferReview\')">返回</button></div>'
+    : '<div style="display:flex;gap:10px;padding:4px 0">' +
+        '<button class="dl-sheet-btn dl-sheet-btn-cancel" onclick="navTo(\'transferReview\')">取消</button>' +
+        '<button class="dl-sheet-btn dl-sheet-btn-confirm" id="dlAssignConfirmBtn" onclick="confirmAssign()" disabled>确认调整</button>' +
+      '</div>';
 
   document.getElementById('dlAssignContent').innerHTML = '' +
     '<div class="cf-card">' +
@@ -477,7 +496,7 @@ function renderAssignReview() {
       '<div class="cf-field-row"><span class="cf-label">所属年度</span><span class="cf-value">' + (t.year || '—') + '</span></div>' +
       '<div class="cf-field-row"><span class="cf-label">任务周期</span><span class="cf-value">' + (t.period || '—') + '</span></div>' +
       '<div class="cf-field-row"><span class="cf-label">所属管理部</span><span class="cf-value">' + t.dept + '</span></div>' +
-      '<div class="cf-field-row cf-field-last"><span class="cf-label">待处理站点数</span><span class="cf-value">' + (t.pendingCount || '—') + ' 个</span></div>' +
+      '<div class="cf-field-row cf-field-last"><span class="cf-label">站点数量</span><span class="cf-value">' + (t.pendingCount || '—') + ' 个</span></div>' +
     '</div>' +
     '<div class="cf-card" style="background:#fff8e8;border:1px solid #ffe58f;">' +
       '<div class="cf-card-title" style="color:#d48806">原专家信息</div>' +
@@ -486,21 +505,19 @@ function renderAssignReview() {
       '<div class="cf-field-row"><span class="cf-label">拒绝原因</span><span class="cf-value" style="color:#8a8f99;text-align:left;font-weight:400">' + t.rejectReason + '</span></div>' +
       '<div class="cf-field-row cf-field-last"><span class="cf-label">拒绝时间</span><span class="cf-value">' + t.rejectTime + '</span></div>' +
     '</div>' +
-    (t.logs && t.logs.length > 0 ? '<div class="cf-card"><div class="cf-card-title">转派日志</div><div id="dlLogTimeline">' + t.logs.map(function(log){
+    (isReadOnly && t.assignedTo ? '<div class="cf-card" style="background:#f6ffed;border:1px solid #b7eb8f;">' +
+      '<div class="cf-card-title" style="color:#389e0d">转派结果</div>' +
+      '<div class="cf-field-row"><span class="cf-label">转派后专家</span><span class="cf-value" style="color:#389e0d">' + t.assignedTo + '</span></div>' +
+      '<div class="cf-field-row cf-field-last"><span class="cf-label">转派时间</span><span class="cf-value">' + t.assignTime + '</span></div>' +
+    '</div>' : '') +
+    (t.logs && t.logs.length > 0 ? '<div class="cf-card"><div class="cf-card-title">任务调整日志</div><div id="dlLogTimeline">' + t.logs.map(function(log){
       return '<div style="display:flex;gap:8px;margin-bottom:8px;align-items:flex-start">' +
         '<div style="width:8px;height:8px;border-radius:50%;background:#4b7cf4;margin-top:4px;flex-shrink:0"></div>' +
         '<div style="flex:1"><div style="font-size:11px;color:#999;margin-bottom:2px">' + log.time + '</div><div style="font-size:12px;color:#333;line-height:1.4">' + log.text + '</div></div>' +
       '</div>';
     }).join('') + '</div></div>' : '') +
-    '<div class="cf-card">' +
-      '<div class="cf-card-title">选择新专家 <span style="font-weight:400;font-size:12px;color:#999">（' + t.dept + '）</span></div>' +
-      '<div id="dlExpertList">' + expertsHtml + '</div>' +
-      '<div id="dlSelectedExpert" style="margin-top:10px;display:none;padding:8px;background:#f0f5ff;border-radius:6px;font-size:12px;color:#4b7cf4;text-align:center">已选择：<span id="dlSelectedExpertName"></span></div>' +
-    '</div>' +
-    '<div style="display:flex;gap:10px;padding:4px 0">' +
-      '<button class="dl-sheet-btn dl-sheet-btn-cancel" onclick="navTo(\'transferReview\')">取消</button>' +
-      '<button class="dl-sheet-btn dl-sheet-btn-confirm" id="dlAssignConfirmBtn" onclick="confirmAssign()" disabled>确认转派</button>' +
-    '</div>';
+    selectionHtml +
+    footerHtml;
   _selectedExpertName = null;
 }
 
@@ -524,11 +541,11 @@ function confirmAssign() {
     t.assignedTo = _selectedExpertName;
     t.assignTime = new Date().toISOString().replace('T', ' ').slice(0, 16);
     if (!t.logs) t.logs = [];
-    t.logs.push({ time: t.assignTime, text: '部门领导 王主任 转派给 ' + _selectedExpertName });
-    // 模拟通知PC端：写入转派完成标记
+    t.logs.push({ time: t.assignTime, text: '部门领导 王主任 将任务调整至 ' + _selectedExpertName });
+    // 模拟通知PC端：写入任务调整完成标记
     try { localStorage.setItem('transferDone_' + t.id, 'true'); } catch(e) {}
   }
-  showToast('已转派给「' + _selectedExpertName + '」');
+  showToast('已调整至「' + _selectedExpertName + '」');
   setTimeout(function(){ navTo('transferReview'); }, 800);
 }
 

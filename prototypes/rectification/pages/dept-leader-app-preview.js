@@ -102,7 +102,7 @@
           <div class="dl-doc-section">
             <div class="dl-doc-section-title">页面导航</div>
             <ul>
-              <li><strong>转派审核 → 待处理的专家拒绝转派列表 → 审核指派</strong>（查看拒绝原因 + 选择新专家）</li>
+              <li><strong>专家任务调整（仅专家拒绝任务）→ 待处理任务列表 → 转派</strong>（查看拒绝原因 + 选择新专家）</li>
               <li><strong>整改任务 → 整改任务列表（待整改/已归档）→ 站点详情</strong>（只读）</li>
             </ul>
           </div>
@@ -111,8 +111,8 @@
             <div class="dl-doc-section-title">页面清单</div>
             <ol>
               <li>工作台（首页）</li>
-              <li>转派审核（列表页）</li>
-              <li>审核指派（详情页 + 专家选择）</li>
+              <li>专家任务调整（列表页）</li>
+              <li>任务转派（详情页 + 专家选择）</li>
               <li>整改任务（列表页 + segment切换）</li>
               <li>站点详情（只读页）</li>
             </ol>
@@ -120,7 +120,7 @@
 
           <div class="dl-nav-footer">
             <button class="dl-nav-btn primary" data-target="./dept-leader-app-standalone.html">工作台</button>
-            <button class="dl-nav-btn" data-target="./dept-leader-app-standalone.html#page=transferReview">转派审核</button>
+            <button class="dl-nav-btn" data-target="./dept-leader-app-standalone.html#page=transferReview">专家任务调整</button>
             <button class="dl-nav-btn" data-target="./dept-leader-app-standalone.html#page=rectifyList">整改任务</button>
           </div>
           <p class="dl-hint">点击上方按钮可在手机模型中切换预览不同页面</p>
