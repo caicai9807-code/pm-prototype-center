@@ -232,7 +232,7 @@
           rectificationTasks[rtId] = {
             id: rtId, noticeId: notice.id, taskId: notice.taskId, siteCode: code,
             taskName: notice.taskName || '—', stationName: notice.stationName || code, stationCode: code,
-            dept: notice.dept || '—', area: area, status: '待整改', assignee: assignee,
+            dept: notice.dept || '—', area: area, status: code === '60218B011' ? '待专家审核' : '待整改', assignee: assignee,
             assigneeSource: '站点所属片区所所长',
             deadline: '2026-07-25', overdueDays: 0, rectificationInfo: '', rectificationFiles: [],
             signStatus: '待会签',
@@ -275,6 +275,24 @@
   // ============================================================
   var state;
 
+  function migrateDemoReviewTask(parsed) {
+    if (!parsed.rectificationTasks) return false;
+    var changed = false;
+    Object.keys(parsed.rectificationTasks).forEach(function (id) {
+      var task = parsed.rectificationTasks[id];
+      if (!task || task.siteCode !== '60218B011') return;
+      if (task.status === '待复查' || task.status === '待整改') {
+        task.status = '待专家审核';
+        task.rectificationInfo = task.rectificationInfo || '已完成问题整改并补充相关材料，提交专家审核。';
+        task.rectificationFiles = task.rectificationFiles && task.rectificationFiles.length
+          ? task.rectificationFiles
+          : ['整改告知书.docx'];
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -283,6 +301,7 @@
         // 校验关键字段存在
         if (parsed && parsed.tasks && parsed.siteStates) {
           state = parsed;
+          if (migrateDemoReviewTask(state)) save();
           return;
         }
       }
