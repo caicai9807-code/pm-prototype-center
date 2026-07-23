@@ -261,12 +261,6 @@
           <span class="site-card-tag ${getCheckTagClass(s.checkStatus)}">${s.checkStatusText}</span>
         </div>
         <div class="site-info-row">
-          <span class="site-info-label">整改状态</span>
-          ${s.rectifyStatus === 'none'
-            ? '<span class="site-info-value">—</span>'
-            : `<span class="site-card-tag ${getRectifyTagClass(s.rectifyStatus)}">${s.rectifyStatusText}</span>`}
-        </div>
-        <div class="site-info-row">
           <span class="site-info-label">用户编码</span>
           <span class="site-info-value">${s.userCode}</span>
         </div>

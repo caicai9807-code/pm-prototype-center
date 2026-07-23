@@ -939,7 +939,6 @@
 
     applySeparatedStatuses(site);
     var checkStatusTagClass = getCheckTagClass(site.checkStatus);
-    var rectifyStatusTagClass = getRectifyTagClass(site.rectifyStatus);
 
     var isUnqualified = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
 
@@ -972,12 +971,6 @@
       <div class="status-info-row">
         <span class="status-info-label">检查状态</span>
         <span class="status-tag ${checkStatusTagClass}">${site.checkStatusText}</span>
-      </div>
-      <div class="status-info-row">
-        <span class="status-info-label">整改状态</span>
-        ${site.rectifyStatus === 'none'
-          ? '<span class="status-info-value">—</span>'
-          : '<span class="status-tag ' + rectifyStatusTagClass + '">' + site.rectifyStatusText + '</span>'}
       </div>
       ${checkBtnHtml}
       ${rectifyBtnHtml}
