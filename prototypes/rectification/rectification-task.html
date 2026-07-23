@@ -58,18 +58,28 @@
 
     /* ── 表格列宽 ── */
     .rt-table {
-      min-width: 1260px;
+      min-width: 1740px;
       table-layout: fixed;
     }
     .rt-table .col-seq { width: 52px; }
-    .rt-table .col-task-name { width: 200px; }
-    .rt-table .col-station-name { width: 120px; }
+    .rt-table .col-task-name { width: 230px; }
+    .rt-table .col-station-code { width: 110px; }
+    .rt-table .col-station-name { width: 130px; }
+    .rt-table .col-dept { width: 110px; }
+    .rt-table .col-area { width: 110px; }
     .rt-table .col-person { width: 80px; }
     .rt-table .col-status { width: 90px; }
-    .rt-table .col-deadline { width: 100px; }
+    .rt-table .col-deadline { width: 110px; }
     .rt-table .col-overdue { width: 80px; }
+    .rt-table .col-overdue-days { width: 90px; }
     .rt-table .col-node { width: 120px; }
     .rt-table .col-ops { width: 110px; }
+
+    .rt-empty-cell {
+      height: 120px;
+      color: var(--pc-color-text-3);
+      text-align: center;
+    }
 
     /* 操作列 sticky 固定 */
     .rt-table th:last-child,
@@ -360,6 +370,7 @@
   <script src="../../shared/components/Layout/layout.js"></script>
   <script src="./config.js"></script>
   <script src="./components.js"></script>
+  <script src="./mock/data.js"></script>
   <script src="./store/PrototypeStore.js"></script>
 
   <script>
@@ -371,13 +382,65 @@
       // ============================================================
       var Store = window.PrototypeStore;
       var mockData = [
-        { id: 1, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区中心站', stationCode: '60218B001', person: '赵立成', status: '待整改', deadline: '2026-07-20', overdueDays: 0, node: '待接收' },
-        { id: 2, taskName: '2026 第27周 裕华片区异常转派补查任务', stationName: '裕华区万达站', stationCode: '60218B004', person: '王建国', status: '整改中', deadline: '2026-07-25', overdueDays: 0, node: '整改执行' },
-        { id: 3, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区东南站', stationCode: '60218B007', person: '赵立成', status: '待专家审核', deadline: '2026-06-28', overdueDays: 7, node: '专家审核' },
-        { id: 4, taskName: '2026 第26周 桥西片区常规面积核查任务', stationName: '桥西区新百站', stationCode: '60218B010', person: '李志强', status: '已完成', deadline: '2026-07-05', overdueDays: 0, node: '已完成' },
-        { id: 5, taskName: '2026 第26周 长安片区管网排查任务', stationName: '长安区中山东路站', stationCode: '60218B012', person: '张伟', status: '已超期', deadline: '2026-06-25', overdueDays: 10, node: '整改执行' },
-        { id: 6, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区槐北站', stationCode: '60218B015', person: '赵立成', status: '待整改', deadline: '2026-07-22', overdueDays: 0, node: '待接收' }
+        { id: 1, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区中心站', stationCode: '60218B001', dept: '裕华管理部', area: '裕华片区所', person: '赵立成', status: '待整改', deadline: '2026-07-20', overdueDays: 0, node: '待接收' },
+        { id: 2, taskName: '2026 第27周 裕华片区异常转派补查任务', stationName: '裕华区万达站', stationCode: '60218B004', dept: '裕华管理部', area: '裕华片区所', person: '王建国', status: '整改中', deadline: '2026-07-25', overdueDays: 0, node: '整改执行' },
+        { id: 3, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区东南站', stationCode: '60218B007', dept: '裕华管理部', area: '裕华片区所', person: '赵立成', status: '待专家审核', deadline: '2026-06-28', overdueDays: 7, node: '专家审核' },
+        { id: 4, taskName: '2026 第26周 桥西片区常规面积核查任务', stationName: '桥西区新百站', stationCode: '60218B010', dept: '桥西管理部', area: '桥西片区所', person: '李志强', status: '已完成', deadline: '2026-07-05', overdueDays: 0, node: '已完成' },
+        { id: 5, taskName: '2026 第26周 长安片区管网排查任务', stationName: '长安区中山东路站', stationCode: '60218B012', dept: '长安管理部', area: '长安片区所', person: '张伟', status: '已超期', deadline: '2026-06-25', overdueDays: 10, node: '整改执行' },
+        { id: 6, taskName: '2026 第27周 裕华片区常规面积核查任务', stationName: '裕华区槐北站', stationCode: '60218B015', dept: '裕华管理部', area: '裕华片区所', person: '赵立成', status: '待整改', deadline: '2026-07-22', overdueDays: 0, node: '待接收' }
       ];
+
+      var stationProfiles = {
+        '60218B001': { name: '裕华区中心站', dept: '裕华管理部', area: '裕华片区所' },
+        '60218B002': { name: '长安区东站', dept: '长安管理部', area: '长安片区所' },
+        '60218B003': { name: '桥西区南站', dept: '桥西管理部', area: '桥西片区所' },
+        '60218B004': { name: '裕华区万达站', dept: '裕华管理部', area: '裕华片区所' },
+        '60218B005': { name: '长安区西站', dept: '长安管理部', area: '长安片区所' },
+        '60218B006': { name: '桥西区北站', dept: '桥西管理部', area: '桥西片区所' },
+        '60218B007': { name: '裕华区东站', dept: '裕华管理部', area: '裕华片区所' },
+        '60218B008': { name: '长安区南站', dept: '长安管理部', area: '长安片区所' },
+        '60218B009': { name: '桥西区东站', dept: '桥西管理部', area: '桥西片区所' },
+        '60218B010': { name: '裕华区南站', dept: '裕华管理部', area: '裕华片区所' },
+        '60218B011': { name: '长安区中心站', dept: '长安管理部', area: '长安片区所' },
+        '60218B012': { name: '桥西区中心站', dept: '桥西管理部', area: '桥西片区所' },
+        '60218B013': { name: '裕华区西站', dept: '裕华管理部', area: '裕华片区所' },
+        '60218B014': { name: '长安区北站', dept: '长安管理部', area: '长安片区所' },
+        '60218B015': { name: '桥西区西站', dept: '桥西管理部', area: '桥西片区所' }
+      };
+
+      function getSiteProfile(row) {
+        var stationCode = row.stationCode || row.siteCode;
+        var sitePool = window.MockData && window.MockData.sitePool ? window.MockData.sitePool : [];
+        return sitePool.find(function (item) { return item.code === stationCode; }) || stationProfiles[stationCode] || null;
+      }
+
+      function hasBusinessValue(value) {
+        return value !== undefined && value !== null && value !== '' && value !== '—';
+      }
+
+      function inferOrganization(row) {
+        var site = getSiteProfile(row);
+        var stationName = hasBusinessValue(row.stationName) ? row.stationName : (site && site.name) || '';
+        var dept = hasBusinessValue(row.dept) ? row.dept : (site && site.dept) || '';
+        var area = hasBusinessValue(row.area) ? row.area : hasBusinessValue(row.areaOffice) ? row.areaOffice : (site && site.area) || '';
+        if (!dept) {
+          if (stationName.indexOf('裕华') !== -1) dept = '裕华管理部';
+          else if (stationName.indexOf('长安') !== -1) dept = '长安管理部';
+          else if (stationName.indexOf('桥西') !== -1) dept = '桥西管理部';
+        }
+        if (!area && dept) area = dept.replace('管理部', '片区所');
+        return { dept: dept || '—', area: area || '—' };
+      }
+
+      function calculateOverdueDays(row) {
+        var recordedDays = Number(row.overdueDays) || 0;
+        if (row.status === '待专家审核' || row.status === '已完成') return recordedDays;
+        if (!row.deadline) return recordedDays;
+        var deadline = new Date(row.deadline + 'T23:59:59');
+        if (isNaN(deadline.getTime())) return recordedDays;
+        var diff = Math.ceil((Date.now() - deadline.getTime()) / (1000 * 60 * 60 * 24));
+        return diff > 0 ? diff : 0;
+      }
 
       /** 从 Store 加载数据，若无则用 fallback */
       function loadData() {
@@ -385,23 +448,30 @@
           var storeData = Store.getRectificationTasks();
           if (storeData && storeData.length) {
             mockData = storeData.map(function (r) {
-              var now = new Date();
-              var deadline = new Date(r.deadline || now);
-              var diff = Math.ceil((deadline - now) / (1000*60*60*24));
+              var org = inferOrganization(r);
+              var site = getSiteProfile(r);
+              var areaDirectors = { '裕华片区所': '刘建军', '长安片区所': '王海涛', '桥西片区所': '赵国强' };
               return {
                 id: r.id,
+                taskId: r.taskId,
                 taskName: r.taskName || '—',
-                stationName: r.stationName || r.siteCode || '—',
-                stationCode: r.siteCode || '',
-                person: r.assignee || '—',
+                stationName: hasBusinessValue(r.stationName) && r.stationName !== r.siteCode ? r.stationName : (site && site.name) || r.siteCode || '—',
+                stationCode: r.stationCode || r.siteCode || '—',
+                dept: org.dept,
+                area: org.area,
+                person: hasBusinessValue(r.assignee) ? r.assignee : areaDirectors[org.area] || '—',
                 status: r.status || '待整改',
                 deadline: r.deadline || '—',
-                overdueDays: diff < 0 ? Math.abs(diff) : 0,
+                overdueDays: calculateOverdueDays(r),
                 node: r.status === '待整改' ? '待接收' : r.status === '整改中' ? '整改执行' : r.status === '待专家审核' ? '专家审核' : r.status === '已完成' ? '已完成' : '整改执行'
               };
             });
+          } else {
+            mockData.forEach(function (r) { r.overdueDays = calculateOverdueDays(r); });
           }
-        } catch(e) {}
+        } catch(e) {
+          mockData.forEach(function (r) { r.overdueDays = calculateOverdueDays(r); });
+        }
       }
 
       // ============================================================
@@ -423,30 +493,44 @@
         return html;
       }
 
+      function renderRows(data) {
+        if (!data.length) return '<tr><td class="rt-empty-cell" colspan="13">暂无符合条件的整改任务</td></tr>';
+        return data.map(function (r, index) {
+          var isOverdue = r.overdueDays > 0;
+          var overdueClass = isOverdue ? 'rt-overdue-yes' : 'rt-overdue-no';
+          return '\
+            <tr>\
+              <td class="rt-col-center">' + (index + 1) + '</td>\
+              <td>' + r.taskName + '</td>\
+              <td>' + r.stationCode + '</td>\
+              <td>' + r.stationName + '</td>\
+              <td>' + r.dept + '</td>\
+              <td>' + r.area + '</td>\
+              <td>' + r.person + '</td>\
+              <td class="rt-col-center"><span class="' + statusClass(r.status) + '">' + r.status + '</span></td>\
+              <td>' + r.deadline + '</td>\
+              <td class="rt-col-center"><span class="' + overdueClass + '">' + (isOverdue ? '是' : '否') + '</span></td>\
+              <td class="rt-col-center"><span class="' + overdueClass + '">' + (isOverdue ? r.overdueDays + ' 天' : '0 天') + '</span></td>\
+              <td>' + r.node + '</td>\
+              <td>' + renderAction(r) + '</td>\
+            </tr>';
+        }).join('');
+      }
+
+      function renderPersonOptions() {
+        var names = [];
+        mockData.forEach(function (r) {
+          if (r.person && r.person !== '—' && names.indexOf(r.person) === -1) names.push(r.person);
+        });
+        return names.map(function (name) { return '<option value="' + name + '">' + name + '</option>'; }).join('');
+      }
+
       // ============================================================
       // 渲染主体内容
       // ============================================================
       function renderPageContent() {
         var total = mockData.length;
-        var rowsHtml = '';
-        for (var i = 0; i < total; i++) {
-          var r = mockData[i];
-          var isOverdue = r.overdueDays > 0;
-          var overdueClass = isOverdue ? 'rt-overdue-yes' : 'rt-overdue-no';
-          var overdueText = isOverdue ? '超期 ' + r.overdueDays + ' 天' : '正常';
-          rowsHtml += '\
-            <tr>\
-              <td class="rt-col-center">' + r.id + '</td>\
-              <td>' + r.taskName + '</td>\
-              <td>' + r.stationName + '</td>\
-              <td>' + r.person + '</td>\
-              <td class="rt-col-center"><span class="' + statusClass(r.status) + '">' + r.status + '</span></td>\
-              <td>' + r.deadline + '</td>\
-              <td class="rt-col-center"><span class="' + overdueClass + '">' + overdueText + '</span></td>\
-              <td>' + r.node + '</td>\
-              <td>' + renderAction(r) + '</td>\
-            </tr>';
-        }
+        var rowsHtml = renderRows(mockData);
 
         return '\
           <div class="rt-page">\
@@ -459,7 +543,7 @@
                   <div class="rt-filter-item"><label>任务名称：</label><input class="control" id="rt-f-task" placeholder="请输入" /></div>\
                   <div class="rt-filter-item"><label>站点名称：</label><input class="control" id="rt-f-station" placeholder="请输入" /></div>\
                   <div class="rt-filter-item"><label>整改状态：</label><select class="control" id="rt-f-status"><option value="">全部</option><option value="待整改">待整改</option><option value="整改中">整改中</option><option value="待专家审核">待专家审核</option><option value="已完成">已完成</option><option value="已超期">已超期</option></select></div>\
-                  <div class="rt-filter-item"><label>整改人：</label><input class="control" id="rt-f-person" placeholder="请输入" /></div>\
+                  <div class="rt-filter-item"><label>整改人：</label><select class="control" id="rt-f-person"><option value="">全部</option>' + renderPersonOptions() + '</select></div>\
                   <div class="rt-filter-item"><label>管理部：</label><select class="control" id="rt-f-dept"><option value="">全部</option><option value="裕华管理部">裕华管理部</option><option value="长安管理部">长安管理部</option><option value="桥西管理部">桥西管理部</option></select></div>\
                   <div class="rt-filter-item"><label>片区所：</label><select class="control" id="rt-f-area"><option value="">全部</option><option value="裕华片区所">裕华片区所</option><option value="长安片区所">长安片区所</option><option value="桥西片区所">桥西片区所</option></select></div>\
                   <div class="rt-filter-item"><label>是否超期：</label><select class="control" id="rt-f-overdue"><option value="">全部</option><option value="是">是</option><option value="否">否</option></select></div>\
@@ -482,11 +566,15 @@
                       <tr>\
                         <th class="rt-col-center col-seq">序号</th>\
                         <th class="col-task-name">主任务名称</th>\
+                        <th class="col-station-code">换热站编码</th>\
                         <th class="col-station-name">站点名称</th>\
+                        <th class="col-dept">管理部</th>\
+                        <th class="col-area">片区所</th>\
                         <th class="col-person">整改人</th>\
                         <th class="rt-col-center col-status">整改状态</th>\
                         <th class="col-deadline">整改截止时间</th>\
                         <th class="rt-col-center col-overdue">是否超期</th>\
+                        <th class="rt-col-center col-overdue-days">超期天数</th>\
                         <th class="col-node">当前处理节点</th>\
                         <th class="col-ops">操作</th>\
                       </tr>\
@@ -585,7 +673,7 @@
           var taskVal = (document.getElementById('rt-f-task').value || '').trim();
           var stationVal = (document.getElementById('rt-f-station').value || '').trim();
           var statusVal = document.getElementById('rt-f-status').value;
-          var personVal = (document.getElementById('rt-f-person').value || '').trim();
+          var personVal = document.getElementById('rt-f-person').value;
           var deptVal = document.getElementById('rt-f-dept').value;
           var areaVal = document.getElementById('rt-f-area').value;
           var overdueVal = document.getElementById('rt-f-overdue').value;
@@ -594,7 +682,9 @@
             if (taskVal && r.taskName.indexOf(taskVal) === -1) return false;
             if (stationVal && r.stationName.indexOf(stationVal) === -1) return false;
             if (statusVal && r.status !== statusVal) return false;
-            if (personVal && r.person.indexOf(personVal) === -1) return false;
+            if (personVal && r.person !== personVal) return false;
+            if (deptVal && r.dept !== deptVal) return false;
+            if (areaVal && r.area !== areaVal) return false;
             if (overdueVal === '是' && !(r.overdueDays > 0)) return false;
             if (overdueVal === '否' && r.overdueDays > 0) return false;
             return true;
@@ -605,15 +695,31 @@
         if (queryBtn) queryBtn.addEventListener('click', doFilter);
         if (resetBtn) {
           resetBtn.addEventListener('click', function () {
-            ['rt-f-task','rt-f-station','rt-f-person'].forEach(function (id) {
+            ['rt-f-task','rt-f-station'].forEach(function (id) {
               var el = document.getElementById(id);
               if (el) el.value = '';
             });
-            ['rt-f-status','rt-f-dept','rt-f-area','rt-f-overdue'].forEach(function (id) {
+            ['rt-f-status','rt-f-person','rt-f-dept','rt-f-area','rt-f-overdue'].forEach(function (id) {
               var el = document.getElementById(id);
               if (el) el.value = '';
             });
+            var areaSelect = document.getElementById('rt-f-area');
+            if (areaSelect) {
+              Array.prototype.forEach.call(areaSelect.options, function (option) { option.hidden = false; });
+            }
             renderTable(mockData);
+          });
+        }
+
+        var deptSelect = document.getElementById('rt-f-dept');
+        var areaSelect = document.getElementById('rt-f-area');
+        if (deptSelect && areaSelect) {
+          deptSelect.addEventListener('change', function () {
+            var selectedDept = this.value;
+            Array.prototype.forEach.call(areaSelect.options, function (option) {
+              option.hidden = !!selectedDept && !!option.value && option.value !== selectedDept.replace('管理部', '片区所');
+            });
+            if (areaSelect.selectedOptions[0] && areaSelect.selectedOptions[0].hidden) areaSelect.value = '';
           });
         }
 
@@ -858,25 +964,7 @@
       // ============================================================
       function renderTable(data) {
         var total = data.length;
-        var rowsHtml = '';
-        for (var i = 0; i < total; i++) {
-          var r = data[i];
-          var isOverdue = r.overdueDays > 0;
-          var overdueClass = isOverdue ? 'rt-overdue-yes' : 'rt-overdue-no';
-          var overdueText = isOverdue ? '超期 ' + r.overdueDays + ' 天' : '正常';
-          rowsHtml += '\
-            <tr>\
-              <td class="rt-col-center">' + r.id + '</td>\
-              <td>' + r.taskName + '</td>\
-              <td>' + r.stationName + '</td>\
-              <td>' + r.person + '</td>\
-              <td class="rt-col-center"><span class="' + statusClass(r.status) + '">' + r.status + '</span></td>\
-              <td>' + r.deadline + '</td>\
-              <td class="rt-col-center"><span class="' + overdueClass + '">' + overdueText + '</span></td>\
-              <td>' + r.node + '</td>\
-              <td>' + renderAction(r) + '</td>\
-            </tr>';
-        }
+        var rowsHtml = renderRows(data);
         document.getElementById('rt-table-body').innerHTML = rowsHtml;
 
         var badge = document.querySelector('.rt-count-badge');

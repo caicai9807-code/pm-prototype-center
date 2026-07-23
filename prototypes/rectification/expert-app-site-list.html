@@ -240,7 +240,8 @@
         return `<button class="site-card-btn btn-gray" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       }
       if (site.checkStatus === 'checking' && site.status === 'confirming') {
-        return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}&tab=record'">确认检查记录单</button>`;
+        const confirmUrl = `./expert-app-check-confirm.html?code=${site.code}&task=${taskId}`;
+        return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${confirmUrl}'">确认检查记录单</button>`;
       } else if (site.checkStatus === 'unchecked') {
         return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}'">开始检查</button>`;
       } else if (site.checkStatus === 'checked' || site.rectifyStatus !== 'none') {
