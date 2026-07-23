@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>确认检查记录单</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary: #1677ff; --success: #00b578; --danger: #ff4d4f; }
+    html, body {
+      min-height: 100%; background: #f5f6f8; color: #333;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px; -webkit-tap-highlight-color: transparent;
+    }
+    button, textarea { font: inherit; }
+    .cf-nav {
+      position: sticky; top: 0; z-index: 50; height: 40px; background: #fff;
+      display: flex; align-items: center; padding: 0 8px; border-bottom: 1px solid #edf0f2;
+    }
+    .cf-back {
+      width: 32px; height: 32px; border: 0; background: transparent; color: #333;
+      font-size: 22px; font-weight: 300; cursor: pointer;
+    }
+    .cf-title { flex: 1; margin-right: 32px; text-align: center; font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    .cf-content { padding: 8px 12px 88px; }
+    .cf-site-line { padding: 2px 2px 10px; color: #999; font-size: 12px; }
+    .cf-site-line strong { color: #333; font-size: 15px; margin-right: 8px; }
+    .cf-card {
+      background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    }
+    .cf-card-title {
+      font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px;
+      padding-bottom: 7px; border-bottom: 1px solid #f0f0f0;
+    }
+    .cf-row { display: flex; align-items: center; justify-content: space-between; min-height: 34px; border-bottom: 1px solid #f5f5f5; }
+    .cf-row:last-child { border-bottom: 0; }
+    .cf-label { color: #999; font-size: 12px; }
+    .cf-value { color: #333; font-size: 13px; font-weight: 500; }
+    .cf-tag { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+    .cf-tag-green { color: var(--success); background: #ebfaf3; }
+    .cf-tag-orange { color: #d48806; background: #fff7e6; }
+    .cf-tag-red { color: #ff3141; background: #ffeeee; }
+    .cf-tip { margin-bottom: 10px; padding: 8px 10px; border-radius: 6px; background: #fff7e6; color: #ad6800; font-size: 12px; line-height: 1.6; }
+    .cf-tip.success { background: #f6ffed; color: #389e0d; }
+    .cf-tip.rejected { background: #fff1f0; color: #cf1322; }
+    .cf-item { padding: 10px 12px; margin-bottom: 6px; border: 1px solid #f0f0f0; border-radius: 8px; background: #fff; }
+    .cf-item:last-child { margin-bottom: 0; }
+    .cf-item-title { display: flex; align-items: flex-start; gap: 6px; color: #333; font-size: 13px; font-weight: 600; line-height: 1.55; }
+    .cf-result { flex-shrink: 0; margin-top: 1px; padding: 1px 7px; border-radius: 4px; color: var(--success); background: #ebfaf3; font-size: 12px; font-weight: 500; }
+    .cf-item-desc { margin-top: 5px; color: #666; font-size: 12px; line-height: 1.55; }
+    .cf-expert { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .cf-expert:last-child { border-bottom: 0; }
+    .cf-role { color: #999; font-size: 12px; }
+    .cf-name { color: #333; font-size: 13px; font-weight: 600; }
+    .cf-time { margin-top: 3px; color: #999; font-size: 11px; }
+    .cf-signature { grid-column: 2 / 4; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px dashed #d9d9d9; border-radius: 6px; background: #fafafa; }
+    .cf-sign-label { color: #999; font-size: 11px; }
+    .cf-sign-name { flex: 1; text-align: center; color: #1a1a1a; font: 22px "KaiTi", "STKaiti", "楷体", serif; letter-spacing: 4px; }
+    .cf-footer {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; gap: 10px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.98);
+      border-top: 1px solid #edf0f2; box-shadow: 0 -2px 8px rgba(0,0,0,.05);
+    }
+    .cf-btn { flex: 1; height: 40px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .cf-btn-reject { background: #fff; color: var(--danger); border: 1px solid var(--danger); }
+    .cf-btn-approve { background: var(--primary); color: #fff; border: 0; }
+    .cf-btn-done { background: var(--success); color: #fff; border: 0; }
+    .cf-sheet-mask { position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-end; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .cf-sheet-mask.show { opacity: 1; pointer-events: auto; }
+    .cf-sheet { width: 100%; padding-bottom: env(safe-area-inset-bottom); border-radius: 16px 16px 0 0; background: #fff; transform: translateY(100%); transition: transform .25s; }
+    .cf-sheet-mask.show .cf-sheet { transform: translateY(0); }
+    .cf-sheet-title { padding: 16px; text-align: center; color: #1a1a1a; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
+    .cf-sheet-body { padding: 14px 16px; }
+    .cf-sheet-note { margin-bottom: 12px; color: #999; font-size: 12px; line-height: 1.6; }
+    .cf-sheet-label { margin-bottom: 7px; color: #333; font-size: 13px; font-weight: 500; }
+    .cf-required { color: var(--danger); }
+    .cf-textarea { width: 100%; min-height: 96px; padding: 10px; resize: none; outline: none; border: 1px solid #e8e8e8; border-radius: 8px; background: #fafafa; color: #333; }
+    .cf-textarea:focus { border-color: var(--primary); background: #fff; }
+    .cf-count { margin-top: 4px; text-align: right; color: #bbb; font-size: 11px; }
+    .cf-sheet-footer { display: flex; gap: 10px; padding: 0 16px 14px; }
+    .cf-sheet-btn { flex: 1; height: 40px; border: 0; border-radius: 20px; font-weight: 600; cursor: pointer; }
+    .cf-sheet-cancel { background: #f5f5f5; color: #666; }
+    .cf-sheet-confirm { background: var(--danger); color: #fff; }
+    .cf-toast { position: fixed; top: 50%; left: 50%; z-index: 200; transform: translate(-50%,-50%); padding: 10px 18px; border-radius: 8px; background: rgba(0,0,0,.76); color: #fff; white-space: nowrap; transition: opacity .3s; }
+    .cf-toast.hide { opacity: 0; }
+  </style>
+</head>
+<body>
+  <header class="cf-nav">
+    <button class="cf-back" aria-label="返回" onclick="goBack()">&lsaquo;</button>
+    <div class="cf-title">确认检查记录单</div>
+  </header>
+
+  <main class="cf-content">
+    <div class="cf-site-line"><strong>桥西区北站</strong>面积检查任务</div>
+    <section class="cf-card">
+      <div class="cf-card-title">检查结论</div>
+      <div class="cf-row"><span class="cf-label">检查结论</span><span class="cf-tag cf-tag-green">合格</span></div>
+      <div class="cf-row"><span class="cf-label">检查人</span><span class="cf-value">赵立成</span></div>
+      <div class="cf-row"><span class="cf-label">检查日期</span><span class="cf-value">2025-07-03</span></div>
+    </section>
+
+    <section class="cf-card">
+      <div class="cf-card-title">检查项目</div>
+      <div id="checkItems"></div>
+    </section>
+
+    <section class="cf-card">
+      <div class="cf-card-title">双专家确认</div>
+      <div class="cf-tip" id="confirmTip">专家一已确认。请专家二核对全部内容，同意时需完成电子签名。</div>
+      <div class="cf-expert">
+        <span class="cf-role">专家一</span>
+        <div><div class="cf-name">赵立成</div><div class="cf-time">2025-07-03 10:32</div></div>
+        <span class="cf-tag cf-tag-green">已确认</span>
+        <div class="cf-signature"><span class="cf-sign-label">电子签名</span><span class="cf-sign-name">赵立成</span></div>
+      </div>
+      <div class="cf-expert">
+        <span class="cf-role">专家二</span>
+        <div><div class="cf-name">李明</div><div class="cf-time" id="expert2Time"></div></div>
+        <span class="cf-tag cf-tag-orange" id="expert2Status">待确认</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cf-footer" id="actionFooter">
+    <button class="cf-btn cf-btn-reject" onclick="openRejectSheet()">不同意</button>
+    <button class="cf-btn cf-btn-approve" onclick="startSignature()">同意并签名</button>
+  </footer>
+
+  <div class="cf-sheet-mask" id="rejectSheet">
+    <div class="cf-sheet" onclick="event.stopPropagation()">
+      <div class="cf-sheet-title">退回检查记录单</div>
+      <div class="cf-sheet-body">
+        <div class="cf-sheet-note">退回后，检查记录单将由专家一修改并重新提交确认。</div>
+        <div class="cf-sheet-label">退回原因 <span class="cf-required">*</span></div>
+        <textarea class="cf-textarea" id="rejectReason" maxlength="200" placeholder="请填写需要专家一修改的内容"></textarea>
+        <div class="cf-count"><span id="reasonCount">0</span>/200</div>
+      </div>
+      <div class="cf-sheet-footer">
+        <button class="cf-sheet-btn cf-sheet-cancel" onclick="closeRejectSheet()">取消</button>
+        <button class="cf-sheet-btn cf-sheet-confirm" onclick="submitReject()">确认退回</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var siteCode = params.get('code') || '60218B006';
+    var taskId = params.get('task') || '';
+    var storageKey = 'expertAppCheckConfirmV2:' + siteCode;
+    var state = sessionStorage.getItem(storageKey) || '';
+    var items = [
+      { id: 1, title: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？', result: '是' },
+      { id: 2, title: '用热范围平面图是否具备绘制人、审批流程是否完整？', result: '是' },
+      { id: 3, title: '面积核查依据（确权书及相关证明材料）是否有效且齐全？', result: '是' },
+      { id: 4, title: '是否存在面积变化情况？', result: '是', desc: '有少量面积变化但已核实' },
+      { id: 5, title: '面积核查汇总表与用热现场是否一致？', result: '是' },
+      { id: 6, title: '商业门头平面图与现场顺序是否一致？', result: '是' },
+      { id: 7, title: '实测计算是否满足制度要求？', result: '是' }
+    ];
+
+    document.getElementById('checkItems').innerHTML = items.map(function(item) {
+      return '<div class="cf-item"><div class="cf-item-title"><span>' + item.id + '. ' + item.title + '</span><span class="cf-result">' + item.result + '</span></div>' +
+        (item.desc ? '<div class="cf-item-desc">' + item.desc + '</div>' : '') + '</div>';
+    }).join('');
+
+    function siteDetailTarget(tab) {
+      return './expert-app-site-detail.html?code=' + encodeURIComponent(siteCode) + '&task=' + encodeURIComponent(taskId) + (tab ? '&tab=' + tab : '');
+    }
+
+    function navigate(target) {
+      if (window.__EXPERT_APP_NAVIGATE__) window.__EXPERT_APP_NAVIGATE__(target);
+      else window.location.href = target;
+    }
+
+    function goBack() { navigate(siteDetailTarget('record')); }
+
+    function startSignature() {
+      var returnTarget = './expert-app-check-confirm.html?code=' + encodeURIComponent(siteCode) + '&task=' + encodeURIComponent(taskId);
+      var target = './expert-app-signature.html?name=' + encodeURIComponent('李明') + '&mode=check-confirm&code=' + encodeURIComponent(siteCode) + '&return=' + encodeURIComponent(returnTarget);
+      navigate(target);
+    }
+
+    function openRejectSheet() {
+      document.getElementById('rejectSheet').classList.add('show');
+      setTimeout(function() { document.getElementById('rejectReason').focus(); }, 220);
+    }
+
+    function closeRejectSheet() { document.getElementById('rejectSheet').classList.remove('show'); }
+
+    function submitReject() {
+      var reason = document.getElementById('rejectReason').value.trim();
+      if (!reason) { showToast('请填写退回原因'); return; }
+      sessionStorage.setItem(storageKey, 'rejected');
+      closeRejectSheet();
+      showToast('已退回专家一修改');
+      setTimeout(function() { navigate(siteDetailTarget('record')); }, 900);
+    }
+
+    function renderState() {
+      var tip = document.getElementById('confirmTip');
+      var status = document.getElementById('expert2Status');
+      var time = document.getElementById('expert2Time');
+      var footer = document.getElementById('actionFooter');
+      if (state === 'approved') {
+        tip.className = 'cf-tip success';
+        tip.textContent = '双专家均已完成确认，检查记录单已生效。';
+        status.className = 'cf-tag cf-tag-green';
+        status.textContent = '已确认';
+        time.textContent = '2025-07-03 10:45';
+        footer.innerHTML = '<button class="cf-btn cf-btn-done" onclick="goBack()">确认完成，返回站点详情</button>';
+      } else if (state === 'rejected') {
+        tip.className = 'cf-tip rejected';
+        tip.textContent = '检查记录单已退回专家一修改，重新提交后需再次确认。';
+        status.className = 'cf-tag cf-tag-red';
+        status.textContent = '已退回';
+        footer.innerHTML = '<button class="cf-btn cf-btn-done" onclick="goBack()">返回站点详情</button>';
+      }
+    }
+
+    function showToast(message) {
+      var toast = document.createElement('div');
+      toast.className = 'cf-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.classList.add('hide'); }, 1500);
+      setTimeout(function() { toast.remove(); }, 1900);
+    }
+
+    document.getElementById('rejectSheet').addEventListener('click', function(event) {
+      if (event.target === this) closeRejectSheet();
+    });
+    document.getElementById('rejectReason').addEventListener('input', function() {
+      document.getElementById('reasonCount').textContent = this.value.length;
+    });
+    renderState();
+  </script>
+</body>
+</html>

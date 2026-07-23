@@ -148,6 +148,7 @@
     const params = new URLSearchParams(window.location.search);
     const taskId = params.get('id') || 'T20250615001';
     const taskType = params.get('type') || 'area-check';
+    const isReadonly = params.get('readonly') === '1';
 
     // 模拟数据：按任务ID分组站点列表（3-5个/组）
     const siteData = {
@@ -197,21 +198,28 @@
       }
     }
 
+    function getDetailUrl(site) {
+      return `./expert-app-site-detail.html?code=${site.code}&task=${taskId}${isReadonly ? '&readonly=1' : ''}`;
+    }
+
     function getBtnHtml(site) {
-      const detailUrl = `./expert-app-site-detail.html?code=${site.code}&task=${taskId}`;
+      const detailUrl = getDetailUrl(site);
+      if (isReadonly) {
+        return `<button class="site-card-btn btn-gray" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
+      }
       if (site.status === 'rectified' || site.status === 'checked') {
-        return `<button class="site-card-btn btn-green" onclick="location.href='${detailUrl}'">查看详情</button>`;
+        return `<button class="site-card-btn btn-green" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       } else if (site.status === 'confirming') {
-        return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}&tab=record'">确认检查记录单</button>`;
+        return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}&tab=record'">确认检查记录单</button>`;
       } else if (site.status === 'unchecked') {
-        return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}'">开始检查</button>`;
+        return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}'">开始检查</button>`;
       } else {
-        return `<button class="site-card-btn btn-gray" onclick="location.href='${detailUrl}'">查看详情</button>`;
+        return `<button class="site-card-btn btn-gray" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       }
     }
 
     listEl.innerHTML = sites.map(s => `
-      <div class="site-card">
+      <div class="site-card" onclick="location.href='${getDetailUrl(s)}'" style="cursor:pointer;">
         <div class="site-card-header">
           <span class="site-card-name">${s.name}</span>
           <span class="site-card-tag ${getTagClass(s.status)}">${s.statusText}</span>

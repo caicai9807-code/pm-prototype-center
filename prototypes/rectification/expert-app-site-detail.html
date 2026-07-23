@@ -1079,21 +1079,19 @@
         const isApproved = expert2.status === '已确认';
         const isRejected = expert2.status === '已退回';
         const tipClass = isApproved ? ' success' : isRejected ? ' rejected' : '';
-        const tipText = isApproved
-          ? '双专家均已完成确认，检查记录单已生效。'
-          : isRejected
-            ? '检查记录单已退回专家一修改，重新提交后需再次确认。'
-            : '专家一已确认。请专家二核对全部内容，同意时需完成电子签名。';
+        const tipText = isReadonly
+          ? '该任务已结束，当前仅支持查看检查记录单及确认状态。'
+          : isApproved
+            ? '双专家均已完成确认，检查记录单已生效。'
+            : isRejected
+              ? '检查记录单已退回专家一修改，重新提交后需再次确认。'
+              : '专家一已确认。请专家二核对全部内容，同意时需完成电子签名。';
         const expert2Tag = isApproved
           ? '<span class="status-tag tag-green">已确认</span>'
           : isRejected
             ? '<span class="status-tag tag-red">已退回</span>'
             : '<span class="status-tag tag-orange">待确认</span>';
-        const actionsHtml = isApproved
-          ? '<div class="check-confirm-actions"><button class="check-confirm-btn done" onclick="activateTab(\'basic\')">确认完成，返回站点信息</button></div>'
-          : isRejected
-            ? ''
-            : '<div class="check-confirm-actions"><button class="check-confirm-btn reject" onclick="openRecordReject()">不同意</button><button class="check-confirm-btn approve" onclick="startExpert2Signature()">同意并签名</button></div>';
+        const actionsHtml = '';
 
         confirmationHtml = `
           <div class="adm-card check-confirm-card">
@@ -1207,8 +1205,9 @@
     });
 
     function openCheckConfirmation() {
-      activateTab('record');
-      document.getElementById('panel-record').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var target = './expert-app-check-confirm.html?code=' + encodeURIComponent(siteCode) + '&task=' + encodeURIComponent(taskId);
+      if (window.__EXPERT_APP_NAVIGATE__) window.__EXPERT_APP_NAVIGATE__(target);
+      else window.location.href = target;
     }
 
     function startExpert2Signature() {

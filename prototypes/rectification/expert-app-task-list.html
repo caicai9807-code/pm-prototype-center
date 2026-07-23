@@ -501,8 +501,8 @@
           : '<span>站点：<strong>' + t.site + '</strong></span><span>通知单：<strong>' + t.notice + '</strong></span>';
 
         var detailHref = './expert-app-task-detail.html?id=' + t.id + '&type=' + taskType;
-        if (t.status === 'progress' && taskType === 'area-check') {
-          detailHref = './expert-app-site-list.html?id=' + t.id;
+        if ((t.status === 'progress' || t.status === 'done') && taskType === 'area-check') {
+          detailHref = './expert-app-site-list.html?id=' + t.id + '&type=area-check' + (t.status === 'done' ? '&readonly=1' : '');
         }
 
         var isDisabled = t.status === 'pending';

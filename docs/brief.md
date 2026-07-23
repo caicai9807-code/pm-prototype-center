@@ -158,7 +158,7 @@
 | 专家 APP 工作台 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app.html` | 移动端 APP/H5 | APP 启动/预览页 | 面积检查任务、整改任务 |
 | 专家 APP 任务列表 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-task-list.html` | 移动端 APP/H5 | 工作台 | 任务确认、任务详情、整改站点详情 |
 | 专家 APP 任务确认 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-task-confirm.html` | 移动端 APP/H5 | 待确认任务 | 确认/拒绝并返回列表 |
-| 专家 APP 任务详情 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-task-detail.html` | 移动端 APP/H5 | 任务列表 | 站点列表 |
+| 专家 APP 任务详情 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-task-detail.html` | 移动端 APP/H5 | 历史链接/整改任务 | 站点详情；已结束面积检查不再进入该页 |
 | 专家 APP 站点列表 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-site-list.html` | 移动端 APP/H5 | 任务详情 | 站点详情 |
 | 专家 APP 站点详情 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-site-detail.html` | 移动端 APP/H5 | 站点列表/整改任务 | 楼栋详情、检查记录、复核/审核弹窗 |
 | 专家 APP 楼栋详情 | `/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-building-detail.html` | 移动端 APP/H5 | 站点详情 | 返回站点、查看变更、上传复核材料 |
@@ -502,12 +502,12 @@
 
 **交互逻辑**：点击确认直接提交幂等请求；成功后 Toast 并返回列表。点击拒绝先打开原因弹窗，校验通过后提交并产生转派记录。若任务已被其他端处理，页面展示最新结果并禁用操作，不允许覆盖。
 
-#### 6.4.17 专家 APP 任务详情（expert-app-task-detail.html）
+#### 6.4.17 专家 APP 任务详情（expert-app-task-detail.html，历史兼容）
 
 - **绝对路径**：`/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-task-detail.html`
 - **终端/场景**：专家移动端查看面积检查或整改任务摘要。
 - **主要使用者**：关联检查专家。
-- **上游/下游**：任务列表进入；下游为站点列表或站点整改详情。
+- **上游/下游**：历史链接或整改任务进入；已结束面积检查任务改为直接进入站点列表。
 
 | 页面区域 | 展示内容与关键字段 | 操作入口 | 动态规则与区域关系 |
 | --- | --- | --- | --- |
@@ -516,23 +516,23 @@
 | 站点卡片区 | 站点名称、编码、类型、状态 | 点击站点 | 仅展示当前任务关联站点 |
 | 底部操作区 | 调整、拒绝、开始检查等 | 按状态操作 | 只显示 `allowedActions` 返回的动作 |
 
-**交互逻辑**：根据任务类型加载不同详情模型，但共用任务 ID 和权限校验。点击站点进入站点列表或详情并保留任务上下文。状态变化后返回本页必须刷新，不继续显示旧按钮。
+**交互逻辑**：该页面暂时保留历史兼容。新版面积检查流程中，进行中和已结束任务均直接进入站点列表；已结束任务追加 `readonly=1`，不再展示本页的结束信息、任务附件和操作历史。
 
 #### 6.4.18 专家 APP 站点列表（expert-app-site-list.html）
 
 - **绝对路径**：`/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-site-list.html`
 - **终端/场景**：专家移动端按任务查看站点。
 - **主要使用者**：关联检查专家。
-- **上游/下游**：任务详情进入；下游为站点详情。
+- **上游/下游**：任务列表中的进行中或已结束任务进入；下游为站点详情。
 
 | 页面区域 | 展示内容与关键字段 | 操作入口 | 动态规则与区域关系 |
 | --- | --- | --- | --- |
 | 导航区 | 返回、站点列表 | 返回 | 返回任务详情并保留位置 |
 | 站点卡片区 | 名称、编码、状态、地址、办事处、片区所 | 点击卡片 | 只返回当前任务和专家有权站点 |
-| 卡片操作区 | 开始检查、查看详情 | 按钮 | 待检查显示开始；已检查/已整改显示详情 |
+| 卡片操作区 | 开始检查、确认检查记录单、查看详情 | 按钮 | 进行中按站点状态显示操作；已结束只读模式统一显示查看详情 |
 | 反馈区 | 空态、加载、失败 | 刷新/重试 | 状态变化后更新卡片和数量 |
 
-**交互逻辑**：点击整张卡片进入站点详情；按钮操作与卡片点击不能触发两次导航。开始检查前后端校验任务时间和专家权限；成功后站点状态变检查中，再进入详情。
+**交互逻辑**：点击整张卡片进入站点详情；按钮操作与卡片点击不能触发两次导航。已结束任务的 `readonly=1` 必须继续传递到站点详情和楼栋详情，隐藏全部业务操作，仅保留Tab切换和查看能力。
 
 #### 6.4.19 专家 APP 站点详情（expert-app-site-detail.html）
 
@@ -548,7 +548,7 @@
 | 建筑物区 | 建筑名称、原/现面积、依据、复核状态 | 查看详情、复核 | 仅“实测”建筑开放复核 |
 | 复核弹窗 | 照片、普查面积、复查面积 | 上传、删除、提交 | 至少一张照片且面积>0；成功刷新卡片徽标 |
 | 审核 Sheet | 通过/驳回、原因 | 取消、确认 | 驳回原因必填；状态和权限后端校验 |
-| 检查记录确认区 | 记录单全部字段、专家一确认时间和电子签名、专家二状态 | 不同意、同意并签名 | 桥西区北站当前展示1/2确认态；同意必须签名，双方确认后生效；不同意填写原因后退回专家一修改 |
+| 检查记录确认区 | 记录单全部字段、专家一确认时间和电子签名、专家二状态 | 确认检查记录单 | 桥西区北站当前展示1/2确认态；点击后进入独立确认页，原检查记录单Tab继续只读展示，不承载确认操作 |
 | 已确认提示 | 确认检查记录单按钮、只读提示 | 确认检查记录单、我知道了 | 所有2/2站点继续显示“确认检查记录单”；点击弹出“专家已确认，不可编辑”，不得替换为审核入口 |
 
 **交互逻辑**：Tab 切换按需加载并保留已加载状态；上传照片失败可单张重试。复核成功后以服务端结果刷新建筑卡片，不能依赖页面内存。审核提交后更新状态卡和确认进度，并同步 Web 端。
@@ -585,6 +585,22 @@
 | 底部操作区 | 校验状态 | 暂存、提交 | 提交时全部必填校验并防重复 |
 
 **交互逻辑**：进入编辑前请求填写锁；未获锁则切换只读并展示填写人。暂存允许不完整数据，提交要求检查项、异常子项、结论和签名完整。提交后专家一显示已确认；专家二在站点详情中只读复核，同意时必须完成电子签名，不同意时填写原因并退回专家一修改。双方确认后记录单完成并生效。
+
+#### 6.4.21A 专家 APP 检查记录确认（expert-app-check-confirm.html）
+
+- **绝对路径**：`/Users/sears/Desktop/VibeWork/pm-prototype-center/prototypes/rectification/expert-app-check-confirm.html`
+- **终端/场景**：面积检查任务中，专家二确认专家一已提交的检查记录单。
+- **主要使用者**：专家二。
+- **上游/下游**：站点详情顶部「确认检查记录单」进入；同意后进入电子签名页，退回或完成后返回站点详情。
+
+| 页面区域 | 展示内容与关键字段 | 操作入口 | 动态规则与区域关系 |
+| --- | --- | --- | --- |
+| 导航区 | 返回、确认检查记录单 | 返回 | 返回站点详情的检查记录单Tab |
+| 记录信息 | 检查结论、检查人、检查日期、7项检查结果 | 无 | 全部只读 |
+| 双专家确认 | 专家一姓名、时间、电子签名；专家二状态 | 无 | 专家一已确认，专家二默认待确认 |
+| 固定操作区 | 不同意、同意并签名 | 退回、签名 | 不同意原因必填；同意进入现有电子签名页 |
+
+**交互逻辑**：确认操作从站点详情Tab迁移到独立页面。原检查记录单Tab继续保留只读详情；专家二签名完成后返回本页展示双专家确认完成状态，再返回站点详情。
 
 #### 6.4.22 专家 APP 电子签名（expert-app-signature.html）
 
