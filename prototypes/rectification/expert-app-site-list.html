@@ -60,7 +60,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .site-card-name {
       font-size: 16px;
@@ -174,27 +174,59 @@
 
     const sites = siteData[taskId] || siteData['T20250615001'];
     sites.forEach(function(site) {
-      if (site.code !== '60218B006') return;
-      var confirmationState = sessionStorage.getItem('expertAppCheckConfirmV2:' + site.code);
-      if (confirmationState === 'approved') {
-        site.status = 'checked';
-        site.statusText = '已检查';
-      } else if (confirmationState === 'rejected') {
-        site.status = 'returned';
-        site.statusText = '待修改';
+      if (site.code === '60218B006') {
+        var confirmationState = sessionStorage.getItem('expertAppCheckConfirmV2:' + site.code);
+        if (confirmationState === 'approved') {
+          site.status = 'checked';
+          site.statusText = '已检查';
+        } else if (confirmationState === 'rejected') {
+          site.status = 'returned';
+          site.statusText = '待修改';
+        }
       }
+      applySeparatedStatuses(site);
     });
     const listEl = document.getElementById('siteList');
 
-    function getTagClass(status) {
+    function applySeparatedStatuses(site) {
+      if (site.status === 'unchecked') {
+        site.checkStatus = 'unchecked';
+        site.checkStatusText = '待检查';
+      } else if (site.status === 'confirming' || site.status === 'returned') {
+        site.checkStatus = 'checking';
+        site.checkStatusText = '检查中';
+      } else {
+        site.checkStatus = 'checked';
+        site.checkStatusText = '已检查';
+      }
+
+      var rectifyMap = {
+        rectify: ['pending', '待整改'],
+        rectifying: ['progress', '整改中'],
+        rectified: ['done', '已整改'],
+        overdue: ['overdue', '超期']
+      };
+      var rectifyValue = rectifyMap[site.status] || ['none', '—'];
+      site.rectifyStatus = rectifyValue[0];
+      site.rectifyStatusText = rectifyValue[1];
+    }
+
+    function getCheckTagClass(status) {
       switch(status) {
-        case 'rectified': return 'tag-green';
         case 'checked': return 'tag-green';
-        case 'confirming': return 'tag-orange';
-        case 'returned': return 'tag-orange';
+        case 'checking': return 'tag-blue';
         case 'unchecked': return 'tag-gray';
-        case 'rectify': return 'tag-red';
         default: return 'tag-gray';
+      }
+    }
+
+    function getRectifyTagClass(status) {
+      switch(status) {
+        case 'pending': return 'tag-orange';
+        case 'progress': return 'tag-blue';
+        case 'done': return 'tag-green';
+        case 'overdue': return 'tag-red';
+        default: return '';
       }
     }
 
@@ -207,12 +239,12 @@
       if (isReadonly) {
         return `<button class="site-card-btn btn-gray" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       }
-      if (site.status === 'rectified' || site.status === 'checked') {
-        return `<button class="site-card-btn btn-green" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
-      } else if (site.status === 'confirming') {
+      if (site.checkStatus === 'checking' && site.status === 'confirming') {
         return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}&tab=record'">确认检查记录单</button>`;
-      } else if (site.status === 'unchecked') {
+      } else if (site.checkStatus === 'unchecked') {
         return `<button class="site-card-btn btn-blue" onclick="event.stopPropagation();location.href='${detailUrl}'">开始检查</button>`;
+      } else if (site.checkStatus === 'checked' || site.rectifyStatus !== 'none') {
+        return `<button class="site-card-btn btn-green" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       } else {
         return `<button class="site-card-btn btn-gray" onclick="event.stopPropagation();location.href='${detailUrl}'">查看详情</button>`;
       }
@@ -222,7 +254,16 @@
       <div class="site-card" onclick="location.href='${getDetailUrl(s)}'" style="cursor:pointer;">
         <div class="site-card-header">
           <span class="site-card-name">${s.name}</span>
-          <span class="site-card-tag ${getTagClass(s.status)}">${s.statusText}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">检查状态</span>
+          <span class="site-card-tag ${getCheckTagClass(s.checkStatus)}">${s.checkStatusText}</span>
+        </div>
+        <div class="site-info-row">
+          <span class="site-info-label">整改状态</span>
+          ${s.rectifyStatus === 'none'
+            ? '<span class="site-info-value">—</span>'
+            : `<span class="site-card-tag ${getRectifyTagClass(s.rectifyStatus)}">${s.rectifyStatusText}</span>`}
         </div>
         <div class="site-info-row">
           <span class="site-info-label">用户编码</span>

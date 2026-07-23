@@ -887,6 +887,7 @@
         site.confirmProgress = '2/2';
       } else if (persistedConfirmState === 'rejected') {
         site.checkRecord.confirmation.expert2.status = '已退回';
+        site.status = 'returned';
         site.statusText = '待修改';
         site.confirmProgress = '0/2';
       }
@@ -894,32 +895,71 @@
     window._currentSiteData = site;
     document.getElementById('pageTitle').textContent = site.name;
 
-    // 根据状态显示不同标签颜色和按钮
-    var statusTagClass = 'tag-gray';
-    if (site.status === 'checked' || site.status === 'rectified') statusTagClass = 'tag-green';
-    else if (site.status === 'rectify') statusTagClass = 'tag-orange';
-    else if (site.status === 'confirming') statusTagClass = 'tag-orange';
-    else if (site.status === 'unchecked') statusTagClass = 'tag-gray';
+    // 将原兼容状态拆分为检查状态与整改状态，展示和操作判断不再共用一个状态字段
+    function applySeparatedStatuses(targetSite) {
+      if (targetSite.status === 'unchecked') {
+        targetSite.checkStatus = 'unchecked';
+        targetSite.checkStatusText = '待检查';
+      } else if (targetSite.status === 'confirming' || targetSite.status === 'returned') {
+        targetSite.checkStatus = 'checking';
+        targetSite.checkStatusText = '检查中';
+      } else {
+        targetSite.checkStatus = 'checked';
+        targetSite.checkStatusText = '已检查';
+      }
+
+      var rectifyMap = {
+        rectify: ['pending', '待整改'],
+        rectifying: ['progress', '整改中'],
+        rectified: ['done', '已整改'],
+        overdue: ['overdue', '超期']
+      };
+      var rectifyValue = rectifyMap[targetSite.status];
+      if (!rectifyValue && targetSite.checkRecord && targetSite.checkRecord.submitted && targetSite.checkRecord.conclusion === '不合格') {
+        rectifyValue = ['pending', '待整改'];
+      }
+      rectifyValue = rectifyValue || ['none', '—'];
+      targetSite.rectifyStatus = rectifyValue[0];
+      targetSite.rectifyStatusText = rectifyValue[1];
+    }
+
+    function getCheckTagClass(status) {
+      if (status === 'checked') return 'tag-green';
+      if (status === 'checking') return 'tag-blue';
+      return 'tag-gray';
+    }
+
+    function getRectifyTagClass(status) {
+      if (status === 'pending') return 'tag-orange';
+      if (status === 'progress') return 'tag-blue';
+      if (status === 'done') return 'tag-green';
+      if (status === 'overdue') return 'tag-red';
+      return 'tag-gray';
+    }
+
+    applySeparatedStatuses(site);
+    var checkStatusTagClass = getCheckTagClass(site.checkStatus);
+    var rectifyStatusTagClass = getRectifyTagClass(site.rectifyStatus);
 
     var isUnqualified = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
 
-    var btnHtml = '';
+    var checkBtnHtml = '';
+    var rectifyBtnHtml = '';
     if (!isReadonly && site.confirmProgress === '2/2') {
-      btnHtml = '<button class="action-btn-full btn-primary" onclick="showConfirmedNotice()">确认检查记录单</button>';
+      checkBtnHtml = '<button class="action-btn-full btn-primary" onclick="showConfirmedNotice()">确认检查记录单</button>';
     } else if (!isReadonly && site.status === 'confirming' && siteCode === '60218B006' && persistedConfirmState !== 'rejected') {
-      btnHtml = '<button class="action-btn-full btn-primary" onclick="openCheckConfirmation()">确认检查记录单</button>';
-    } else if (!isReadonly && site.status === 'unchecked') {
-      btnHtml = '<button class="action-btn-full btn-primary" onclick="location.href=\'./expert-app-check-record.html?code=' + siteCode + '&task=' + taskId + '\'">填写检查记录单</button>';
-    } else if (!isReadonly && (site.status === 'checked' || site.status === 'rectified')) {
-      btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
-    } else if (!isReadonly && site.status === 'rectify') {
-      btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
+      checkBtnHtml = '<button class="action-btn-full btn-primary" onclick="openCheckConfirmation()">确认检查记录单</button>';
+    } else if (!isReadonly && site.checkStatus === 'unchecked') {
+      checkBtnHtml = '<button class="action-btn-full btn-primary" onclick="location.href=\'./expert-app-check-record.html?code=' + siteCode + '&task=' + taskId + '\'">填写检查记录单</button>';
+    }
+    if (!isReadonly && site.rectifyStatus !== 'none') {
+      rectifyBtnHtml = '<button class="action-btn-full btn-gray" onclick="showRectifyAudit()">整改审核</button>';
     }
 
     document.getElementById('statusCard').innerHTML = `
       <div class="status-card-top">
         <span class="status-card-name">${site.name}</span>
-        ${isUnqualified ? '<span class="status-tag tag-red">不合格</span>' : '<span class="status-tag ' + statusTagClass + '">' + site.statusText + '</span>'}
+        ${isUnqualified ? '<span class="status-tag tag-red">不合格</span>' : ''}
       </div>
       <div class="status-info-row">
         <span class="status-info-label">检查完成时间</span>
@@ -930,10 +970,17 @@
         <span class="status-info-value">${site.confirmProgress}</span>
       </div>
       <div class="status-info-row">
-        <span class="status-info-label">站点状态</span>
-        <span class="status-tag ${statusTagClass}">${site.statusText}</span>
+        <span class="status-info-label">检查状态</span>
+        <span class="status-tag ${checkStatusTagClass}">${site.checkStatusText}</span>
       </div>
-      ${btnHtml}
+      <div class="status-info-row">
+        <span class="status-info-label">整改状态</span>
+        ${site.rectifyStatus === 'none'
+          ? '<span class="status-info-value">—</span>'
+          : '<span class="status-tag ' + rectifyStatusTagClass + '">' + site.rectifyStatusText + '</span>'}
+      </div>
+      ${checkBtnHtml}
+      ${rectifyBtnHtml}
     `;
 
     // 渲染站点信息
@@ -1233,18 +1280,15 @@
       sessionStorage.setItem(checkConfirmStorageKey, 'rejected');
       record.confirmation.expert2.status = '已退回';
       site.confirmProgress = '0/2';
+      site.status = 'returned';
       site.statusText = '待修改';
+      applySeparatedStatuses(site);
       var rows = document.querySelectorAll('#statusCard .status-info-row');
       if (rows[1]) rows[1].querySelector('.status-info-value').textContent = '0/2';
       if (rows[2]) {
         var statusEl = rows[2].querySelector('.status-tag');
-        statusEl.className = 'status-tag tag-orange';
-        statusEl.textContent = '待修改';
-      }
-      var topStatusEl = document.querySelector('#statusCard .status-card-top .status-tag');
-      if (topStatusEl) {
-        topStatusEl.className = 'status-tag tag-orange';
-        topStatusEl.textContent = '待修改';
+        statusEl.className = 'status-tag tag-blue';
+        statusEl.textContent = '检查中';
       }
       var statusButton = document.querySelector('#statusCard .action-btn-full');
       if (statusButton) statusButton.remove();
