@@ -393,6 +393,47 @@
     .result-na { background: #f5f5f5; color: #999; }
     .check-record-desc { font-size: 12px; color: #666; margin-top: 4px; line-height: 1.5; }
 
+    /* 检查记录单双专家确认（专家二视角） */
+    .check-confirm-card { margin-top: 8px; }
+    .check-confirm-tip {
+      margin-bottom: 10px; padding: 8px 10px; border-radius: 6px;
+      background: #fff7e6; color: #ad6800; font-size: 12px; line-height: 1.6;
+    }
+    .check-confirm-tip.success { background: #f6ffed; color: #389e0d; }
+    .check-confirm-tip.rejected { background: #fff1f0; color: #cf1322; }
+    .confirm-expert-row {
+      display: grid; grid-template-columns: 52px minmax(0, 1fr) auto;
+      align-items: center; gap: 8px; padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .confirm-expert-row:last-of-type { border-bottom: none; }
+    .confirm-role { font-size: 12px; color: #999; }
+    .confirm-name { font-size: 13px; color: #333; font-weight: 600; }
+    .confirm-time { margin-top: 3px; font-size: 11px; color: #999; }
+    .confirm-signature {
+      grid-column: 2 / 4; display: flex; align-items: center; gap: 8px;
+      margin-top: 2px; padding: 8px 10px; border: 1px dashed #d9d9d9;
+      border-radius: 6px; background: #fafafa;
+    }
+    .confirm-signature-label { font-size: 11px; color: #999; flex-shrink: 0; }
+    .confirm-signature-name {
+      flex: 1; text-align: center; color: #1a1a1a; font-size: 22px;
+      font-family: "KaiTi", "STKaiti", "楷体", serif; letter-spacing: 4px;
+    }
+    .check-confirm-actions {
+      position: sticky; bottom: 0; z-index: 20; display: flex; gap: 10px;
+      margin: 8px -12px -16px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,0.98); border-top: 1px solid #f0f0f0;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+    }
+    .check-confirm-btn {
+      flex: 1; height: 40px; border-radius: 20px; font-size: 14px;
+      font-weight: 600; cursor: pointer; background: #fff;
+    }
+    .check-confirm-btn.reject { border: 1px solid #ff4d4f; color: #ff4d4f; }
+    .check-confirm-btn.approve { border: none; background: #1677ff; color: #fff; }
+    .check-confirm-btn.done { border: none; background: #00b578; color: #fff; }
+
     /* 整改通知单 */
     .notice-card {
       background: #fff8e8; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px;
@@ -561,6 +602,17 @@
 
   <div class="safe-area"></div>
 
+  <!-- 双专家已确认提示 -->
+  <div class="modal-overlay" id="confirmedNoticeOverlay">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">温馨提示</div>
+      <div class="modal-body" style="padding-top:8px;text-align:center;color:#666;line-height:1.7;">专家已确认，不可编辑</div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-confirm" onclick="closeConfirmedNotice()">我知道了</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 复查审核弹窗（底部Sheet） -->
   <div class="sheet-overlay" id="auditOverlay">
     <div class="sheet-card" onclick="event.stopPropagation()">
@@ -584,6 +636,23 @@
     </div>
   </div>
 
+  <!-- 检查记录单退回弹窗 -->
+  <div class="sheet-overlay" id="recordRejectOverlay">
+    <div class="sheet-card" onclick="event.stopPropagation()">
+      <div class="sheet-header">退回检查记录单</div>
+      <div class="sheet-body">
+        <div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:12px;">退回后，检查记录单将由专家一修改并重新提交确认。</div>
+        <div class="sheet-label">退回原因 <span class="required">*</span></div>
+        <textarea class="sheet-textarea" id="recordRejectReason" placeholder="请填写需要专家一修改的内容" maxlength="200"></textarea>
+        <div class="sheet-count"><span id="recordRejectCount">0</span>/200</div>
+      </div>
+      <div class="sheet-footer">
+        <button class="sheet-btn sheet-btn-cancel" onclick="closeRecordReject()">取消</button>
+        <button class="sheet-btn" style="background:#ff4d4f;color:#fff;" onclick="submitRecordReject()">确认退回</button>
+      </div>
+    </div>
+  </div>
+
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -599,8 +668,8 @@
         street: '维明街道', address: '桥西区中山路与维明大街交叉口北行50米',
         contact: '—', phone: '—',
         censusUser: '王普查', censusDate: '2025-06-28',
-        status: 'unchecked', statusText: '未检查', checkTime: '—',
-        confirmProgress: '0/2',
+        status: 'confirming', statusText: '确认中', checkTime: '2025-07-03',
+        confirmProgress: '1/2',
         originalArea: {
           total: 5420.00,
           residential: { subtotal: 3800.00, multiLayer: 2100.00, highRise: 1200.00, apartment: 500.00 },
@@ -617,15 +686,21 @@
           { id: 2, building: '2号楼', floors: 8, heatNature: '住宅', chargeType: '按面积收费', status: '已普查', originalArea: 800.00, currentArea: 800.00, diff: 0.00, rate: '0.00%', controlMode: '分户控制', heatingType: '暖气片', buildYear: '2010年', basis: '确权书', attachment: '1份', remark: '—' },
         ],
         checkRecord: {
-          conclusion: '', submitted: false,
+          conclusion: '合格', submitted: true,
+          inspector: '赵立成', checkDate: '2025-07-03',
+          problemDesc: '',
+          confirmation: {
+            expert1: { name: '赵立成', status: '已确认', time: '2025-07-03 10:32', signed: true },
+            expert2: { name: '李明', status: '待确认', time: '' }
+          },
           items: [
-            { id: 1, title: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？', result: '', subItems: [] },
-            { id: 2, title: '用热范围平面图是否具备绘制人、审批流程是否完整？', result: '', subItems: [] },
-            { id: 3, title: '面积核查依据（确权书及相关证明材料）是否有效且齐全？', result: '', subItems: [] },
-            { id: 4, title: '是否存在面积变化情况？', result: '', subItems: [] },
-            { id: 5, title: '面积核查汇总表与用热现场是否一致？', result: '', subItems: [] },
-            { id: 6, title: '商业门头平面图与现场顺序是否一致？', result: '', subItems: [] },
-            { id: 7, title: '实测计算是否满足制度要求？', result: '', subItems: [] },
+            { id: 1, title: '面积核查汇总表是否完整、数据填写正确、项目填写齐全？', result: '是', subItems: [] },
+            { id: 2, title: '用热范围平面图是否具备绘制人、审批流程是否完整？', result: '是', subItems: [] },
+            { id: 3, title: '面积核查依据（确权书及相关证明材料）是否有效且齐全？', result: '是', subItems: [] },
+            { id: 4, title: '是否存在面积变化情况？', result: '是', subItems: [], desc: '有少量面积变化但已核实' },
+            { id: 5, title: '面积核查汇总表与用热现场是否一致？', result: '是', subItems: [] },
+            { id: 6, title: '商业门头平面图与现场顺序是否一致？', result: '是', subItems: [] },
+            { id: 7, title: '实测计算是否满足制度要求？', result: '是', subItems: [] },
           ]
         }
       },
@@ -801,6 +876,21 @@
     }
 
     var site = siteData[siteCode] || siteData['60218B006'];
+    var checkConfirmStorageKey = 'expertAppCheckConfirmV2:' + siteCode;
+    var persistedConfirmState = sessionStorage.getItem(checkConfirmStorageKey) || '';
+    if (siteCode === '60218B006' && site.checkRecord && site.checkRecord.confirmation) {
+      if (persistedConfirmState === 'approved') {
+        site.checkRecord.confirmation.expert2.status = '已确认';
+        site.checkRecord.confirmation.expert2.time = '2025-07-03 10:45';
+        site.status = 'checked';
+        site.statusText = '已检查';
+        site.confirmProgress = '2/2';
+      } else if (persistedConfirmState === 'rejected') {
+        site.checkRecord.confirmation.expert2.status = '已退回';
+        site.statusText = '待修改';
+        site.confirmProgress = '0/2';
+      }
+    }
     window._currentSiteData = site;
     document.getElementById('pageTitle').textContent = site.name;
 
@@ -808,12 +898,17 @@
     var statusTagClass = 'tag-gray';
     if (site.status === 'checked' || site.status === 'rectified') statusTagClass = 'tag-green';
     else if (site.status === 'rectify') statusTagClass = 'tag-orange';
+    else if (site.status === 'confirming') statusTagClass = 'tag-orange';
     else if (site.status === 'unchecked') statusTagClass = 'tag-gray';
 
     var isUnqualified = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
 
     var btnHtml = '';
-    if (!isReadonly && site.status === 'unchecked') {
+    if (!isReadonly && site.confirmProgress === '2/2') {
+      btnHtml = '<button class="action-btn-full btn-primary" onclick="showConfirmedNotice()">确认检查记录单</button>';
+    } else if (!isReadonly && site.status === 'confirming' && siteCode === '60218B006' && persistedConfirmState !== 'rejected') {
+      btnHtml = '<button class="action-btn-full btn-primary" onclick="openCheckConfirmation()">确认检查记录单</button>';
+    } else if (!isReadonly && site.status === 'unchecked') {
       btnHtml = '<button class="action-btn-full btn-primary" onclick="location.href=\'./expert-app-check-record.html?code=' + siteCode + '&task=' + taskId + '\'">填写检查记录单</button>';
     } else if (!isReadonly && (site.status === 'checked' || site.status === 'rectified')) {
       btnHtml = '<button class="action-btn-full btn-primary" onclick="showRectifyAudit()">审核</button>';
@@ -948,15 +1043,18 @@
 
     // 渲染检查记录单
     const record = site.checkRecord;
-    if (!record.submitted) {
-      document.getElementById('checkRecord').innerHTML = `
-        <div class="adm-card" style="text-align:center;padding:40px 20px;">
-          <div style="font-size:48px;margin-bottom:12px;">📝</div>
-          <p style="font-size:14px;color:#999;">暂无检查记录单</p>
-          <p style="font-size:12px;color:#bbb;margin-top:4px;">请先填写检查记录单</p>
-        </div>
-      `;
-    } else {
+    function renderCheckRecordPanel() {
+      if (!record.submitted) {
+        document.getElementById('checkRecord').innerHTML = `
+          <div class="adm-card" style="text-align:center;padding:40px 20px;">
+            <div style="font-size:48px;margin-bottom:12px;">📝</div>
+            <p style="font-size:14px;color:#999;">暂无检查记录单</p>
+            <p style="font-size:12px;color:#bbb;margin-top:4px;">请先填写检查记录单</p>
+          </div>
+        `;
+        return;
+      }
+
       const conclusionTag = record.conclusion === '合格'
         ? '<span class="status-tag tag-green">合格</span>'
         : '<span class="status-tag tag-red">不合格</span>';
@@ -974,6 +1072,49 @@
         </div>`;
       }).join('');
 
+      let confirmationHtml = '';
+      if (record.confirmation && siteCode === '60218B006') {
+        const expert1 = record.confirmation.expert1;
+        const expert2 = record.confirmation.expert2;
+        const isApproved = expert2.status === '已确认';
+        const isRejected = expert2.status === '已退回';
+        const tipClass = isApproved ? ' success' : isRejected ? ' rejected' : '';
+        const tipText = isApproved
+          ? '双专家均已完成确认，检查记录单已生效。'
+          : isRejected
+            ? '检查记录单已退回专家一修改，重新提交后需再次确认。'
+            : '专家一已确认。请专家二核对全部内容，同意时需完成电子签名。';
+        const expert2Tag = isApproved
+          ? '<span class="status-tag tag-green">已确认</span>'
+          : isRejected
+            ? '<span class="status-tag tag-red">已退回</span>'
+            : '<span class="status-tag tag-orange">待确认</span>';
+        const actionsHtml = isApproved
+          ? '<div class="check-confirm-actions"><button class="check-confirm-btn done" onclick="activateTab(\'basic\')">确认完成，返回站点信息</button></div>'
+          : isRejected
+            ? ''
+            : '<div class="check-confirm-actions"><button class="check-confirm-btn reject" onclick="openRecordReject()">不同意</button><button class="check-confirm-btn approve" onclick="startExpert2Signature()">同意并签名</button></div>';
+
+        confirmationHtml = `
+          <div class="adm-card check-confirm-card">
+            <div class="adm-card-title">双专家确认</div>
+            <div class="check-confirm-tip${tipClass}">${tipText}</div>
+            <div class="confirm-expert-row">
+              <span class="confirm-role">专家一</span>
+              <div><div class="confirm-name">${expert1.name}</div><div class="confirm-time">${expert1.time}</div></div>
+              <span class="status-tag tag-green">已确认</span>
+              <div class="confirm-signature"><span class="confirm-signature-label">电子签名</span><span class="confirm-signature-name">${expert1.name}</span></div>
+            </div>
+            <div class="confirm-expert-row">
+              <span class="confirm-role">专家二</span>
+              <div><div class="confirm-name">${expert2.name}</div>${expert2.time ? `<div class="confirm-time">${expert2.time}</div>` : ''}</div>
+              ${expert2Tag}
+            </div>
+          </div>
+          ${actionsHtml}
+        `;
+      }
+
       document.getElementById('checkRecord').innerHTML = `
         <div class="adm-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -988,8 +1129,10 @@
           <div class="adm-card-title">检查项目</div>
           ${itemsHtml}
         </div>
+        ${confirmationHtml}
       `;
     }
+    renderCheckRecordPanel();
 
     // 动态添加整改通知单Tab（仅检查不合格时显示）
     var showRectify = site.checkRecord && site.checkRecord.submitted && site.checkRecord.conclusion === '不合格';
@@ -1046,13 +1189,90 @@
     }
 
     // Tab 切换
-    document.getElementById('tabBar').addEventListener('click', function(e) {
-      const tab = e.target.closest('.adm-tab');
+    function activateTab(tabName) {
+      const tab = document.querySelector('.adm-tab[data-tab="' + tabName + '"]');
       if (!tab) return;
       document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      if (tabName === 'record') {
+        setTimeout(function() { tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }, 0);
+      }
+    }
+    document.getElementById('tabBar').addEventListener('click', function(e) {
+      const tab = e.target.closest('.adm-tab');
+      if (!tab) return;
+      activateTab(tab.dataset.tab);
+    });
+
+    function openCheckConfirmation() {
+      activateTab('record');
+      document.getElementById('panel-record').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function startExpert2Signature() {
+      var returnTarget = './expert-app-site-detail.html?code=' + encodeURIComponent(siteCode) + '&task=' + encodeURIComponent(taskId) + '&tab=record';
+      var signatureTarget = './expert-app-signature.html?name=' + encodeURIComponent(record.confirmation.expert2.name) +
+        '&mode=check-confirm&code=' + encodeURIComponent(siteCode) + '&return=' + encodeURIComponent(returnTarget);
+      if (window.__EXPERT_APP_NAVIGATE__) window.__EXPERT_APP_NAVIGATE__(signatureTarget);
+      else window.location.href = signatureTarget;
+    }
+
+    function openRecordReject() {
+      document.getElementById('recordRejectOverlay').classList.add('show');
+      setTimeout(function() { document.getElementById('recordRejectReason').focus(); }, 220);
+    }
+
+    function closeRecordReject() {
+      document.getElementById('recordRejectOverlay').classList.remove('show');
+    }
+
+    function submitRecordReject() {
+      var reason = document.getElementById('recordRejectReason').value.trim();
+      if (!reason) { showToast('请填写退回原因'); return; }
+      sessionStorage.setItem(checkConfirmStorageKey, 'rejected');
+      record.confirmation.expert2.status = '已退回';
+      site.confirmProgress = '0/2';
+      site.statusText = '待修改';
+      var rows = document.querySelectorAll('#statusCard .status-info-row');
+      if (rows[1]) rows[1].querySelector('.status-info-value').textContent = '0/2';
+      if (rows[2]) {
+        var statusEl = rows[2].querySelector('.status-tag');
+        statusEl.className = 'status-tag tag-orange';
+        statusEl.textContent = '待修改';
+      }
+      var topStatusEl = document.querySelector('#statusCard .status-card-top .status-tag');
+      if (topStatusEl) {
+        topStatusEl.className = 'status-tag tag-orange';
+        topStatusEl.textContent = '待修改';
+      }
+      var statusButton = document.querySelector('#statusCard .action-btn-full');
+      if (statusButton) statusButton.remove();
+      renderCheckRecordPanel();
+      closeRecordReject();
+      showToast('已退回专家一修改');
+    }
+
+    document.getElementById('recordRejectOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeRecordReject();
+    });
+    document.getElementById('recordRejectReason').addEventListener('input', function() {
+      document.getElementById('recordRejectCount').textContent = this.value.length;
+    });
+
+    if (params.get('tab') === 'record') activateTab('record');
+
+    function showConfirmedNotice() {
+      document.getElementById('confirmedNoticeOverlay').classList.add('show');
+    }
+
+    function closeConfirmedNotice() {
+      document.getElementById('confirmedNoticeOverlay').classList.remove('show');
+    }
+
+    document.getElementById('confirmedNoticeOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeConfirmedNotice();
     });
 
     // 审核弹窗

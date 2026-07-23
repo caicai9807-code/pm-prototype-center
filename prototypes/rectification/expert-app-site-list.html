@@ -153,7 +153,7 @@
     const siteData = {
       'T20250615001': [
         { code: '60218B003', name: '桥西区南站', status: 'rectified', statusText: '已整改', userCode: '60218B003', address: '桥西区中华南大街与槐安路交叉口南行150米路东', office: '东里街道', districtOffice: '桥西片区所' },
-        { code: '60218B006', name: '桥西区北站', status: 'unchecked', statusText: '待检查', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
+        { code: '60218B006', name: '桥西区北站', status: 'confirming', statusText: '确认中', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
         { code: '60218B009', name: '桥西区东站', status: 'unchecked', statusText: '待检查', userCode: '60218B009', address: '桥西区南长街与槐安路交叉口东行100米', office: '汇通街道', districtOffice: '桥西片区所' },
         { code: '60218B012', name: '桥西区西站', status: 'checked', statusText: '已检查', userCode: '60218B012', address: '桥西区友谊南大街与建国路交叉口西行80米', office: '中山街道', districtOffice: '桥西片区所' },
         { code: '60218B015', name: '桥西区中站', status: 'rectify', statusText: '待整改', userCode: '60218B015', address: '桥西区工农路与维明大街交口西北角', office: '南长街道', districtOffice: '桥西片区所' },
@@ -166,18 +166,31 @@
       ],
       'default': [
         { code: '60218B003', name: '桥西区南站', status: 'checked', statusText: '已检查', userCode: '60218B003', address: '桥西区中华南大街…', office: '东里街道', districtOffice: '桥西片区所' },
-        { code: '60218B006', name: '桥西区北站', status: 'unchecked', statusText: '待检查', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
+        { code: '60218B006', name: '桥西区北站', status: 'confirming', statusText: '确认中', userCode: '60218B006', address: '桥西区中山路与维明大街交叉口北行50米', office: '维明街道', districtOffice: '桥西片区所' },
         { code: '60218B009', name: '桥西区东站', status: 'unchecked', statusText: '待检查', userCode: '60218B009', address: '桥西区南长街与槐安路交叉口东行100米', office: '汇通街道', districtOffice: '桥西片区所' },
       ]
     };
 
     const sites = siteData[taskId] || siteData['T20250615001'];
+    sites.forEach(function(site) {
+      if (site.code !== '60218B006') return;
+      var confirmationState = sessionStorage.getItem('expertAppCheckConfirmV2:' + site.code);
+      if (confirmationState === 'approved') {
+        site.status = 'checked';
+        site.statusText = '已检查';
+      } else if (confirmationState === 'rejected') {
+        site.status = 'returned';
+        site.statusText = '待修改';
+      }
+    });
     const listEl = document.getElementById('siteList');
 
     function getTagClass(status) {
       switch(status) {
         case 'rectified': return 'tag-green';
         case 'checked': return 'tag-green';
+        case 'confirming': return 'tag-orange';
+        case 'returned': return 'tag-orange';
         case 'unchecked': return 'tag-gray';
         case 'rectify': return 'tag-red';
         default: return 'tag-gray';
@@ -188,6 +201,8 @@
       const detailUrl = `./expert-app-site-detail.html?code=${site.code}&task=${taskId}`;
       if (site.status === 'rectified' || site.status === 'checked') {
         return `<button class="site-card-btn btn-green" onclick="location.href='${detailUrl}'">查看详情</button>`;
+      } else if (site.status === 'confirming') {
+        return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}&tab=record'">确认检查记录单</button>`;
       } else if (site.status === 'unchecked') {
         return `<button class="site-card-btn btn-blue" onclick="location.href='${detailUrl}'">开始检查</button>`;
       } else {
