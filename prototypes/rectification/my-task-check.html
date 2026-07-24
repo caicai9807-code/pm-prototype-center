@@ -2920,9 +2920,10 @@
                 <td style="text-align:center;">' + b.basis + '</td>\
                 <td>\
                   <div class="mc-ver-upload-wrap">\
-                    <input type="file" accept="image/*" class="mc-ver-file-input" data-building="' + b.id + '" id="mc-ver-file-' + b.id + '" style="display:none;">\
+                    <input type="file" accept="image/*" class="mc-ver-file-input" data-building="' + b.id + '" data-site-code="' + site.code + '" data-building-name="' + b.building.replace(/"/g,'&quot;') + '" id="mc-ver-file-' + b.id + '" style="display:none;">\
                     <button class="mc-btn mc-btn-default mc-ver-upload-btn" data-building="' + b.id + '" style="padding:2px 10px;font-size:12px;">选择照片</button>\
                     <span class="mc-ver-file-name" id="mc-ver-name-' + b.id + '" style="margin-left:6px;font-size:12px;color:#8c8c8c;">' + (photoName || '未选择') + '</span>\
+                    <div class="mc-ver-preview" id="mc-ver-prev-' + b.id + '" style="display:none;margin-top:4px;"><img style="max-width:80px;max-height:60px;border-radius:4px;border:1px solid #d9d9d9;"></div>\
                   </div>\
                 </td>\
                 <td style="text-align:center;">\
@@ -4180,6 +4181,61 @@
             </div>';
         }
 
+        // ---- 水印工具函数 ----
+        function applyWatermark(file, siteName, siteCode, buildingName, callback) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+              var maxW = 1600, maxH = 1200;
+              var w = img.width, h = img.height;
+              if (w > maxW) { h = h * maxW / w; w = maxW; }
+              if (h > maxH) { w = w * maxH / h; h = maxH; }
+              var canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              var ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              // 水印内容：时间 地点 站点+站点编码-楼栋名称
+              var now = new Date();
+              var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+              var timeStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())
+                + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+              var watermarkText = timeStr + ' ' + siteName + '+' + siteCode + '-' + buildingName;
+              // 水印样式
+              var fontSize = Math.max(12, w * 0.032);
+              ctx.font = 'bold ' + fontSize + 'px "Microsoft YaHei","PingFang SC",Arial,sans-serif';
+              var textW = ctx.measureText(watermarkText).width;
+              var pd = Math.round(fontSize * 0.6);
+              var barH = Math.round(fontSize * 1.8);
+              var bx = w - textW - pd * 2;
+              var by = h - pd * 2;
+              // 半透明背景
+              ctx.fillStyle = 'rgba(0,0,0,0.55)';
+              ctx.beginPath();
+              var r = 4;
+              ctx.moveTo(bx + r, by - barH);
+              ctx.lineTo(bx + textW + pd * 2 - r, by - barH);
+              ctx.quadraticCurveTo(bx + textW + pd * 2, by - barH, bx + textW + pd * 2, by - barH + r);
+              ctx.lineTo(bx + textW + pd * 2, by + pd - r);
+              ctx.quadraticCurveTo(bx + textW + pd * 2, by + pd, bx + textW + pd * 2 - r, by + pd);
+              ctx.lineTo(bx + r, by + pd);
+              ctx.quadraticCurveTo(bx, by + pd, bx, by + pd - r);
+              ctx.lineTo(bx, by - barH + r);
+              ctx.quadraticCurveTo(bx, by - barH, bx + r, by - barH);
+              ctx.fill();
+              // 水印文字
+              ctx.fillStyle = '#ffffff';
+              ctx.textBaseline = 'bottom';
+              ctx.textAlign = 'left';
+              ctx.fillText(watermarkText, bx + pd, by);
+              callback(canvas.toDataURL('image/jpeg', 0.92));
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
         // ---- 实测复核事件绑定 ----
         function bindVerificationEvents() {
           // 选择照片按钮
@@ -4191,14 +4247,35 @@
             });
           });
 
-          // 文件选择后显示文件名
+          // 文件选择后：叠加水印并显示缩略图
           document.querySelectorAll('.mc-ver-file-input').forEach(function (input) {
             input.addEventListener('change', function () {
               var buildingId = this.getAttribute('data-building');
+              var siteCode = this.getAttribute('data-site-code');
+              var buildingName = this.getAttribute('data-building-name');
               var nameSpan = document.getElementById('mc-ver-name-' + buildingId);
+              var prevWrap = document.getElementById('mc-ver-prev-' + buildingId);
               if (this.files && this.files.length > 0) {
-                nameSpan.textContent = this.files[0].name;
+                var file = this.files[0];
+                nameSpan.textContent = file.name;
                 nameSpan.style.color = '#52c41a';
+                // 获取站点名称
+                var siteDetail = siteDetailMap[siteCode];
+                var siteName = siteDetail ? siteDetail.name : siteCode;
+                // 叠加水印
+                applyWatermark(file, siteName, siteCode, buildingName, function (watermarkedUrl) {
+                  // 显示水印缩略图
+                  if (prevWrap) {
+                    prevWrap.style.display = 'block';
+                    var img = prevWrap.querySelector('img');
+                    if (img) img.src = watermarkedUrl;
+                  }
+                  // 保存水印后的 dataURL 用于后续提交
+                  if (!window._watermarkedPhotos) window._watermarkedPhotos = {};
+                  window._watermarkedPhotos[buildingId] = watermarkedUrl;
+                });
+              } else {
+                if (prevWrap) prevWrap.style.display = 'none';
               }
             });
           });

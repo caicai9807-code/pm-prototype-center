@@ -88,6 +88,18 @@
   color: #fff;
 }
 
+/* 重置所有数据按钮（红色警示） */
+.my-task-btn-danger {
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+  background: #fff;
+}
+.my-task-btn-danger:hover {
+  background: #ff4d4f;
+  color: #fff;
+  border-color: #ff4d4f;
+}
+
 /* ========== 数据列表卡片 ========== */
 .my-task-list-card {
   background: #fff;

@@ -74,6 +74,8 @@
           '<div class="my-task-filter-btns">' +
             '<button id="myTaskQueryBtn" class="my-task-btn my-task-btn-primary">查询</button>' +
             '<button id="myTaskResetBtn" class="my-task-btn">重置</button>' +
+            '<button id="myTaskResetDataBtn" class="my-task-btn my-task-btn-danger" title="清空浏览器缓存，恢复到初始演示数据">重置所有数据</button>' +
+
           '</div>' +
         '</div>' +
       '</section>' +
@@ -332,37 +334,103 @@
       document.getElementById("myTaskStatusSelect").value = "";
       refreshList();
     });
+
+    /* 重置所有数据 → 清 localStorage 并 reload */
+    document.addEventListener("click", function (e) {
+      if (e.target.id !== "myTaskResetDataBtn") return;
+      try { localStorage.removeItem('prototype_rectification_store'); } catch(e) {}
+      location.reload();
+    });
   }
 
   /* ========== 审核弹窗渲染 ========== */
   function renderAuditModal(task) {
-    var ti = task.transferInfo;
+    var ti = task.transferInfo || {};
+    var oe = ti.originalExpert || {};
+
     var summary = '\
       <div class="my-task-audit-section">\
         <div class="my-task-audit-section-title">任务摘要</div>\
         <div class="my-task-audit-grid">\
-          <div><span>任务名称</span>' + task.name + '</div>\
-          <div><span>所属年度</span>' + task.year + '</div>\
+          <div><span>任务名称</span>' + (task.name || '—') + '</div>\
+          <div><span>所属年度</span>' + (task.year || '—') + '</div>\
           <div><span>任务周期</span>' + (task.startDate||'—') + ' 至 ' + (task.endDate||'—') + '</div>\
           <div><span>所属管理部</span>' + (task.dept||'—') + '</div>\
           <div><span>待处理站点数</span>' + (task.pendingCount||0) + ' 个</div>\
         </div>\
       </div>';
+
     var expertInfo = '\
       <div class="my-task-audit-section">\
         <div class="my-task-audit-section-title">原专家信息</div>\
         <div class="my-task-audit-expert-box">\
           <div class="my-task-audit-expert-row">\
-            <span class="my-task-audit-expert-label">拒绝原因：</span>\
-            <span>' + (ti ? ti.reason : '—') + '</span>\
+            <span>原专家：</span>\
+            <span class="my-task-audit-expert-name">' + (oe.name || '—') + '</span>\
+            <span class="my-task-audit-expert-tag">' + (oe.type || '—') + '</span>\
           </div>\
-          <div class="my-task-audit-expert-row"><span>拒绝时间：</span>' + (ti ? ti.time : '—') + '</div>\
+          <div class="my-task-audit-expert-row"><span>所属部门：</span>' + (oe.dept || '—') + '</div>\
+          <div class="my-task-audit-expert-row">\
+            <span class="my-task-audit-expert-label">拒绝原因：</span>' + (ti.rejectReason || '—') + '\
+          </div>\
+          <div class="my-task-audit-expert-row">\
+            <span class="my-task-audit-expert-label">拒绝时间：</span>' + (ti.rejectTime || '—') + '\
+          </div>\
         </div>\
       </div>';
+
+    var logsHtml = (ti.logs || []).map(function (log) {
+      return '\
+        <div class="my-task-audit-log-item">\
+          <div class="my-task-audit-log-dot"></div>\
+          <div>\
+            <div class="my-task-audit-log-time">' + (log.time || '—') + '</div>\
+            <div class="my-task-audit-log-text">' + (log.text || '—') + '</div>\
+          </div>\
+        </div>';
+    }).join('');
+
+    var logsSection = logsHtml ? '\
+      <div class="my-task-audit-section">\
+        <div class="my-task-audit-section-title">任务调整日志</div>\
+        <div class="my-task-audit-timeline">' + logsHtml + '</div>\
+      </div>' : '';
+
+    var expertsHtml = (task.availableExperts || []).map(function (exp) {
+      var initial = (exp.name || '?').slice(0, 1);
+      return '\
+        <label class="my-task-audit-expert-card">\
+          <input type="radio" name="audit-expert-radio" value="' + exp.name + '">\
+          <div class="my-task-audit-card-body">\
+            <div class="my-task-audit-card-header">\
+              <div class="my-task-audit-avatar">' + initial + '</div>\
+              <div class="my-task-audit-card-info">\
+                <div class="my-task-audit-card-name">' + (exp.name || '—') + '</div>\
+                <div class="my-task-audit-card-type">' + (exp.type || '—') + ' · ' + (exp.dept || '—') + '</div>\
+              </div>\
+              <div class="my-task-audit-card-radio"></div>\
+            </div>\
+            <div class="my-task-audit-card-detail">\
+              <div><span>近期任务：</span>' + (typeof exp.recentTasks === 'number' ? exp.recentTasks + ' 天前' : (exp.recentTasks || '—')) + '</div>\
+            </div>\
+          </div>\
+        </label>';
+    }).join('');
+
+    var expertSelectSection = expertsHtml ? '\
+      <div class="my-task-audit-section">\
+        <div class="my-task-audit-section-title">选择新专家<span class="my-task-audit-subtitle">（' + (task.dept || '—') + '）</span></div>\
+        <div class="my-task-audit-expert-list">' + expertsHtml + '</div>\
+      </div>' : '';
+
     var body = document.getElementById("myTaskAuditBody");
-    if (body) body.innerHTML = summary + expertInfo;
+    if (body) body.innerHTML = summary + expertInfo + expertSelectSection + logsSection;
+
     var confirmBtn = document.getElementById("myTaskAuditConfirm");
-    if (confirmBtn) confirmBtn.disabled = true;
+    if (confirmBtn) {
+      confirmBtn.disabled = !(task.availableExperts && task.availableExperts.length);
+      confirmBtn.textContent = '确认调整';
+    }
   }
 
   /* ========== 注册 ========== */
@@ -375,7 +443,7 @@
       transferInfo: { originalExpert: { name: "周磊", type: "二类专家", dept: "桥西管理部" }, rejectReason: "本周已有其他紧急任务安排，无法兼顾", rejectTime: "2026-07-06 15:30",
         logs: [{ time: "2026-07-06 10:00", text: "系统创建任务并下发给专家 周磊" },{ time: "2026-07-06 15:30", text: "专家 周磊 拒绝任务，原因：本周已有其他紧急任务安排，无法兼顾" }]
       },
-      availableExperts: [{ name: "王秀英", type: "一类专家", dept: "桥西管理部", recentTasks: "本周 3 个任务，1 个待审核" },{ name: "赵国强", type: "二类专家", dept: "桥西管理部", recentTasks: "本周 1 个整改任务" }]
+      availableExperts: [{ name: "王秀英", type: "一类专家", dept: "桥西管理部", recentTasks: 3 },{ name: "赵国强", type: "二类专家", dept: "桥西管理部", recentTasks: 1 }]
     },
     { id: 4, name: "2026 第31周 常规合同面积检查任务", year: "2026", startDate: "2026-07-28", endDate: "2026-08-03", status: "待开始", pendingCount: 10, dept: "裕华管理部" },
     { id: 5, name: "2026 第28周 专项检查任务", year: "2026", startDate: "2026-07-07", endDate: "2026-07-13", status: "进行中", pendingCount: 3, dept: "裕华管理部" },
@@ -383,14 +451,25 @@
   ];
 
   function loadData() {
+    // 始终以 fallbackTasks 的 6 条为基础，保证截图状态
+    currentData = fallbackTasks.map(function(t) { return JSON.parse(JSON.stringify(t)); });
     try {
       var storeData = Store.getMyTasks();
       if (storeData && storeData.length) {
-        currentData = storeData;
-        return;
+        // 从 Store 合并状态变更（确认/拒绝/审核操作产生的）
+        storeData.forEach(function(storeTask) {
+          var idx = currentData.findIndex(function(c) { return c.id === storeTask.id; });
+          if (idx !== -1) {
+            currentData[idx].status = storeTask.status;
+            currentData[idx].pendingCount = storeTask.pendingCount !== undefined ? storeTask.pendingCount : currentData[idx].pendingCount;
+            currentData[idx].hasTransfer = storeTask.hasTransfer;
+            if (storeTask.hasTransfer && storeTask.transferInfo) {
+              currentData[idx].transferInfo = storeTask.transferInfo;
+            }
+          }
+        });
       }
     } catch(e) {}
-    currentData = fallbackTasks;
   }
 
   window.PageMyTaskList = {

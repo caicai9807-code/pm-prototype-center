@@ -364,7 +364,13 @@
       width: 36px; height: 36px; border-radius: 4px;
       background: #e8f0fe; color: #1677ff;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+      font-size: 18px; flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .uploaded-photo-thumb .wm-mock {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.5); color: #fff; font-size: 6px;
+      text-align: center; line-height: 12px; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; padding: 0 2px;
     }
     .uploaded-photo-info { flex: 1; min-width: 0; }
     .uploaded-photo-name {
@@ -533,14 +539,14 @@
         <div class="photo-upload-title">已上传照片</div>
         <div class="uploaded-photo-grid-two">
           <div class="uploaded-photo-item">
-            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-thumb">📐<span class="wm-mock">裕华中心站</span></div>
             <div class="uploaded-photo-info">
               <div class="uploaded-photo-name">现场检查照片_1.jpg</div>
               <div class="uploaded-photo-meta">2026-07-02 09:32 · 裕华区中心站</div>
             </div>
           </div>
           <div class="uploaded-photo-item">
-            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-thumb">📐<span class="wm-mock">裕华中心站</span></div>
             <div class="uploaded-photo-info">
               <div class="uploaded-photo-name">现场检查照片_2.jpg</div>
               <div class="uploaded-photo-meta">2026-07-02 09:35 · 裕华区中心站</div>
@@ -566,14 +572,14 @@
         <div class="photo-upload-title">已上传照片</div>
         <div class="uploaded-photo-grid-two">
           <div class="uploaded-photo-item">
-            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-thumb">📐<span class="wm-mock">裕华中心站</span></div>
             <div class="uploaded-photo-info">
               <div class="uploaded-photo-name">现场检查照片_1.jpg</div>
               <div class="uploaded-photo-meta">2026-07-02 09:32 · 裕华区中心站</div>
             </div>
           </div>
           <div class="uploaded-photo-item">
-            <div class="uploaded-photo-thumb">📐</div>
+            <div class="uploaded-photo-thumb">📐<span class="wm-mock">裕华中心站</span></div>
             <div class="uploaded-photo-info">
               <div class="uploaded-photo-name">现场检查照片_2.jpg</div>
               <div class="uploaded-photo-meta">2026-07-02 09:35 · 裕华区中心站</div>
@@ -1415,19 +1421,71 @@
       }
     }
 
+    // ---- 水印工具函数 ----
+    function applyWatermark(file, siteName, siteCode, buildingName, callback) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var img = new Image();
+        img.onload = function () {
+          var maxW = 1600, maxH = 1200;
+          var w = img.width, h = img.height;
+          if (w > maxW) { h = h * maxW / w; w = maxW; }
+          if (h > maxH) { w = w * maxH / h; h = maxH; }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          var now = new Date();
+          var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+          var timeStr = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate())
+            + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+          var watermarkText = timeStr + ' ' + siteName + '+' + siteCode + '-' + buildingName;
+          var fontSize = Math.max(12, w * 0.032);
+          ctx.font = 'bold ' + fontSize + 'px "Microsoft YaHei","PingFang SC",Arial,sans-serif';
+          var textW = ctx.measureText(watermarkText).width;
+          var pd = Math.round(fontSize * 0.6);
+          var barH = Math.round(fontSize * 1.8);
+          var bx = w - textW - pd * 2;
+          var by = h - pd * 2;
+          ctx.fillStyle = 'rgba(0,0,0,0.55)';
+          var r = 4;
+          ctx.beginPath();
+          ctx.moveTo(bx + r, by - barH);
+          ctx.lineTo(bx + textW + pd * 2 - r, by - barH);
+          ctx.quadraticCurveTo(bx + textW + pd * 2, by - barH, bx + textW + pd * 2, by - barH + r);
+          ctx.lineTo(bx + textW + pd * 2, by + pd - r);
+          ctx.quadraticCurveTo(bx + textW + pd * 2, by + pd, bx + textW + pd * 2 - r, by + pd);
+          ctx.lineTo(bx + r, by + pd);
+          ctx.quadraticCurveTo(bx, by + pd, bx, by + pd - r);
+          ctx.lineTo(bx, by - barH + r);
+          ctx.quadraticCurveTo(bx, by - barH, bx + r, by - barH);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.textBaseline = 'bottom';
+          ctx.textAlign = 'left';
+          ctx.fillText(watermarkText, bx + pd, by);
+          callback(canvas.toDataURL('image/jpeg', 0.92));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
     function handleReviewPhotoSelect(input) {
       var files = input.files;
       if (!files || files.length === 0) return;
+      var siteData = window._currentSiteData || {};
+      var siteName = siteData.name || '未知站点';
+      var siteCode = siteData.code || '';
+      var bd = reviewBuildingId ? (window._reviewBuildings && window._reviewBuildings[reviewBuildingId]) : null;
+      var buildingName = bd ? bd.building : '未知楼栋';
       for (var i = 0; i < files.length; i++) {
         var f = files[i];
-        var reader = new FileReader();
-        reader.onload = (function(fileName) {
-          return function(e) {
-            reviewPhotos.push({ name: fileName, dataUrl: e.target.result });
-            renderReviewPhotos();
-          };
-        })(f.name);
-        reader.readAsDataURL(f);
+        // 叠加水印后再存储
+        applyWatermark(f, siteName, siteCode, buildingName, function (dataUrl) {
+          reviewPhotos.push({ name: f.name, dataUrl: dataUrl });
+          renderReviewPhotos();
+        });
       }
       input.value = '';
     }

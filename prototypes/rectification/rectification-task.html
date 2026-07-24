@@ -489,6 +489,8 @@
           html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-receive" data-station="' + row.stationCode + '" data-deadline="' + row.deadline + '" data-rectid="' + row.id + '">接收</span>';
         } else if (row.status === '整改中' || row.status === '已超期') {
           html += '<span class="rt-action-divider"></span><span class="rt-action-link rt-action-fix" data-rectid="' + row.id + '">整改</span>';
+        } else if (row.status === '待专家审核') {
+          html += '<span class="rt-action-divider"></span><a class="rt-action-link" href="./rectification-detail.html?code=' + row.stationCode + taskIdParam + '">审核</a>';
         }
         return html;
       }
